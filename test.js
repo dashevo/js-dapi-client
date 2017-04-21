@@ -52,13 +52,24 @@ async function start(){
     //     console.log('Height is', height);
     // },60000)
     // height="0000041461694567a06dccb44caebcd99b5075cbb0b5e96fdd0f1400aba1b483";
-    var data = {
+    var rootdata = {
+        base: 'RootBase',
         params: '{BanMajority: 999, State: {Rating: -1}}',
         returns:  '{BanMajority,BanParticipation, State{Rating, Balance}}',
     }
-    let newAccount = await SDK.Accounts.User.create(data);
+    let newRootObj = await SDK.Accounts.User.create(rootdata);
+    console.log(61, newRootObj);
 
-    console.log(newAccount);
+    accountKey = "maddog"
+
+    var accountData={
+        base: 'AccountBase',
+        params: '{Action: 999, AccKey:'+'\"'+accountKey +'\"'+'}',
+        returns:  '{Action,Type,AccKey,PubKey,Signature}',
+    }
+    let newAccObj = await SDK.Accounts.User.create(accountData);
+
+    console.log(72, newAccObj);
     // let hash = await SDK.Explorer.API.getHashFromHeight(height);
     // let height2 = await SDK.Explorer.API.getHeightFromHash(hash);
 

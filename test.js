@@ -58,9 +58,9 @@ async function start(){
         returns:  '{BanMajority,BanParticipation, State{Rating, Balance}}',
     }
     let newRootObj = await SDK.Accounts.User.create(rootdata);
-    console.log(61, newRootObj);
+    // console.log(61, newRootObj);
 
-    accountKey = "maddog"
+    accountKey = "test"
 
     var accountData={
         base: 'AccountBase',
@@ -69,7 +69,15 @@ async function start(){
     }
     let newAccObj = await SDK.Accounts.User.create(accountData);
 
-    console.log(72, newAccObj);
+    // console.log(72, newAccObj);
+
+    var queryData={
+        returns:  '{BanMajority,BanParticipation, State{Rating, Balance}}', //return default obj
+    }
+
+    let queryRoot = await SDK.Accounts.User.search(queryData)
+    // console.log(79, queryRoot);
+
     // let hash = await SDK.Explorer.API.getHashFromHeight(height);
     // let height2 = await SDK.Explorer.API.getHeightFromHash(hash);
 

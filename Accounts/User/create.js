@@ -21,17 +21,7 @@ exports.create = function() {
             //         user:_u,
             //         _reqId:uuid.generate.v4()
             //     };
-            //     console.log(_u.params)
-            //     console.log(_u.returns)
-            //     console.log({"query":"mutation{addRootBase(obj:"+ _u.params+")"+_u.returns+"}"})
-                ax.post('http://localhost:4000/graphql/graphiql',
-                    {"query":"mutation{add"+_u.base+"(obj:"+ _u.params+")"+_u.returns+"}"})
-                    .then(function (response) {
-                        return resolve(response.data.data)
-                    })
-                    .catch(function (error) {
-                        console.log(error.response.data.errors);
-                    });
+            //
                 // self.emitter.once(msg._reqId, function(data){
                 //     if(data.hasOwnProperty('error') && data.error==null){
                 //         return resolve(data.message);
@@ -46,6 +36,18 @@ exports.create = function() {
             //     res.result = 'Missing User';
             //     return resolve(res);
             // }
+
+            // console.log(_u.params)
+            //     console.log(_u.returns)
+            //     console.log({"query":"mutation{addRootBase(obj:"+ _u.params+")"+_u.returns+"}"})
+            ax.post('http://localhost:4000/graphql/graphiql',
+                {"query":"mutation{add"+_u.base+"(obj:"+ _u.params+")"+_u.returns+"}"})
+                .then(function (response) {
+                    return resolve(response.data.data)
+                })
+                .catch(function (error) {
+                    console.log(error.response.data.errors);
+                });
         });
     }
 }

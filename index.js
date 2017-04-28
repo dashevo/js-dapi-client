@@ -1,8 +1,6 @@
 const {merge} = require('khal').misc;
-const Connector = require('./util/Connector');
 const EE2 = require('eventemitter2').EventEmitter2;
 const webcoinDash = require('webcoin-dash');
-
 const SDK = async function(options={}){
     let self = {};
     self.params = {};
@@ -21,7 +19,6 @@ const SDK = async function(options={}){
     //The Account part will be use to provide Account functionnality,
     //Therefore it will allow to connect and retrieve user information
     self.Accounts = require('./Accounts/').Accounts.call(self);
-
     //The Wallet part will be used to do stuff based on manipulating the Dash.
     //Data will be provided from Accounts which will store the Pub/Prv keys.
     //It will perform action such as sending a payment, analyzing tx history and stuff like this.
@@ -52,10 +49,6 @@ const SDK = async function(options={}){
     self.tools.bitcore = require('bitcore-lib-dash');
 
     self.tools.util = require('dash-util');
-    // self.CONNECTOR_TYPE="CLIENT";
-    // self.CONNECTOR_HOST="CLIENT";
-    // self.CONNECTOR_PORT="CLIENT";
-    // self.IS_CONNECTED=false;
 
     //Prepare EventEmitter
     self.emitter = new EE2();

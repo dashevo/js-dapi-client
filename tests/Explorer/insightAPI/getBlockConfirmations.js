@@ -14,7 +14,6 @@ describe('Insight-API - getBlockConfirmations', async function() {
         let getLastBlock = await SDK.Explorer.API.getLastBlock();
         let expectedDiff = (getLastBlock.height-validBlockHeight)+1;
         let confirmations = await SDK.Explorer.API.getBlockConfirmations(validBlockHeight);
-        console.log(expectedDiff);
         confirmations.should.equal(expectedDiff);
     });
 });

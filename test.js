@@ -16,7 +16,7 @@ const options = {
     //         port: 80,
     //         fullPath:"http://192.168.0.20:3001/insight-api-dash"
     //     }]
-    // }
+    // }io
     DISCOVER:{
         INSIGHT_SEEDS:[
 
@@ -57,28 +57,41 @@ async function start(){
         params: '{BanMajority: 999, State: {Rating: -1}}',
         returns:  '{BanMajority,BanParticipation, State{Rating, Balance}}',
     }
-    let newRootObj = await SDK.Accounts.User.create(rootdata);
-    // console.log(61, newRootObj);
+    // let newRootObj = await SDK.Accounts.User.create(rootdata);
+    // // console.log(61, newRootObj);
+    //
+    // accountKey = "test"
+    //
+    // var accountData={
+    //     base: 'AccountBase',
+    //     params: '{Action: 999, AccKey:'+'\"'+accountKey +'\"'+'}',
+    //     returns:  '{Action,Type,AccKey,PubKey,Signature}',
+    // }
+    // let newAccObj = await SDK.Accounts.User.create(accountData);
+    //
+    // // console.log(72, newAccObj);
+    //
+    // var queryData={
+    //     returns:  '{BanMajority,BanParticipation, State{Rating, Balance}}', //return default obj
+    // }
+    //
+    // let queryRoot = await SDK.Accounts.User.search(queryData)
+    // // console.log(79, queryRoot);
 
-    accountKey = "test"
+    // let addr = await SDK.Explorer.API.getBalance();
+    // let UTXO= await SDK.Explorer.API.getUTXO();
+    // let fee= await SDK.Explorer.API.estimateFees();
+    let sent= await SDK.Explorer.API.send();
 
-    var accountData={
-        base: 'AccountBase',
-        params: '{Action: 999, AccKey:'+'\"'+accountKey +'\"'+'}',
-        returns:  '{Action,Type,AccKey,PubKey,Signature}',
-    }
-    let newAccObj = await SDK.Accounts.User.create(accountData);
 
-    // console.log(72, newAccObj);
+    // let bal = await addr.getBalance
+    // console.log(82, addr)
+    // console.log(83, UTXO)
+    // console.log(84, fee)
+    console.log(85, sent)
 
-    var queryData={
-        returns:  '{BanMajority,BanParticipation, State{Rating, Balance}}', //return default obj
-    }
 
-    let queryRoot = await SDK.Accounts.User.search(queryData)
-    // console.log(79, queryRoot);
 
-    // let hash = await SDK.Explorer.API.getHashFromHeight(height);
     // let height2 = await SDK.Explorer.API.getHeightFromHash(hash);
 
 

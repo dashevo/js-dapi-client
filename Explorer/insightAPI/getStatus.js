@@ -1,4 +1,5 @@
 const _fetch = require('../../util/fetcher.js')._fetch;
+
 exports.getStatus = function() {
     let self = this;
     return async function(){

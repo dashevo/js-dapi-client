@@ -1,12 +1,12 @@
 const axios = require('axios');
 
-exports.getBalance = function() {
+exports.getBalance = function(addr) {
     let self = this;
     return async function(){
         return new Promise(async function (resolve, reject) {
             let getInsightCandidate = await self.Discover.getInsightCandidate();
             let getInsightURI = getInsightCandidate.URI;
-            let url = `${getInsightURI}/addr/yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4/balance`;
+            let url = `${getInsightURI}/addr/${addr}/balance`;
             return axios
               .get(url)
               .then(function(response){
@@ -16,7 +16,7 @@ exports.getBalance = function() {
               .catch(function(error){
                 if(error){
                     console.log(url, error)
-                    console.error(`An error was triggered while fetching address ${'XfmtHzRb8TLGpE3z3bV9iMXr7N8UbNsLfk'} `);
+                    console.error(`An error was triggered while fetching address ${addr} `);
                     return resolve(false);
                 }
             });
@@ -24,13 +24,13 @@ exports.getBalance = function() {
     }
 }
 
-exports.getUTXO = function() {
+exports.getUTXO = function(addr) {
     let self = this;
     return async function(){
         return new Promise(async function (resolve, reject) {
             let getInsightCandidate = await self.Discover.getInsightCandidate();
             let getInsightURI = getInsightCandidate.URI;
-            let url = `${getInsightURI}/addr/yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4/utxo`;
+            let url = `${getInsightURI}/addr/${addr}/utxo`;
             return axios
               .get(url)
               .then(function(response){
@@ -39,7 +39,7 @@ exports.getUTXO = function() {
               .catch(function(error){
                 if(error){
                     console.log(url, error)
-                    console.error(`An error was triggered while fetching address ${'XfmtHzRb8TLGpE3z3bV9iMXr7N8UbNsLfk'} `);
+                    console.error(`An error was triggered while fetching address ${addr} `);
                     return resolve(false);
                 }
             });

@@ -1,20 +1,23 @@
 require('../../_before.js');
 const should = require('should');
+const Mnemonic = require('bitcore-mnemonic-dash')
 
-//pvr: not a valid test yet - just temp used for dev purposes
-var signature = '';
-var authBaseAddress = '';
-describe('Accounts - create', function() {
-    it('should create transaction on the blockchain with user object data', async function() {
+let fundedAddr = 'yiBCPVWznF2nHDQD6H8wFWB8bhN8TKHFXc';
+let username = 'pierre';
+let mnemonic = new Mnemonic('jaguar paddle monitor scrub stage believe odor frown honey ahead harsh talk');
+let privKey = mnemonic.toHDPrivateKey().derive("m/1").privateKey;
+let authHeadAddr = mnemonic.toHDPrivateKey().derive("m/1/" + (new Date() / 1000)).privateKey.toAddress().toString(); //random new address
 
-        SDK.Accounts.User.create('pierre', 'yiBCPVWznF2nHDQD6H8wFWB8bhN8TKHFXc', signature, authBaseAddress)
-            .then((result) => {
-                console.log(result)
+describe('Accounts - Create', function() {
+    it('should create transaction on the blockchain with user object data', function() {
+
+        return SDK.Accounts.User.create(fundedAddr, username, authHeadAddr, privKey)
+            .then(res => {
+                res.should.have.property('txid').with.lengthOf(64);
             })
-            .catch((err) => {
-                console.log(err)
-            });
-
-
+            .catch(err => {
+                console.log(err);
+                should.fail;
+            })
     });
 });

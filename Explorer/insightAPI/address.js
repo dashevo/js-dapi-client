@@ -29,7 +29,6 @@ exports.getBalance = function() {
 exports.getUTXO = function() {
     let self = this;
 
-    //pvr: why return Promise inside async function?
     return async function(addr) {
         //console.log('addr', addr)
         return new Promise(async function(resolve, reject) {
@@ -39,13 +38,13 @@ exports.getUTXO = function() {
             return axios
                 .get(url)
                 .then(function(response) {
-                    return resolve(response.data);
+                    resolve(response.data);
                 })
                 .catch(function(error) {
                     if (error) {
                         console.log(url, error)
                         console.error(`An error was triggered while fetching address ${addr} `);
-                        return resolve(false);
+                        reject(error);
                     }
                 });
         });

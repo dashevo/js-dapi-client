@@ -7,7 +7,7 @@ exports.send = function() {
             let getInsightCandidate = await self.Discover.getInsightCandidate();
             let getInsightURI = getInsightCandidate.URI;
             let url = `https://dev-test.dash.org/insight-api-dash/tx/send`;  //hard coded for now due to version issue
-            console.log('rawtx', rawtx)
+            // console.log('rawtx', rawtx)
             return axios
               .post(url, {rawtx: rawtx})
               .then(function(response){

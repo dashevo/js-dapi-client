@@ -1,36 +1,44 @@
 const has = require('../../util/has.js');
 const { uuid } = require('khal');
 const ax = require('axios');
+const Transaction = require('bitcore-lib-dash').Transaction;
 
-//pvr: this code to be moved (to bitcore-lib-dash perhaps?)
+//pvr: this code to be moved (to bitcore-lib-dash perhaps?)//////
 function getSpendingOutput(utxos) {
     let arr = JSON.parse(utxos);
     let res = Math.max.apply(Math, arr.map(function(o) { return o.amount; }))
     let obj = arr.find(function(o) { return o.amount == res; })
 }
 
-getTransaction = function(utxos, accountData, signature) {
+getTransaction = function(utxos, authHeadAddresss, changeAddr, accData, privateKey) {
 
-    const bitcore = require('bitcore-lib-dash');
-    const Transaction = bitcore.Transaction;
+    /*pvr: only 1 input used for now
+      output with largest available amount is used
+      to implement selectCoins algo (or is this already done on protocol level?)
+    */
+    let arr = utxos;
+    let res = Math.max.apply(Math, arr.map(function(o) { return o.amount; }))
+    let obj = arr.find(function(o) { return o.amount == res; })
 
-    this.MIN_FEE = 200000;
-    let sOut = getSpendingOutput(utxos);
+    let utxo = new Transaction.UnspentOutput({
+        "address": obj.address,
+        "txid": obj.txid,
+        "vout": obj.vout,
+        "scriptPubKey": obj.scriptPubKey,
+        "satoshis": +(obj.amount) * 100000000
+    });
 
-    let trx = new Transaction()
-        .from(new Transaction.UnspentOutput({
-            "address": sOut.address,
-            "txid": sOut.txid,
-            "vout": sOut.vout,
-            "scriptPubKey": sOut.scriptPubKey,
-            "satoshis": +(sOut.amount) * 100000000
-        }))
-        .to(authHeadAddresss, this.MIN_SEND_AMT)
-        .change(fundedAddress)
-        .addData(JSON.stringify(accountData))
-        .fee(this.MIN_FEE)
+    const MIN_FEE = 200000;
+    const MIN_SEND_AMT = 500000;
 
-    trx.applySignature(signature);
+    return new Transaction()
+        .from(utxo)
+        .to(authHeadAddresss, MIN_SEND_AMT) //pvr: to send full amount in production (min amount just used to not deplete fundedAddr for tests)
+        .change(changeAddr)
+        .addData(JSON.stringify(accData))
+        .fee(MIN_FEE)
+        .sign(privateKey)
+        .serialize(true);
 }
 
 getAccountData = function(username, authHeadAddresss) {
@@ -41,36 +49,26 @@ getAccountData = function(username, authHeadAddresss) {
         pubKey: authHeadAddresss
     }
 }
-//move code end
+//move code end////////////////////////////////////////////////
 
-exports.create = function() {
-    let self = this;
+exports.create = function(fundedAddr, username, authHeadAddresss, privKey) {
 
-    return async function(username, fundedAddress, signature, authHeadAddresss) {
+    var x = 1;
 
-        return self.Explorer.API.getUTXO(fundedAddress);
-
-        // self.Explorer.API.getUTXO(fundedAddress)
-        //     .then((x) => {
-        //         return x;
-        //     })
-        //     .catch((error) => {
-        //         return error;
-        //     })
-
-        // self.Explorer.API.getUTXO(fundedAddress)
-        //     .then(function(utxos) {
-        //         console.log('xxx' + utxos);
-        //         // return new Promise(function(resolve, reject) {
-        //         //     let res = { error: null, result: 'success' };
-        //         //     return resolve(utxos);
-        //         // });
-        //         // getTransaction(utxos, getAccountData(username, authHeadAddresss, signature));
-        //     });
-
-
-    }
+    return SDK.Explorer.API.getUTXO(fundedAddr, username)
+        .then(utxos => {
+            return SDK.Explorer.API.send(getTransaction(
+                utxos,
+                authHeadAddresss,
+                fundedAddr,
+                getAccountData(username, authHeadAddresss),
+                privKey));
+        })
 }
+
+
+
+
 
 /*Temp
 if (_u &&

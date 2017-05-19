@@ -53,8 +53,6 @@ getAccountData = function(username, authHeadAddresss) {
 
 exports.create = function(fundedAddr, username, authHeadAddresss, privKey) {
 
-    var x = 1;
-
     return SDK.Explorer.API.getUTXO(fundedAddr, username)
         .then(utxos => {
             return SDK.Explorer.API.send(getTransaction(

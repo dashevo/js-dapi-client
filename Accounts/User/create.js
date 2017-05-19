@@ -1,6 +1,3 @@
-const has = require('../../util/has.js');
-const { uuid } = require('khal');
-const ax = require('axios');
 const Transaction = require('bitcore-lib-dash').Transaction;
 
 //pvr: this code to be moved (to bitcore-lib-dash perhaps?)//////

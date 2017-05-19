@@ -2,7 +2,7 @@ const User = function(){
     let self = this;
     return {
         create:require('./create').create,//.call(self), //pvr: what is this self call for?
-        login:require('./login').login.call(self),
+        login:require('./login').login,//.call(self),
         search:require('./search').search.call(self),
         send:require('./send').send.call(self),
         update:require('./update').update.call(self),

@@ -69,16 +69,18 @@ async function start(){
     // let addr = await SDK.Explorer.API.getBalance('yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4');
     // let UTXO= await SDK.Explorer.API.getUTXO('yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4');
     // let fee= await SDK.Explorer.API.estimateFees(4);
-    let sent= await SDK.Explorer.API.send();
-    let tx= await SDK.Explorer.API.getTx('dce49c9e92b1ba673dc7c2822c509c3850e09b4da766413bfd2051565ca1d396');
-
-
-
-    // // console.log(82, addr)
-    // console.log(83, UTXO)
-    // console.log(84, fee)
-    console.log(85, sent)
+    // let sent= await SDK.Explorer.API.send();
+    // let tx= await SDK.Explorer.API.getTx('dce49c9e92b1ba673dc7c2822c509c3850e09b4da766413bfd2051565ca1d396');
+    let fee = await SDK.BWS.BWS.getFeeLevels()('live',(err, x)=>{console.log('res fee', x)})
+    let bwsutxo = await SDK.BWS.BWS.getUtxos()((err, x)=>{console.log('res utxo', x)},'nada',['yb21342iADyqAotjwcn4imqjvAcdYhnzeH', 'yb21342iADyqAotjwcn4imqjvAcdYhnzeH'])
+    let tx = await SDK.BWS.BWS.getTx()('65d4f6369bf8a0785ae05052c86da4a57f76866805e3adadc82a13f7da41cbdf',(err, x)=>{console.log('res tx', x)})
+    // console.log(82, addr)
+    console.log(83, bwsutxo)
+    console.log(84, fee)
+    // console.log(85, sent)
     console.log(86, tx)
+    // console.log(83, fee)
+
 
 
 

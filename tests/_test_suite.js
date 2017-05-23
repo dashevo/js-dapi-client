@@ -1,9 +1,12 @@
 require('./index.js');
+require('./Accounts/User/create.js')
+require('./Accounts/User/login.js')
 require('./Explorer/insightAPI/getStatus.js')
 require('./Explorer/insightAPI/getBlock.js')
 require('./Explorer/insightAPI/getBlockBits.js')
 require('./Explorer/insightAPI/getBlockChainwork.js')
 require('./Explorer/insightAPI/getBlockConfirmations.js')
+//FIXME If a block is mined during the fetching process, this data, when verified will be shifted and won't equal.
 require('./Explorer/insightAPI/getBlockHeaders.js')
 require('./Explorer/insightAPI/getBlockMerkleRoot.js')
 require('./Explorer/insightAPI/getBlockSize.js')

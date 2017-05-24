@@ -11,15 +11,16 @@ const options = {
     DISCOVER:{
         INSIGHT_SEEDS:[
             {
+                protocol:'http',
+                path:"insight-api-dash",
+                base:"51.15.5.18",
+                port:3001
+            },
+            {
                 protocol:'https',
                 path:"insight-api-dash",
                 base:"dev-test.dash.org",
                 port:443
-            },
-            { protocol:'http',
-                path:"insight-api-dash",
-                base:"51.15.5.18",
-                port:3001
             }
         ]
     }
@@ -74,12 +75,18 @@ async function start(){
     let fee = await SDK.BWS.BWS.getFeeLevels()('live',(err, x)=>{console.log('res fee', x)})
     let bwsutxo = await SDK.BWS.BWS.getUtxos()((err, x)=>{console.log('res utxo', x)},'nada',['yb21342iADyqAotjwcn4imqjvAcdYhnzeH', 'yb21342iADyqAotjwcn4imqjvAcdYhnzeH'])
     let tx = await SDK.BWS.BWS.getTx()('65d4f6369bf8a0785ae05052c86da4a57f76866805e3adadc82a13f7da41cbdf',(err, x)=>{console.log('res tx', x)})
+    let bwsbal = await SDK.BWS.BWS.getBalance()('yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4',(err, x)=>{console.log('res balance', x)})
+    let bwssend= await SDK.BWS.BWS.broadcastRawTx()(1,1,1,(err, x)=>{console.log('res balance', x)});
+
     // console.log(82, addr)
     console.log(83, bwsutxo)
     console.log(84, fee)
     // console.log(85, sent)
     console.log(86, tx)
     // console.log(83, fee)
+    console.log(85, bwsbal)
+    console.log(88, bwssend)
+
 
 
 

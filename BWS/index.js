@@ -107,17 +107,18 @@ let self = this;
                           return axios
                             .get(url)
                             .then(function(response){
-                              return resolve(cb(null, includeExtendedInfo ?
+                              return resolve(includeExtendedInfo ?
                                 (()=> {response.data.transactions.forEach(
                                 txId => {
                                   promises.push(axios.get(`${getInsightURI}/tx/${txId}`));
                                         })
-                                  axios.all(promises)
+                                  return axios.all(promises)
                                   .then(res => {
                                     const ans = res.map(r=>r.data)
-                                  return resolve(cb(null, ans))})})() :
-                                response.data.transactions
-                              ))
+                                    // console.log(118, ans)
+                                    cb(null, ans)})})() :
+                                 cb(null, response.data.transactions)
+                              )
                             })
                             .catch(function(error){
                               if(error){

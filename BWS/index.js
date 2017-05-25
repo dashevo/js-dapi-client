@@ -18,7 +18,7 @@ let self = this;
                         .get(url)
                         .then(function(response){
                           // console.log(url, response.data)
-                          return resolve(cb(null, response.data));
+                          return resolve(cb(null, response.data[lastblock]));
                         })
                         .catch(function(error){
                           if(error){

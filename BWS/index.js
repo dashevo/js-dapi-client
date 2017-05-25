@@ -17,7 +17,7 @@ let self = this;
                       return axios
                         .get(url)
                         .then(function(response){
-                          console.log(url, response.data)
+                          // console.log(url, response.data)
                           return resolve(cb(null, response.data));
                         })
                         .catch(function(error){
@@ -46,8 +46,8 @@ let self = this;
 
                     axios.all(promises)
                     .then(res => {
-                      console.log(49, res)
-                      resolve(cb(null, res[1].data))});
+                      // console.log(49, res)
+                      return resolve(cb(null, res[1].data))});
                       });
                   }
             },
@@ -62,7 +62,7 @@ let self = this;
                       return axios
                         .get(`${url}/${txid}`)
                         .then(function(response){
-                          console.log(`${url}/${txid}`, response.data)
+                          // console.log(`${url}/${txid}`, response.data)
                           return resolve(cb(null, response.data));
                         })
                         .catch(function(error){
@@ -92,11 +92,46 @@ let self = this;
                         let res = await SDK.Explorer.API.send(rawTx)
                         return resolve(cb(null, res))}
                         );
-                      }
+                    }
                 },
+              getTxHistory: function() {
+                  // let self = this;
+                  return async function(opts, skip=0, limit=0, includeExtendedInfo, cb){
+                        return new Promise(async function (resolve, reject) {
+                          let getInsightCandidate = await self.Discover.getInsightCandidate();
+                          let getInsightURI = getInsightCandidate.URI;
+                          let url = `${getInsightURI}/addr/yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4?from=${skip}&to=${limit}`
+
+                          let promises = [];
+
+                          return axios
+                            .get(url)
+                            .then(function(response){
+                              return resolve(cb(null, includeExtendedInfo ?
+                                (()=> {response.data.transactions.forEach(
+                                txId => {
+                                  promises.push(axios.get(`${getInsightURI}/tx/${txId}`));
+                                        })
+                                  axios.all(promises)
+                                  .then(res => {
+                                    const ans = res.map(r=>r.data)
+                                  return resolve(cb(null, ans))})})() :
+                                response.data.transactions
+                              ))
+                            })
+                            .catch(function(error){
+                              if(error){
+                                  console.log(url, error)
+                                  console.error(`An error was triggered getting getTxHistory`);
+                                  return cb(false);
+                              }
+                          });
+                            });
+                        };
+                    }
+              },
         }
-      }
-};
+      };
 
 
 // API.getFeeLevels()('live',(err, x)=>{console.log('res', x)})

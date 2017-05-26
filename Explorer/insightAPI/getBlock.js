@@ -1,30 +1,29 @@
 const _fetch = require('../../util/fetcher.js')._fetch;
 const axios = require('axios');
-exports.getBlock = function() {
-    let self = this;
-    return async function(identifier){
-        return new Promise(async function (resolve, reject) {
-            let hash = identifier;
-            if(identifier.constructor.name=="Number"){hash = await self.Explorer.API.getHashFromHeight(identifier);}
 
-            let getInsightCandidate = await self.Discover.getInsightCandidate();
-            let getInsightURI = getInsightCandidate.URI;
-            let url = `${getInsightURI}/block/${hash}`;
-            return axios
-                .get(url)
-                .then(function(response){
-                    if(response.hasOwnProperty('data'))
-                        return resolve(response.data);
-                    else
-                        return resolve(null);
-                })
-                .catch(function(error){
-                    if(error){
+exports.getBlock = function(identifier) {
+
+    return new Promise(function(resolve, reject) {
+
+        var p = [SDK.Discover.getInsightCandidate()];
+        if (Number.isInteger(identifier)) {
+            p.push(SDK.Explorer.API.getHashFromHeight(identifier));
+        }
+
+        Promise.all(p)
+            .then(([insightCandidate, derivedHash]) => {
+                return axios
+                    .get(`${insightCandidate.URI}/block/${derivedHash || identifier}`)
+                    .then(function(response) {
+                        if (response.hasOwnProperty('data'))
+                            resolve(response.data);
+                        else
+                            reject("Unexpected Response: Got " + response);
+                    })
+                    .catch(function(error) {
                         //TODO : Signaling + removal feat
-                        console.error(`An error was triggered while fetching candidate ${getInsightCandidate.idx} - signaling and removing from list`);
-                        return resolve(false);
-                    }
-                });
-        });
-    }
+                        reject(`An error was triggered while fetching candidate ${getInsightCandidate.idx} - signaling and removing from list`);
+                    });
+            });
+    });
 }

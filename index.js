@@ -1,7 +1,7 @@
-const {merge} = require('khal').misc;
+const { merge } = require('khal').misc;
 const EE2 = require('eventemitter2').EventEmitter2;
 const webcoinDash = require('webcoin-dash');
-const SDK = async function(options={}){
+const SDK = function(options = {}) {
     let self = {};
     self.params = {};
     self.params.blockchain = webcoinDash.blockchain;
@@ -10,11 +10,11 @@ const SDK = async function(options={}){
     //TODO : Which components will be used to calculate the fees Wallet.Fees.calculate(prepareTx) ?
     //Contains some seeds like for MN or Socket.
     let defaultConfig = require('./config.js');
-    self._config = merge(options,defaultConfig);
-    if(options.hasOwnProperty('DISCOVER') && options.DISCOVER.hasOwnProperty('INSIGHT_SEEDS') && options.DISCOVER.INSIGHT_SEEDS.constructor.name=="Array"){
+    self._config = merge(options, defaultConfig);
+    if (options.hasOwnProperty('DISCOVER') && options.DISCOVER.hasOwnProperty('INSIGHT_SEEDS') && options.DISCOVER.INSIGHT_SEEDS.constructor.name == "Array") {
         self._config.DISCOVER.INSIGHT_SEEDS = options.DISCOVER.INSIGHT_SEEDS.concat(defaultConfig.DISCOVER.INSIGHT_SEEDS);
     }
-    if(self._config.debug) process.on('unhandledRejection', r => console.log(r));
+    if (self._config.debug) process.on('unhandledRejection', r => console.log(r));
 
     //The Account part will be use to provide Account functionnality,
     //Therefore it will allow to connect and retrieve user information

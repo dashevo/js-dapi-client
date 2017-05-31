@@ -1,5 +1,7 @@
 const axios = require('axios');
 const moment = require('moment');
+const Mnemonic = require('./mnemonic');
+const Bitcoin = require('bitcoinjs-lib');
 
 exports.BWS = function(){
 let self = this;
@@ -77,9 +79,9 @@ let self = this;
             },
             getBalance: function() {
                 // let self = this;
-                return async function(twoStep, cb){
+                return async function(twoStep, cb, addy){
                     return new Promise(async function (resolve, reject) {
-                      let res =  await SDK.Explorer.API.getBalance('yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4')
+                      let res =  await SDK.Explorer.API.getBalance(addy || 'yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4')
                       //how do you know the address to use? prob stored on the opt object that is global? use placehodler for now
                       return resolve(cb(null, res))}
                       );
@@ -91,6 +93,61 @@ let self = this;
                       return new Promise(async function (resolve, reject) {
                         let res = await SDK.Explorer.API.send(rawTx)
                         return resolve(cb(null, res))}
+                        );
+                    }
+                },
+              getFiatRate: function() {
+                  // let self = this;
+                  return async function(opts, ccyCode, ts, provider, cb){
+                      return new Promise(async function (resolve, reject) {
+                        let res = {ts: Date.now()-3000, rate: 120, fetchedOn: Date.now()}
+                        return resolve(cb(null, res))
+                          }
+                        );
+                    }
+                },
+              getMainAddress: function() {
+                  return async function(opts, noVerify, limit=10, reverse, cb, rootKey, _Mnemonic){
+                      return new Promise(async function (resolve, reject) {
+                        console.log(113, Mnemonic, Mnemonic.generateSeedFromMnemonic )
+                        let bip32Seed = Mnemonic.generateSeedFromMnemonic(_Mnemonic);
+                        console.log(9, 'bip32Seed',  bip32Seed)
+                        let dashTestnet = {
+                            messagePrefix: '\x19DarkCoin Signed Message:\n',
+                            bip32: {public:70615939, private: 70615956},//Default was 50221816, but Copay use this one.
+                            pubKeyHash: 140,//140=y (139=y||x)
+                            scriptHash: 19,
+                            wif: 239,
+                            dustThreshold: 5460 // https://github.com/dashpay/dash/blob/v0.12.0.x/src/primitives/transaction.h#L144-L155
+                        };
+                        let dash = {
+                            messagePrefix: '\u0019DarkCoin Signed Message:\n',
+                            bip32: {public: 50221816, private: 50221772},
+                            pubKeyHash: 76,
+                            scriptHash: 16,
+                            wif: 204,
+                            dustThreshold: 5460
+                        };
+                        let bip32HDNode = Bitcoin.HDNode.fromSeedHex(bip32Seed, dashTestnet);
+
+                        let bip32RootKey = bip32HDNode.toBase58();
+
+                        let bip32RootAddress = bip32HDNode.getAddress();
+
+                        let pathDashTestnet = "m/44'/1'/0'/0/";
+                        let pathDashLivenet = "m/44'/5'/0'/0/";
+                        let rt = [bip32HDNode.derivePath(pathDashTestnet+0).getAddress()];
+
+                        for (i=1; i <=limit; i++){
+                          let addy = bip32HDNode.derivePath(pathDashTestnet+i).getAddress()
+                          let bal =  await SDK.Explorer.API.getBalance(addy)
+                          if (!(bal > 0)) {
+                            break
+                          }
+                          rt.push(addy);
+                        }
+                        return resolve(cb(null, rt))
+                        }
                         );
                     }
                 },

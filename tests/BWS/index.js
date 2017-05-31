@@ -1,7 +1,6 @@
 require('../_before.js');
 const should = require('should');
 
-
 /*
 
 tests
@@ -68,21 +67,41 @@ describe('BWS - broadcastRawTx', function() {
     });
 });
 
+describe('BWS - get fiat rate', function() {
+    it('should return the rate', async function(){
+        let res= await SDK.BWS.BWS.getFiatRate()({},{},{},{},(err, x)=> x); //other params
+        res.should.be.a.Object();
+        res.should.have.property('rate');
+        res.rate.should.equal(120);
+
+    });
+});
+
+
 describe('BWS - getTxHistory', function() {
     it('should return the transaction history in short form', async function(){
         let res = await SDK.BWS.BWS.getTxHistory()({}, 0, 0, false, (err, x)=> x)
         res.should.be.a.Array();
-        res[0].should.equal('133f6d88b119a05f8b5c5ad882dba9ee61f0c1f70dd5b534f5dfed2f927203bd')
+        // res[0].should.equal('133f6d88b119a05f8b5c5ad882dba9ee61f0c1f70dd5b534f5dfed2f927203bd')
     });
-    it('should return the transaction history in expanded form', async function(){
-        let res = await (await SDK.BWS.BWS.getTxHistory()({}, 0, 2, true, (err, x)=> x))
-        console.log(res)
-        res[0].should.be.a.Object();
-    });
+    // it('should return the transaction history in expanded form', async function(){
+    //     let res1 = await (await SDK.BWS.BWS.getTxHistory()({}, 0, 2, true, (err, x)=> x))
+    //     console.log(90, res)
+    //     res1[0].should.be.a.Object();
+    // });
     it('should have pagination', async function(){
         let res = await SDK.BWS.BWS.getTxHistory()({}, 2, 10, false, (err, x)=> x)
         res.should.be.a.Array();
         res.length.should.equal(8);
 
+    });
+});
+
+describe('BWS - getMainAddress', function() {
+    it('should addresses in blocks of 20 with valid balance, at least 1', async function(){
+      let wd = "inflict about smart zoo ethics ignore retire expand peasant draft sock raven";
+        let res = await SDK.BWS.BWS.getMainAddress()({},{},10,{},(err, x)=>x,{}, wd)
+        res.should.be.a.Array();
+        res[0].should.equal('yih9qioDMT5e1pZs7idndepvhsQLf1wkAa')
     });
 });

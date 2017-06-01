@@ -107,7 +107,7 @@ let self = this;
                     }
                 },
               getMainAddress: function() {
-                  return async function(opts, noVerify, limit=10, reverse, cb, rootKey, _Mnemonic){
+                  return async function(opts, noVerify, limit, reverse, cb, rootKey, _Mnemonic){
                       return new Promise(async function (resolve, reject) {
                         console.log(113, Mnemonic, Mnemonic.generateSeedFromMnemonic )
                         let bip32Seed = Mnemonic.generateSeedFromMnemonic(_Mnemonic);
@@ -138,13 +138,24 @@ let self = this;
                         let pathDashLivenet = "m/44'/5'/0'/0/";
                         let rt = [bip32HDNode.derivePath(pathDashTestnet+0).getAddress()];
 
-                        for (i=1; i <=limit; i++){
-                          let addy = bip32HDNode.derivePath(pathDashTestnet+i).getAddress()
-                          let bal =  await SDK.Explorer.API.getBalance(addy)
-                          if (!(bal > 0)) {
+
+                        let range = (start, end) => [...Array(end - start + 1)].map((_, i) => start + i);
+
+                        let done = false;
+                        for (i=2; limit ? (i < limit) : true; i=i+20){
+
+                          for (j = i; j < i+20; j++){
+                            let addy = bip32HDNode.derivePath(pathDashTestnet+j).getAddress();
+                            let bal =  await SDK.Explorer.API.getBalance(addy);
+                            if (!(bal > 0)) {
+                              done = true;
+                              break;
+                            }
+                            rt.push(addy);
+                            }
+                            if (done) {
                             break
                           }
-                          rt.push(addy);
                         }
                         return resolve(cb(null, rt))
                         }

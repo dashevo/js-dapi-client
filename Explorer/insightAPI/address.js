@@ -4,7 +4,7 @@ exports.getBalance = function() {
     let self = this;
 
     return async function(addr) {
-        console.log('addr', addr)
+        // console.log('addr', addr)
         return new Promise(async function(resolve, reject) {
             let getInsightCandidate = await self.Discover.getInsightCandidate();
             let getInsightURI = getInsightCandidate.URI;
@@ -12,7 +12,7 @@ exports.getBalance = function() {
             return axios
                 .get(url)
                 .then(function(response) {
-                    console.log(url, response.data)
+                    // console.log(url, response.data)
                     return resolve(response.data);
                 })
                 .catch(function(error) {

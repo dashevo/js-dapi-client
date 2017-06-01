@@ -138,9 +138,6 @@ let self = this;
                         let pathDashLivenet = "m/44'/5'/0'/0/";
                         let rt = [bip32HDNode.derivePath(pathDashTestnet+0).getAddress()];
 
-
-                        let range = (start, end) => [...Array(end - start + 1)].map((_, i) => start + i);
-
                         let done = false;
                         for (i=2; limit ? (i < limit) : true; i=i+20){
 

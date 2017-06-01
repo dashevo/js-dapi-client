@@ -107,10 +107,10 @@ let self = this;
                     }
                 },
               getMainAddress: function() {
-                  return async function(opts, noVerify, limit, reverse, cb, rootKey, _Mnemonic){
+                  return async function(opts, noVerify, limit, reverse, cb, rootKey, _mnemonic, _seed){
                       return new Promise(async function (resolve, reject) {
                         console.log(113, Mnemonic, Mnemonic.generateSeedFromMnemonic )
-                        let bip32Seed = Mnemonic.generateSeedFromMnemonic(_Mnemonic);
+                        let bip32Seed = _seed ? _seed : Mnemonic.generateSeedFromMnemonic(_mnemonic);
                         console.log(9, 'bip32Seed',  bip32Seed)
                         let dashTestnet = {
                             messagePrefix: '\x19DarkCoin Signed Message:\n',

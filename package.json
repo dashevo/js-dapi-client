@@ -1,5 +1,5 @@
 {
-  "name": "dapi-sdk",
+  "name": "@dashevo/dapi-sdk",
   "version": "1.0.0",
   "description": "Client SDK for DASH DAPI.",
   "main": "index.js",
@@ -30,7 +30,7 @@
     "should": "^11.2.1"
   },
   "scripts": {
-    "test": "mocha tests/_test_suite.js"
+    "test": "mocha tests/_test_suite.js --no-timeouts"
   },
   "author": "",
   "license": "ISC"

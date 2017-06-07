@@ -4,7 +4,7 @@ This module aim it's concerns at heping developers working with the DAPI on a Ja
 
 It wraps all the work needed to answer to your real need (Tx, Blocks, Balance, UTXO..) and provide easy to use Promise-based method.
 
-### Features 
+### Features :
 - Deliver a bitcore-wallet-service compatible D-API (see [BWS doc here](https://github.com/dashevo/dapi-sdk/blob/master/BWS/README.md)).
 - Provide accounts registration/authentication (using OP_RETURN for now).
 - Basic discovery mode and request balancing.
@@ -16,10 +16,8 @@ It wraps all the work needed to answer to your real need (Tx, Blocks, Balance, U
 ## Getting Started
 ### Install DAPI-SDK
 * npm : `npm i -S dapi-sdk`
-* github :
-```sh
-npm i -S github:dashevo/dapi-sdk
-```
+* github : `npm i -S github:dashevo/dapi-sdk`
+
 ### Uses : 
 
 You can check our [test folder](https://github.com/dashevo/dapi-sdk/tree/master/tests) to see some usage exemples. 
@@ -31,7 +29,13 @@ You can check our [test folder](https://github.com/dashevo/dapi-sdk/tree/master/
 //import package
 const DAPISDK = require('dapi-sdk');
 
-
+//Quiter version of possibles options.
+const options = {
+    debug:false,
+    verbose:false,
+    errors:false,
+    warnings:false
+};
 let SDK = DAPISDK(options);
 ```
 
@@ -46,12 +50,12 @@ Where theses options can be (in parenthesis,the default value) :
 		
 ```json
 {
-  INSIGHT_SEEDS: [
+"INSIGHT_SEEDS": [
            {
-                protocol: 'http',
-                path: "insight-api-dash",
-                base: "51.15.5.18",
-                port: 3001
+                "protocol": "http",
+                "path": "insight-api-dash",
+                "base": "51.15.5.18",
+                "port": 3001
             }
         ]
 }
@@ -63,54 +67,43 @@ Most of the SDK methods will returns you a Promise.
 Therefore depending on your specific needs you can init or call methods of the SDK in a async way :
 
 ```js
-DAPISDK()
-    .then(function (SDK) {
-        SDK
-            .Explorer
-            .API
-            .getLastBlockHeight()
-            .then(function (height) {
-                console.log(`last height is ${height}`);
-            })
-    });
+let API = SDK.Explorer.API;
+
+API
+	.getLastBlockHeight()
+	.then(function (height) {
+        console.log(`last height is ${height}`);
+    })
+
+API
+	.getLastBlockHeight(API.getHashFromHeight)
+	.then(function(hash){
+		console.log(`Last hash is ${hash}`);
+	})
+});
 ```
 
 or using async/await features provided in last NodeJS version :
+
 ```js
-let SDK = await DAPISDK();
 let height = await SDK.Explorer.API.getLastBlockHeight();
 console.log(`last height is ${height}`);
 ```
 
-On the API documentation below, I will mostly using await.
+On the API documentation below, and for readability reasons, await will mostly be used.
 
-#### Options
-When initializing the SDK, you might want to pass some options.
+#### Add specific insight-api node
 
-- Verbose mode (log everything) : `verbose:true`. Default `false`
-- Log errors : `errors:true`. Default `true`
-- Log warnings : `warnings:true`. Default `true`
-- Debug Mode : `debug:true`. Default `true`
-- DISCOVER :
-    - INSIGHT-SEEDS : DAPI-SDK will first try to fetch a list of insight-api from MN in seeds, you can also provide seeds by giving it here an `Array`
+During developement phase, you might need to have access to the website you want to call your data from. 
+Therefore you have the possibility to add your seed yourself (we might bring default stable server later). 
 
-For instance, if you want DAPI-SDK to just shut the fuck up :
-```js
-const options = {
-    debug:false,
-    verbose:false,
-    errors:false,
-    warnings:false
-};
-let SDK = await DAPISDK(options);
-```
-Or if you want DAPI-SDK to have specific insight api as seeds :
+Exemple : 
 
 ```js
 const options = {
+   STUFF:stuff,
    DISCOVER:{
            INSIGHT_SEEDS:[{
-               //fullPath: https://insight.dash.siampm.com/api
                protocol:"https",
                path:'api',
                base:"insight.dash.siampm.com",
@@ -120,7 +113,6 @@ const options = {
 };
 let SDK = await DAPISDK(options);
 ```
-
 
 You will then have access to many components :
 
@@ -202,13 +194,6 @@ The blockchain provide you also some events such as
     - `socket.tx` - Where the argument provided is the TX.
 
 
-### Internals
-
-You will also able to use some internals. Mind that this is not advised.
-##### EventEmitter :
-//- `SDK.emitter.emit()`
-##### Socket :
-//- `SDK.socket.send()`
 ### Particular examples and usecases :
 
 You can see some usecases and examples : [here](USECASES.md)

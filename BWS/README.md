@@ -1,4 +1,5 @@
-# BWS (WORK IN PROGRESS)
+
+# BWS (v1 - june 7, 2017)
 
 ---
 The purpose of this document is to show the list of BWS mock functions available, the params and examples.
@@ -19,7 +20,7 @@ Some routes will currently only returns static results . (these are marked by 
 params: (opts~, network~, rawTx)
 
 rawTX: a tx hash, 
-> example: 01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff13033911030e2f5032506f6f6c2d74444153482fffffffff0479e36542000000001976a914f0adf747fe902643c66eb6508305ba2e1564567a88ac40230e43000000001976a914f9ee3a27ef832846cf4ad40fe95351effe4a485d88acc73fa800000000004341047559d13c3f81b1fadbd8dd03e4b5a1c73b05e2b980e00d467aa9440b29c7de23664dde6428d75cafed22ae4f0d302e26c5c5a5dd4d3e1b796d7281bdc9430f35ac00000000000000002a6a283662876fa09d54098cc66c0a041667270a582b0ea19428ed975b5b5dfb3bca79000000000200000000000000
+> example: "01000000010000000000000000000000000000000000000000000000000000000000000000ffffffff13033911030e2f5032506f6f6c2d74444153482fffffffff0479e36542000000001976a914f0adf747fe902643c66eb6508305ba2e1564567a88ac40230e43000000001976a914f9ee3a27ef832846cf4ad40fe95351effe4a485d88acc73fa800000000004341047559d13c3f81b1fadbd8dd03e4b5a1c73b05e2b980e00d467aa9440b29c7de23664dde6428d75cafed22ae4f0d302e26c5c5a5dd4d3e1b796d7281bdc9430f35ac00000000000000002a6a283662876fa09d54098cc66c0a041667270a582b0ea19428ed975b5b5dfb3bca79000000000200000000000000"
 
 returns: error or boolean
 
@@ -29,7 +30,7 @@ returns: error or boolean
 params: (txid)
 
 txid: a tx id, 
-> example: 65d4f6369bf8a0785ae05052c86da4a57f76866805e3adadc82a13f7da41cbdf
+> example: "65d4f6369bf8a0785ae05052c86da4a57f76866805e3adadc82a13f7da41cbdf"
 
 returns: Object with tx details 
 > (see [insight API for example](http://insight.dev.dash.org/api/tx/02e7146fed1eeca237a0304d0d4252314773cc08273a37624bf4928275ccdd28))
@@ -37,17 +38,22 @@ returns: Object with tx details
 
 **getTxHistory:** get transaction history of a address
 
-params: (txid)
+params: (opts~, skip = 0, limit = 0, includeExtendedInfo=false)
 
-txid: a tx id, 
-> example: 65d4f6369bf8a0785ae05052c86da4a57f76866805e3adadc82a13f7da41cbdf
+skip: integer, i.e. skip the first 5 addresses (oldest 5)
 
-returns: Object with tx details 
-> (see [insight API for example](http://insight.dev.dash.org/api/tx/02e7146fed1eeca237a0304d0d4252314773cc08273a37624bf4928275ccdd28))
+limit: integer, i.e. only show a max of 20 address (returns only 20 results)
 
+includeExtendedInfo: boolean, if **false** returns array of address, if **true** returns array of address objects. 
 
+returns: 
 
+array of address: ['yb21342iADyqAotjwcn4imqjvAcdYhnzeH', 'yUGETMg58sQd7mTHEZJKqaEYvvXc7udrsh']
 
+ or 
+
+if **includeExtendedInfo** is true returns a array of address object
+> (see [insight API for example of address object](http://insight.dev.dash.org/api/addr/XfmtHzRb8TLGpE3z3bV9iMXr7N8UbNsLfk))
 
 
 ## Address
@@ -76,6 +82,15 @@ limit: how many address max to return (address are generated in sequence)
 returns: a list of addresses with none zero balance (but will return at least 1 even if balance is zero)
 
 
+**getUtxos:** returns a list utxo for a given array of addresses
+
+params: (opts~, addresses)
+
+addresses: an array of addresses(string)
+> example: ['yb21342iADyqAotjwcn4imqjvAcdYhnzeH', 'yUGETMg58sQd7mTHEZJKqaEYvvXc7udrsh']
+
+returns: a list of sub arrays containing utxo of each address in the addresses array
+
 
 ## Utils
 
@@ -101,4 +116,7 @@ cb: a callback function,
 
 returns: 
 >Object: {ts: timestamp, rate: nuber (in fiat for 1 dash), fetchedOn: timestamp}
+
+
+
 

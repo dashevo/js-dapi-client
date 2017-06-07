@@ -13,12 +13,12 @@ Some routes will currently only returns static results . (these are marked by 
 )
 
 ## how to use example: 
+BWS is promised based... it's recommended to use async await.
+...
 ```js
-...
 let broadcastResult = await SDK.BWS.broadcastRawTx(opts,network,rawTx);
-...
 ```
-do stuff with broadcastResult.
+...do stuff with broadcastResult.
 
 ## Transactions
 

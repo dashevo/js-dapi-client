@@ -12,6 +12,13 @@ Some params will be placeholders for now (these are marked by ~)
 Some routes will currently only returns static results . (these are marked by *#static*
 )
 
+## how to use example: 
+```js
+...
+let broadcastResult = await SDK.BWS.broadcastRawTx(opts,network,rawTx);
+...
+```
+do stuff with broadcastResult.
 
 ## Transactions
 

@@ -1,27 +1,67 @@
-## DAPI-SDK
+## DAPI-SDK (1.1.0)
+ 
+This module aim it's concerns at heping developers working with the DAPI on a Javascript landscape. 
+
+It wraps all the work needed to answer to your real need (Tx, Blocks, Balance, UTXO..) and provide easy to use Promise-based method.
+
+### Features 
+- Deliver a bitcore-wallet-service compatible D-API (see [BWS doc here](https://github.com/dashevo/dapi-sdk/blob/master/BWS/README.md)).
+- Provide accounts registration/authentication (using OP_RETURN for now).
+- Basic discovery mode and request balancing.
+- Explorer API (connector with Insight-API)
+- Blockchain/SPV validation (blockheaders)
+- TX/Blocks events (whenever a new block/tx is found emit the data).
+
 
 ## Getting Started
-### Using DAPI-SDK
-
-Install DAPI-SDK from npm
-
+### Install DAPI-SDK
+* npm : `npm i -S dapi-sdk`
+* github :
 ```sh
-npm i -S dapi-sdk
+npm i -S github:dashevo/dapi-sdk
 ```
+### Uses : 
 
-Install from github :
+You can check our [test folder](https://github.com/dashevo/dapi-sdk/tree/master/tests) to see some usage exemples. 
 
-```sh
-npm i -S github:Alex-Werner/dapi-sdk
-```
 
-Import the package :
+##### Import the package :
 ```js
+
+//import package
 const DAPISDK = require('dapi-sdk');
+
+
+let SDK = DAPISDK(options);
 ```
+
+Where theses options can be (in parenthesis,the default value) : 
+
+- debug(false) : Bool - When activated, returns utils logs (methods called, uris...)
+- verbose(false) : Bool - Will talk. A lot. Emitted events, received stuff...
+- warnings(true) : Bool - When activated, log errors received/handled.
+- errors(true) : Bool - When activated, log errors received/handled.
+- DISCOVER: Object - 
+	- INSIGHT_SEEDS : Array of insight-api uri metadata endpoints (temporary step - see below an exemple) 
+		
+```json
+{
+  INSIGHT_SEEDS: [
+           {
+                protocol: 'http',
+                path: "insight-api-dash",
+                base: "51.15.5.18",
+                port: 3001
+            }
+        ]
+}
+```
+
 
 Most of the SDK methods will returns you a Promise.
+
 Therefore depending on your specific needs you can init or call methods of the SDK in a async way :
+
 ```js
 DAPISDK()
     .then(function (SDK) {

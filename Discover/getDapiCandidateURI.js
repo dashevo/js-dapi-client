@@ -1,7 +1,7 @@
-exports.getInsightCandidateURI = function() {
+exports.getDapiCandidateURI = function() {
 
     return new Promise(function(resolve, reject) {
-        SDK.Discover.getInsightCandidate()
+        SDK.Discover.getDapiCandidate()
             .then(candidate => {
                 resolve(candidate.URI)
             })

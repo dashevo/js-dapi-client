@@ -17,7 +17,7 @@ exports.getBlock = function(identifier) {
                 //TODO : Signaling + removal feat
                 console.log(error);
                 reject("Unhandled error");
-                // reject(`An error was triggered while fetching candidate ${getInsightCandidate.idx} - signaling and removing from list`);
+                // reject(`An error was triggered while fetching candidate ${getDapiCandidate.idx} - signaling and removing from list`);
             });
     });
 }

@@ -3,6 +3,6 @@
 Undocumented at this stage (internal used only).
 
 - init
-- getInsightCandidate - Get a random insightAPI object (URI);
-- getInsightCandidateURI
+- getDapiCandidate - Get a random insightAPI object (URI);
+- getDapiCandidateURI
 - getSocketCandidate

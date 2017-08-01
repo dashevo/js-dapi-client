@@ -1,7 +1,7 @@
 //Choose a random insight uri
 const { math } = require('khal');
 
-exports.getInsightCandidate = function() {
+exports.getDapiCandidate = function() {
 
     return new Promise(function(resolve, reject) {
 
@@ -14,8 +14,6 @@ exports.getInsightCandidate = function() {
         else {
             return resolve(SDK.Discover.Masternode.validMNList)
         }
-        // .then(Promise.resolve(SDK.Discover.getInsightCandidate.apply(null, arguments))) //pvr: check arguments?
-
     }).then(validMNList => {
         if (validMNList && validMNList.length > 0) {
             //Select randomnly one of them

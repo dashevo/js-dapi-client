@@ -40,8 +40,8 @@ exports.getBlockHeaders = function(identifier = 0, nbOfBlocks = 25, isAscending 
 //                 if (identifier < 0) identifier = 0;
 //             }
 
-//             let getInsightCandidate = await self.Discover.getInsightCandidate();
-//             let getInsightURI = getInsightCandidate.URI;
+//             let getDapiCandidate = await self.Discover.getDapiCandidate();
+//             let getInsightURI = getDapiCandidate.URI;
 
 //             //Block-headers accept height or hash.
 //             let url = `${getInsightURI}/block-headers/${identifier}/${nbOfBlocks}`;
@@ -56,7 +56,7 @@ exports.getBlockHeaders = function(identifier = 0, nbOfBlocks = 25, isAscending 
 //                 .catch(function(error) {
 //                     if (error) {
 //                         //TODO : Signaling + removal feat
-//                         console.error(`An error was triggered while fetching candidate ${getInsightCandidate.idx} - signaling and removing from list`);
+//                         console.error(`An error was triggered while fetching candidate ${getDapiCandidate.idx} - signaling and removing from list`);
 //                         return resolve(false);
 //                     }
 //                 });

@@ -3,21 +3,20 @@ const explorerGet = require('./common/ExplorerHelper').explorerGet;
 exports.getBlock = function(identifier) {
 
     return new Promise(function(resolve, reject) {
+        let _id = null;
 
-        (Number.isInteger(identifier)
-            ? SDK.Explorer.API.getHashFromHeight(identifier)
-            : Promise.resolve(identifier))
+        Promise.resolve(Number.isInteger(identifier))
+            .then(isInt => {
+                return isInt ? SDK.Explorer.API.getHashFromHeight(identifier) : identifier
+            })
             .then(id => {
                 return explorerGet(`/block/${id}`)
             })
             .then(block => {
-                resolve(block)
+                resolve(block);
             })
             .catch(function(error) {
-                //TODO : Signaling + removal feat
-                console.log(error);
-                reject("Unhandled error");
-                // reject(`An error was triggered while fetching candidate ${getDapiCandidate.idx} - signaling and removing from list`);
-            });
-    });
+                reject(error);
+            })
+    })
 }

@@ -3,6 +3,10 @@ const requesterJSON = require('../../util/requesterJSON.js');
 const { uuid } = require('khal');
 
 isPingable = function(el) {
+
+    // return el;
+
+    // TODO: return only pingable nodes
     return new Promise(function(resolve, reject) {
         let uri = el.fullBase + el.insightPath + '/status';
         requesterJSON.get(uri)

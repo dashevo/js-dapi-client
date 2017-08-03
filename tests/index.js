@@ -1,10 +1,11 @@
 const should = require('should');
-const DAPISDK = require('../index.js');
-const options = {
+const DAPISDK = require('../Connector/dapiFactory.js');
+
+const options = { //no effect for dapi - using defaults
     verbose: false,
-    errors: true,
-    warnings: true,
-    debug: true,
+    errors: false,
+    warnings: false,
+    debug: false,
     DISCOVER: {
         INSIGHT_SEEDS: [
             /*{
@@ -22,12 +23,11 @@ const options = {
         ]
     }
 };
+
 describe('Init DAPI-SDK', function() {
     it('should start the SDK', function() {
-        //noinspection JSAnnotator
         global.SDK = DAPISDK(options);
     });
-
 
     it('should have the right components', function() {
         should.exist(global.SDK);

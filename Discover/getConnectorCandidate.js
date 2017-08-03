@@ -10,6 +10,9 @@ exports.getConnectorCandidate = function() {
                 .then(isSuccess => {
                     resolve(SDK.Discover.Masternode.validMNList)
                 })
+                .catch(e => {
+                    console.log(e)
+                })
         }
         else {
             return resolve(SDK.Discover.Masternode.validMNList)

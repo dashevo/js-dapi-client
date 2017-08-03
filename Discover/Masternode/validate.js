@@ -4,9 +4,6 @@ const { uuid } = require('khal');
 
 isPingable = function(el) {
 
-    // return el;
-
-    // TODO: return only pingable nodes
     return new Promise(function(resolve, reject) {
         let uri = el.fullBase + el.insightPath + '/status';
         requesterJSON.get(uri)
@@ -18,16 +15,20 @@ isPingable = function(el) {
                 }
             })
             .catch(function(err) {
-                console.log(err);
+                resolve(null)
+                //not pingabe do nothing (perhaps some logging)
             });
     })
 };
-exports.validate = function(_unvalidList) {
+exports.validate = function(_unValidatedList) {
 
     return new Promise(function(resolve, reject) {
-        Promise.all(_unvalidList.map(ul => isPingable(ul)))
+        Promise.all(_unValidatedList.map(ul => isPingable(ul)))
             .then(validList => {
-                resolve(validList)
+                resolve(validList.filter(i => i != null))
+            })
+            .catch(err => {
+                console.log(err);
             })
     });
 }

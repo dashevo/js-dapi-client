@@ -1,5 +1,7 @@
 const should = require('should');
-const DAPISDK = require('../Connector/dapiFactory.js');
+const _config = require('../config')
+
+const REFSDK = _config.useTrustedServer ? require('../Connector/trustedFactory.js') : require('../Connector/dapiFactory.js');
 
 const options = { //no effect for dapi - using defaults
     verbose: false,
@@ -16,7 +18,7 @@ const options = { //no effect for dapi - using defaults
             },*/
             {
                 protocol: 'https',
-                path: "insight-api-dash",
+                path: "/insight-api-dash",
                 base: "dev-test.dash.org",
                 port: 443
             }
@@ -26,7 +28,7 @@ const options = { //no effect for dapi - using defaults
 
 describe('Init DAPI-SDK', function() {
     it('should start the SDK', function() {
-        global.SDK = DAPISDK(options);
+        global.SDK = REFSDK(options);
     });
 
     it('should have the right components', function() {

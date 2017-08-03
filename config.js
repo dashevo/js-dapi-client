@@ -1,14 +1,14 @@
 const Config = {
-    useInsight: false, // bypass dapi and access insight methods directly
+    useTrustedServer: false,
     DISCOVER: {
         INSIGHT_SEEDS: [
-            /*{
-                protocol:"https",
-                path:'/api',
-                base:"insight.dash.siampm.com",
-                port: 80,
-                fullPath:"https://insight.dash.siampm.com/api"
-            }*/
+            {
+                protocol: "https",
+                path: '/api',
+                base: "insight.dash.siampm.com",
+                port: 443,
+                fullPath: "https://insight.dash.siampm.com/api"
+            }
         ],
         DAPI_SEEDS: [
             {

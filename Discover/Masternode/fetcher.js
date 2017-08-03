@@ -6,7 +6,7 @@ getNodes = function() {
     //read from local storage
     //if none return config defaults
 
-    return SDK._config.useInsight ? SDK._config.DISCOVER.INSIGHT_SEEDS : SDK._config.DISCOVER.DAPI_SEEDS
+    return SDK._config.useTrustedServer ? SDK._config.DISCOVER.INSIGHT_SEEDS : SDK._config.DISCOVER.DAPI_SEEDS
 }
 
 exports.fetcher = function() {

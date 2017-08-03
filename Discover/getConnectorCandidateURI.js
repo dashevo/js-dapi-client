@@ -1,7 +1,7 @@
-exports.getDapiCandidateURI = function() {
+exports.getConnectorCandidateURI = function() {
 
     return new Promise(function(resolve, reject) {
-        SDK.Discover.getDapiCandidate()
+        SDK.Discover.getConnectorCandidate()
             .then(candidate => {
                 resolve(candidate.URI)
             })

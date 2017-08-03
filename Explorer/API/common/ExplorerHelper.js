@@ -2,7 +2,7 @@ const axios = require('axios')
 
 function explorerPost(apiMethod, data) {
     return new Promise(function(resolve, reject) {
-        SDK.Discover.getDapiCandidateURI()
+        SDK.Discover.getConnectorCandidateURI()
             .then(uri => {
                 uri += apiMethod;
                 if (SDK._config.debug) console.log(`[EXPLORER][POST] ${uri}`);
@@ -18,7 +18,7 @@ function explorerPost(apiMethod, data) {
 };
 function explorerGet(apiMethod) {
     return new Promise(function(resolve, reject) {
-        SDK.Discover.getDapiCandidateURI()
+        SDK.Discover.getConnectorCandidateURI()
             .then(uri => {
                 uri += apiMethod;
                 if (SDK._config.debug) console.log(`[EXPLORER][GET] ${uri}`);

@@ -9,7 +9,7 @@ exports.getHashFromHeight = function(height) {
             })
             .catch(error => {
                 reject(`An error was triggered while fetching candidate  :` + error);
-                //pvr: (`An error was triggered while fetching candidate ${getDapiCandidate.idx} - signaling and removing from list`)
+                //pvr: (`An error was triggered while fetching candidate ${getConnectorCandidate.idx} - signaling and removing from list`)
                 //not sure why error message relates to insight candidate?
             })
     })

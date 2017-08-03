@@ -20,7 +20,7 @@ exports.getMNlist = function() {
 
     return new Promise(async function(resolve, reject) {
 
-        SDK.Discover.getDapiCandidateURI()
+        SDK.Discover.getConnectorCandidateURI()
             .then(getInsightURI => {
                 let url = 'http://test-insight.dev.dash.org/insight-api-dash/status?q=getMNlist';
                 let protocol = url.split(':')[0];

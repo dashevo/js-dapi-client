@@ -8,7 +8,7 @@ exports.getSocketCandidate = function() {
         return new Promise(async function(resolve, reject) {
             if (self.Discover._state !== "ready") {
                 await self.Discover.init();
-                return resolve(self.Discover.getDapiCandidate.apply(null, args));
+                return resolve(self.Discover.getConnectorCandidate.apply(null, args));
             }
 
             let validMNList = self.Discover.Masternode.validMNList;

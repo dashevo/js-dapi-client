@@ -4,8 +4,8 @@ exports.estimateFees = function() {
     let self = this;
     return async function(blockNumber) {
         return new Promise(async function(resolve, reject) {
-            let getDapiCandidate = await self.Discover.getDapiCandidate();
-            let getInsightURI = getDapiCandidate.URI;
+            let getConnectorCandidate = await self.Discover.getConnectorCandidate();
+            let getInsightURI = getConnectorCandidate.URI;
             let url = `${getInsightURI}/utils/estimatefee?nbBlocks=${blockNumber || 2}`;
             return axios
                 .get(url)

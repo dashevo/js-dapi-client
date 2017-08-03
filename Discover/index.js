@@ -4,8 +4,8 @@ exports.Discover = function() {
     return {
         _state: "waiting",
         Masternode: Masternode(),
-        getDapiCandidate: require('./getDapiCandidate').getDapiCandidate,
-        getDapiCandidateURI: require('./getDapiCandidateURI').getDapiCandidateURI,
+        getConnectorCandidate: require('./getConnectorCandidate').getConnectorCandidate,
+        getConnectorCandidateURI: require('./getConnectorCandidateURI').getConnectorCandidateURI,
         getSocketCandidate: require('./getSocketCandidate').getSocketCandidate,
         init: require('./init').init
     };

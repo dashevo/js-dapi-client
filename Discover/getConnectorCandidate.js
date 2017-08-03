@@ -1,7 +1,7 @@
 //Choose a random insight uri
 const { math } = require('khal');
 
-exports.getDapiCandidate = function() {
+exports.getConnectorCandidate = function() {
 
     return new Promise(function(resolve, reject) {
 

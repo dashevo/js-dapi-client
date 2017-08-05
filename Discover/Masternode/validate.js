@@ -2,33 +2,38 @@ const has = require('../../util/has.js');
 const requesterJSON = require('../../util/requesterJSON.js');
 const { uuid } = require('khal');
 
-isPingable = function(el) {
+canPing = (mn) => {
 
     return new Promise(function(resolve, reject) {
-        let uri = el.fullBase + el.insightPath + '/status';
+        let uri = mn.fullBase + mn.connectorPath + '/status';
         requesterJSON.get(uri)
             .then(function(resp) {
                 if ((resp && resp.hasOwnProperty('info'))) {
-                    resolve(el);
+                    resolve(mn);
                 } else {
                     //pvr: some error handling
                 }
             })
             .catch(function(err) {
-                resolve(null)
+                resolve(false)
                 //not pingabe do nothing (perhaps some logging)
             });
     })
-};
-exports.validate = function(_unValidatedList) {
+}
+
+exports.isPingable = (mnList) => {
 
     return new Promise(function(resolve, reject) {
-        Promise.all(_unValidatedList.map(ul => isPingable(ul)))
+        Promise.all(mnList.map(ul => canPing(ul)))
             .then(validList => {
-                resolve(validList.filter(i => i != null))
+                resolve(validList.filter(i => i != false))
             })
             .catch(err => {
                 console.log(err);
             })
     });
+}
+
+isSpvAuthenticated = (mn) => {
+    return true;
 }

@@ -22,7 +22,7 @@ exports.getConnectorCandidate = function() {
             //Select randomnly one of them
             let selectedMNIdx = math.randomBetweenMinAndMax(0, validMNList.length - 1);
             let el = validMNList[selectedMNIdx];
-            return { URI: el.fullBase + el.insightPath, idx: selectedMNIdx };
+            return { URI: el.fullBase + el.connectorPath, idx: selectedMNIdx };
         } else {
             console.log('No MN found :( Sadness & emptyness');
         }

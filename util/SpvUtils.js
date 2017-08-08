@@ -1,15 +1,15 @@
 var SpvUtils = {
-    getMnOnLongestChain: (mnList) => {
+    getMnListOnLongestChain: (mnLists) => {
         //todo: Determine mn on longest chain 
         return new Promise((resolve, reject) => {
-            resolve(mnList[0]);
+            resolve(mnLists[0]);
         })
     },
 
-    getSpvValidMn: (mn) => {
+    getSpvValidMns: (mnList) => {
         //todo: SPV validate based on vin[0] 1000 Dash collateral
         return new Promise((resolve, reject) => {
-            resolve(mn);
+            resolve(mnList);
         })
     },
 }

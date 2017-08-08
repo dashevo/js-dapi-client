@@ -20,7 +20,7 @@ getStoredMasternodes = () => {
 }
 
 getSeedUris = () => {
-    return SDK._config.DISCOVER.INSIGHT_SEEDS
+    return SDK._config.DISCOVER.DAPI_SEEDS
         .map(n => {
             return `${n.protocol}://${n.base}:${n.port}`
         })
@@ -28,33 +28,28 @@ getSeedUris = () => {
 
 getMnListsFromSeeds = () => {
 
-    let mockMnList = [
-        { mn1: {} },
-        { mn2: {} },
-        { mn3: {} }
-    ]
-
     return new Promise((resolve, reject) => {
         Promise.all(getSeedUris().map(uri => {
-            return mockMnList; //axios.get($`uri/api/GetMnLists`) not yet available from insight servers
+            return axios.get(`${uri}/masternodes/list`)
         }))
-            .then(mnLists => {
-                resolve(mnLists)
+            .then(res => {
+                resolve(res.map(r => { return r.data }));
             })
             .catch(err => {
-                console.log(err)
+                console.log(err);
             })
     })
 
 }
 
+
+const mnCount = 10; //random number of mns to connect to (move to config)
 chooseRandomMns = (mnLists) => {
     return mnLists.map(mnList => {
-        return _.sample(mnList, Math.round(mnCount / mnLists.length));
+        return _.sample(mnList, Math.round(mnLists.length / mnCount));
     })
 }
 
-const mnCount = 10; //random number of mns to connect to (move to config)
 exports.fetcher = () => {
     return new Promise((resolve, reject) => {
         getStoredMasternodes()
@@ -63,21 +58,21 @@ exports.fetcher = () => {
                     resolve(mns);
                 }
                 else {
-                    return getMnListsFromSeeds()
+                    return getMnListsFromSeeds();
                 }
             })
             .then(mnLists => {
-                return SpvUtils.getMnOnLongestChain(chooseRandomMns(mnLists))
+                return SpvUtils.getMnListOnLongestChain(mnLists);
             })
-            .then(mnListOnLongestChain => {
-                return SpvUtils.getSpvValidMn(mnListOnLongestChain)
+            .then(bestMnList => {
+                return SpvUtils.getSpvValidMns(bestMnList);
             })
             .then(validMn => {
-                if (validMn) {
-                    resolve(validMn)
+                if (validMnList) {
+                    resolve(validMnList);
                 }
                 else {
-                    reject('No valid MN found')
+                    reject('No valid MN found');
                 }
             })
             .catch(err => console.log(err))

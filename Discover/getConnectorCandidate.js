@@ -1,5 +1,4 @@
-//Choose a random insight uri
-const { math } = require('khal');
+const _ = require('underscore')
 
 exports.getConnectorCandidate = function() {
 
@@ -19,10 +18,8 @@ exports.getConnectorCandidate = function() {
         }
     }).then(validMNList => {
         if (validMNList && validMNList.length > 0) {
-            //Select randomnly one of them
-            let selectedMNIdx = math.randomBetweenMinAndMax(0, validMNList.length - 1);
-            let el = validMNList[selectedMNIdx];
-            return { URI: el.fullBase + el.connectorPath, idx: selectedMNIdx };
+            // _.sample(validMNList).ip;
+            return validMNList[0]; //temp for dev purposes
         } else {
             console.log('No MN found :( Sadness & emptyness');
         }

@@ -25,7 +25,7 @@ require('./Explorer/API/getLastBlock.js') //q=getLastBlockHash on dapi not worki
 require('./Explorer/API/getLastBlockHash.js') //q=getLastBlockHash on dapi not working
 require('./Explorer/API/getLastBlockHeight.js')
 require('./Explorer/API/getLastDifficulty.js')
-require('./util/mnemonic.js');
+// require('./util/mnemonic.js');
 
 // //FIXME If a block is mined during the fetching process, this data, when verified will be shifted and won't equal.
 // // require('./Explorer/API/getBlockHeaders.js')

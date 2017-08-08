@@ -67,7 +67,7 @@ exports.fetcher = () => {
             .then(bestMnList => {
                 return SpvUtils.getSpvValidMns(bestMnList);
             })
-            .then(validMn => {
+            .then(validMnList => {
                 if (validMnList) {
                     resolve(validMnList);
                 }

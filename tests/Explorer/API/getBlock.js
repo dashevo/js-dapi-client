@@ -20,7 +20,7 @@ describe('Insight-API - getBlock', function() {
                 block.should.have.property('confirmations');
                 block.should.have.property('previousblockhash');
                 // block.should.have.property('reward');
-                block.should.have.property('isMainChain'); ``
+                block.should.have.property('isMainChain');
                 // block.should.have.property('poolInfo');
                 block.hash.should.equal(validBlockHash);
             })

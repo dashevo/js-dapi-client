@@ -1,5 +1,5 @@
 const moment = require('moment');
-const explorerGet = require('../Explorer/API/common/ExplorerHelper').explorerGet;
+const explorerGet = require('../Common/ExplorerHelper').explorerGet;
 const lastHeight = require('../Explorer/API/getLastBlockHeight').getLastBlockHeight;
 
 exports.getUtxos = function(opts, addresses) {

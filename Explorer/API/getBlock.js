@@ -1,4 +1,4 @@
-const explorerGet = require('./common/ExplorerHelper').explorerGet;
+const explorerGet = require('../../Common/ExplorerHelper').explorerGet;
 
 exports.getBlock = function(identifier) {
 

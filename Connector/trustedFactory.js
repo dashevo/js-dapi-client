@@ -40,7 +40,7 @@ const TRUSTSDK = function(options = {}) {
     self.Blockchain = require('../Blockchain/').Blockchain();
 
     //Another way :
-    // self.Blockchain = require('./Blockchain/alternate/').Blockchain.call(self);
+    // self.Blockchain = require('../Blockchain/alternate/').Blockchain.call(self);
 
     //Theses are some dependencies of DAPI-SDK that because there are creatly built, do not need to be redone again.
     //Therefore I've set them as direct part of the SDK

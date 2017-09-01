@@ -10,15 +10,8 @@ const EventEmitter = require('events').EventEmitter,
 //keep track of chain forks
 //reorg forked chain as main chain
 
-var Blockchain = module.exports = function() {
-    this.store = new BlockStore();
-    this.chainHeight = 0;
-    this._initStore();
-}
-inherits(Blockchain, EventEmitter);
-
 //Todo:move to seperate file
-let getGenesisBlock = function() {
+let getDefaultGenesisBlock = function() {
 
     //Testnet genesis
     return require('./utils')._normalizeHeader(
@@ -34,11 +27,19 @@ let getGenesisBlock = function() {
     )
 }
 
+var Blockchain = module.exports = function(genesisHeader = getDefaultGenesisBlock()) {
+    this.store = new BlockStore();
+    this.chainHeight = 0;
+    this._initStore();
+    this.genesisHeader = genesisHeader;
+}
+inherits(Blockchain, EventEmitter);
+
 Blockchain.prototype._initStore = function() {
     let self = this;
 
     if (!this.store.getTipHash()) {
-        this.store.put(getGenesisBlock())
+        this.store.put(self.genesisHeader())
             .then(() => {
                 self.emit('ready')
             })

@@ -1,7 +1,30 @@
 const DashUtil = require('dash-util')
 const bitcore = new require('bitcore-lib-dash');
 
+
+var validProofOfWork = function(header) {
+    var target = DashUtil.expandTarget(header.bits)
+    var hash = header._getHash().reverse(); //replacement for require(bufer-reverse).reverse()
+    return hash.compare(target) !== 1
+}
+
 module.exports = {
+
+    createBlock: function(prev, bits) {
+        var i = 0;
+        var header = null;
+        do {
+            header = new bitcore.BlockHeader({
+                version: 2,
+                prevHash: prev ? prev._getHash() : DashUtil.nullHash,
+                merkleRoot: DashUtil.nullHash,
+                time: prev ? (prev.time + 1) : Math.floor(Date.now() / 1000),
+                bits: bits,
+                nonce: i++
+            })
+        } while (!validProofOfWork(header))
+        return header
+    },
 
     _normalizeHeader: function(_b) {
         let _el = JSON.parse(JSON.stringify(_b));

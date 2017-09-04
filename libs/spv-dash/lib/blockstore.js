@@ -14,6 +14,9 @@ var BlockStore = module.exports = function() {
     this.tipHash = null;
 }
 
+BlockStore.prototype.preChain = function() {
+
+}
 
 BlockStore.prototype.put = function(_header) {
 
@@ -56,8 +59,6 @@ BlockStore.prototype.get = function(hash) {
 BlockStore.prototype.getTipHash = function() {
     return this.tipHash;
 }
-
-
 
 BlockStore.prototype.close = function(cb) {
     this.db.close();

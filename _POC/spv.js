@@ -1,10 +1,10 @@
 // create blockchain
-var blockchain = require('../libs/spv-dash/lib/spvchain')
-const chain = new blockchain()
+var blockchain = require('../libs/spv-dash/lib/spvchain');
 const bitcore = require('bitcore-lib-dash');
+const utils = require('../libs/spv-dash/lib/utils');
+const DashUtil = require('dash-util');
 
 var getHeaders = function(startHeight) {
-
 
     //When available....
     //SDK.Explorer.API.getHeaders(startHeight) //Get max headers --> returns a promise
@@ -25,8 +25,6 @@ var getHeaders = function(startHeight) {
             ]
 
         let block1LiveNet = { "hash": "000007d91d1254d60e2dd1ae580383070a4ddffa4c64c2eeb4a2f9ecc0414343", "confirmations": 724402, "size": 186, "height": 1, "version": 2, "merkleroot": "ef3ee42b51e2a19c4820ef182844a36db1201c61eb0dec5b42f84be4ad1a1ca7", "tx": ["ef3ee42b51e2a19c4820ef182844a36db1201c61eb0dec5b42f84be4ad1a1ca7"], "time": 1390103681, "mediantime": 1390103681, "nonce": 128987, "bits": "1e0ffff0", "difficulty": 0.000244140625, "chainwork": "0000000000000000000000000000000000000000000000000000000000200020", "previousblockhash": "00000ffd590b1485b3caadc19b22e6379c733355108f107a430458cdf3407ab6", "nextblockhash": "00000bafcc571ece7c5c436f887547ef41b574e10ef7cc6937873a74ef1efeae", "isMainChain": true, "poolInfo": { "poolName": "Q/P2SH/" }, "cbvalue": 500 }
-
-        const utils = require('../libs/spv-dash/lib/utils');
         resolve(blocksTestNet.map(b => utils._normalizeHeader(b)));
     });
 }
@@ -93,54 +91,52 @@ var doConstuctChainThenValidateTest = function() {
     }
 }
 
-var utils = require('../libs/spv-dash/lib/utils')
 getNewBlock = function(prev, bits) {
     return utils.createBlock(prev, parseInt(bits, 16));
 }
 
-getForkedHeaders = function() {
+getCustomGenesis = function() {
+    //Custom genesis to test with lower difficulty
 
-    //init chain with custom genesis
+    return utils._normalizeHeader(
+        {
+            "version": 1,
+            "previousblockhash": null,
+            "merkleroot": DashUtil.nullHash.toString('hex'),
+            "time": 1504510163, //1390095618 for livenet
+            "bits": '1fffffff',
+            "nonce": 2307, //28917698 for livenet
+            "hash": '0071fdcecd3747f1dddc090d836d79c40d239e3b80ccbfed8e5c009dd8b42e23'
+        }
+    )
+}
+
+getForkedHeaders = function() {
 
     var headers = [];
 
-    headers.push(getNewBlock(null, '1fffffff')); //0
-
     //normal chain 1 block - connects to genesis
-    headers.push(getNewBlock(headers[0], '1ffffffe')); //1
+    headers.push(getNewBlock(getCustomGenesis(), '1fffffff')); //0
 
     //fork 2 blocks - connects to genesis
-    headers.push(getNewBlock(headers[0], '1fffff0d')); //2
-    headers.push(getNewBlock(headers[2], '1fffff0c')); //3
+    headers.push(getNewBlock(getCustomGenesis(), '1fffff0d')); //1
+    headers.push(getNewBlock(headers[1], '1fffff0c')); //2
 
     //normal chain 2'nd block
-    headers.push(getNewBlock(headers[1], '1ffffffd')); //4
+    headers.push(getNewBlock(headers[0], '1ffffffd')); //3
 
     //fork 3'rd block = trigger re-org because cumalative difficulty on fork is higher
-    headers.push(getNewBlock(headers[3], '1fffff0b')); //5
+    headers.push(getNewBlock(headers[2], '1fffff0b')); //4
 
     return headers;
 }
 
 doForkThenReorgTest = function() {
-
-    //Custom genesis to test with lower difficulty
-    return require('./utils')._normalizeHeader(
-        {
-            "version": 1,
-            "previousblockhash": null,
-            "merkleroot": 'e0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7',
-            "time": 1390666206, //1390095618 for livenet
-            "bits": '1e0ffff0',
-            "nonce": 3861367235, //28917698 for livenet
-            "hash": '00000bafbc94add76cb75e2ec92894837288a481e5c005f6563d91623bf8bc2c'
-        }
-    )
-
-
     chain._addHeaders(getForkedHeaders());
 }
 
+
+const chain = new blockchain(getCustomGenesis())
 // wait for the blockchain to be ready
 chain.on('ready', function() {
 

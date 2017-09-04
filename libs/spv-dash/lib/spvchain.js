@@ -5,11 +5,6 @@ const EventEmitter = require('events').EventEmitter,
     bitcore = new require('bitcore-lib-dash'),
     inherits = require('inherits');
 
-//TODO list:
-//include checkpoints logic
-//keep track of chain forks
-//reorg forked chain as main chain
-
 //Todo:move to seperate file
 let getDefaultGenesisBlock = function() {
 
@@ -27,11 +22,15 @@ let getDefaultGenesisBlock = function() {
     )
 }
 
+var ForkedChain = require('./forkedChain')
+
 var Blockchain = module.exports = function(genesisHeader = getDefaultGenesisBlock()) {
     this.store = new BlockStore();
     this.chainHeight = 0;
-    this._initStore();
+    this.forkedChains = [];
     this.genesisHeader = genesisHeader;
+
+    this._initStore();
 }
 inherits(Blockchain, EventEmitter);
 
@@ -39,7 +38,7 @@ Blockchain.prototype._initStore = function() {
     let self = this;
 
     if (!this.store.getTipHash()) {
-        this.store.put(self.genesisHeader())
+        this.store.put(self.genesisHeader)
             .then(() => {
                 self.emit('ready')
             })
@@ -55,33 +54,55 @@ Blockchain.prototype.isValidBlock = function(header) {
         header.getDifficulty() > 0; //probably not needed (included in validPOW?)
 }
 
+Blockchain.prototype.handleReorgs = function() {
+
+}
+
+Blockchain.prototype.addCachedBlock = function(block) {
+    let chainMatch = this.forkedChains.filter(fc => fc.getTip() == block.prevHash);
+
+    if (chainMatch.length == 1) {
+        chainMatch.push(new cachedBlock());
+    }
+    else if (chainMatch.length == 0) {
+        this.forkedChains.push(new ForkedChain(block));
+    }
+    else {
+        throw new Exception("New block connecting to more than 1 chain")
+    }
+}
+
 Blockchain.prototype._addHeader = function(header) {
 
     if (!this.isValidBlock(header)) {
         throw new Exception('Block does not conform to consensus rules')
     }
-
-    let refPrevHeader = header.prevHash.toString('hex');
-
-    if (refPrevHeader == this.store.getTipHash()) {
-        let self = this;
-        this.store.put(header)
-            .then(() => {
-                self.chainHeight++;
-            })
-
-    }
     else {
-        this.store.get(refPrevHeader)
-            .then(linkHeader => {
-                if (linkHeader) {
-                    //Todo: Keep track of forks and handle reorgs
-                }
-                else {
-                    throw new Exception(`header with prevHash ${header.prevHash} does not connect to chain`)
-                }
-            })
+        this.addCachedBlock();
     }
+
+    // let refPrevHeader = header.prevHash.toString('hex');
+
+    // if (refPrevHeader == this.store.getTipHash()) {
+    //     let self = this;
+    //     this.store.put(header)
+    //         .then(() => {
+    //             self.chainHeight++;
+    //             self.handleReorgs();
+    //         })
+    // }
+    // else {
+    //     this.store.get(refPrevHeader)
+    //         .then(linkHeader => {
+    //             if (linkHeader) {
+    //                 this.forkedChains.addForkedBlock(forkedBlock)
+    //                 handleReorgs();
+    //             }
+    //             else {
+    //                 throw new Exception(`header with prevHash ${header.prevHash} does not connect to chain`)
+    //             }
+    //         })
+    // }
 }
 
 Blockchain.prototype._addHeaders = function(headers) {

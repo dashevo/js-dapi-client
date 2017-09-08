@@ -1,5 +1,6 @@
 const DashUtil = require('dash-util')
 const bitcore = new require('bitcore-lib-dash');
+const u256 = require('dark-gravity-wave-js/lib/u256')
 
 
 var validProofOfWork = function(header) {
@@ -10,6 +11,14 @@ var validProofOfWork = function(header) {
 
 module.exports = {
 
+    //functions for getting normal (ie non reversed) merkleroot, hash and prevHash values
+    //from bitcore-lib-dash.BlockHeader directly (this fn only temporary)
+    //todo: add getHash(), getPrevHash() and getMerkleRoot() fns to bitcore and PR
+    getCorrectedHash: function(reversedHashObj) {
+        let clone = new Buffer(32);
+        reversedHashObj.copy(clone)
+        return clone.reverse().toString('hex');
+    },
     createBlock: function(prev, bits) {
         var i = 0;
         var header = null;
@@ -25,7 +34,23 @@ module.exports = {
         } while (!validProofOfWork(header))
         return header
     },
+    getDifficulty: function(target) {
 
+        //TODO: temp hack to calculate difficulty (ie higer values for lower targets)
+        //to replace with correct difficulty calculations
+        return 1.0 / target;
+
+        // var nSize = targetBits >>> 24;
+        // var nWord = new u256();
+        // nWord.u32[0] = targetBits & 0x007fffff;
+        // if (nSize <= 3) {
+        //     nWord = nWord.shiftRight(8 * (3 - nSize));
+        // }
+        // else {
+        //     nWord = nWord.shiftLeft(8 * (nSize - 3));
+        // }
+        // return nWord.getCompact();
+    },
     _normalizeHeader: function(_b) {
         let _el = JSON.parse(JSON.stringify(_b));
         let bh = {};

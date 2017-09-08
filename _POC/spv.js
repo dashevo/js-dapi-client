@@ -106,7 +106,7 @@ getCustomGenesis = function() {
             "time": 1504510163, //1390095618 for livenet
             "bits": '1fffffff',
             "nonce": 2307, //28917698 for livenet
-            "hash": '0071fdcecd3747f1dddc090d836d79c40d239e3b80ccbfed8e5c009dd8b42e23'
+            // "hash": '0071fdcecd3747f1dddc090d836d79c40d239e3b80ccbfed8e5c009dd8b42e23'
         }
     )
 }

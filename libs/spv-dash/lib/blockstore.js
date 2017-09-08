@@ -1,6 +1,10 @@
 'use strict';
 
+//pvr: starting to question if levelup is the proper data structure
+//no indexes and the headerchain possibly not large enough to justify using a db in the first place?
+//not ideal to keep track of chain forks and a custom indexed/linked-list structure might be better suited?
 const levelup = require('levelup');
+
 
 var BlockStore = module.exports = function() {
     this.db = levelup('dash.chain',
@@ -12,10 +16,6 @@ var BlockStore = module.exports = function() {
 
     this.Block = require('bitcore-lib-dash').BlockHeader;
     this.tipHash = null;
-}
-
-BlockStore.prototype.preChain = function() {
-
 }
 
 BlockStore.prototype.put = function(_header) {

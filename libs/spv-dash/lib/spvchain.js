@@ -1,4 +1,5 @@
 'use strict';
+const utils = require('./utils');
 
 const EventEmitter = require('events').EventEmitter,
     BlockStore = require('./blockstore'),
@@ -9,7 +10,7 @@ const EventEmitter = require('events').EventEmitter,
 let getDefaultGenesisBlock = function() {
 
     //Testnet genesis
-    return require('./utils')._normalizeHeader(
+    return utils._normalizeHeader(
         {
             "version": 1,
             "previousblockhash": null,
@@ -29,6 +30,7 @@ var Blockchain = module.exports = function(genesisHeader = getDefaultGenesisBloc
     this.chainHeight = 0;
     this.forkedChains = [];
     this.genesisHeader = genesisHeader;
+    this.POW = 0; //difficulty summed
 
     this._initStore();
 }
@@ -38,71 +40,66 @@ Blockchain.prototype._initStore = function() {
     let self = this;
 
     if (!this.store.getTipHash()) {
-        this.store.put(self.genesisHeader)
+        this.putStore(self.genesisHeader)
             .then(() => {
-                self.emit('ready')
+                self.emit('ready');
             })
     }
     else {
-        self.emit('ready')
+        self.emit('ready');
     }
+}
+
+Blockchain.prototype.putStore = function(block) {
+    this.POW += block.bits;
+    return this.store.put(block);
 }
 
 Blockchain.prototype.isValidBlock = function(header) {
     return header.validProofOfWork() &&
         header.validTimestamp &&
-        header.getDifficulty() > 0; //probably not needed (included in validPOW?)
-}
-
-Blockchain.prototype.handleReorgs = function() {
-
+        header.getDifficulty() > 0; //todo: do some darkgravitywave check here or is this included in the validProofOfWork() check?
 }
 
 Blockchain.prototype.addCachedBlock = function(block) {
-    let chainMatch = this.forkedChains.filter(fc => fc.getTip() == block.prevHash);
+    let tipConnection = this.forkedChains.filter(fc => fc.isConnectedToTip(block))
+    let headConnection = this.forkedChains.filter(fc => fc.isConnectedToHead(block))
 
-    if (chainMatch.length == 1) {
-        chainMatch.push(new cachedBlock());
+    block.getDifficulty()
+
+    if (tipConnection.length > 0) {
+        tipConnection[0].addTip(block);
     }
-    else if (chainMatch.length == 0) {
-        this.forkedChains.push(new ForkedChain(block));
+    else if (headConnection.length > 0) {
+        headConnection[0].addHead(block);
     }
     else {
-        throw new Exception("New block connecting to more than 1 chain")
+        this.forkedChains.push(new ForkedChain(block, this.POW, this.store.getTipHash()));
     }
+}
+
+Blockchain.prototype.processMaturedChains = function() {
+
+    let maxDifficulty = Math.max.apply(Math, this.forkedChains.map(f => f.getPOW()));
+    let bestChainMaturedBlocks = this.forkedChains.find(f => f.getPOW() == maxDifficulty).getMaturedBlocks();
+
+    for (let i = 0; i < bestChainMaturedBlocks.length; i++) {
+        this.putStore(bestChainMaturedBlocks.pop());
+    }
+
+    //todo: kill expired chains
 }
 
 Blockchain.prototype._addHeader = function(header) {
 
     if (!this.isValidBlock(header)) {
-        throw new Exception('Block does not conform to consensus rules')
+        throw new Exception('Block does not conform to header consensus rules');
     }
     else {
-        this.addCachedBlock();
+        console.log(`${header.bits} ${utils.getDifficulty(header.bits)}`)
+        this.addCachedBlock(header);
+        this.processMaturedChains();
     }
-
-    // let refPrevHeader = header.prevHash.toString('hex');
-
-    // if (refPrevHeader == this.store.getTipHash()) {
-    //     let self = this;
-    //     this.store.put(header)
-    //         .then(() => {
-    //             self.chainHeight++;
-    //             self.handleReorgs();
-    //         })
-    // }
-    // else {
-    //     this.store.get(refPrevHeader)
-    //         .then(linkHeader => {
-    //             if (linkHeader) {
-    //                 this.forkedChains.addForkedBlock(forkedBlock)
-    //                 handleReorgs();
-    //             }
-    //             else {
-    //                 throw new Exception(`header with prevHash ${header.prevHash} does not connect to chain`)
-    //             }
-    //         })
-    // }
 }
 
 Blockchain.prototype._addHeaders = function(headers) {
@@ -146,13 +143,9 @@ let getMerkleProofs = function(localBlockHash, localMerkleRoot, filterAddr = nul
         });
 
         pool.on('peermerkleblock', function(peer, message) {
-            // console.log('MERKLE BLOCK !!!!' + JSON.stringify(message))
 
-            //Temp way to get normal hex merkle root reversed/little endian (don't understand this stuff yet)
-            let verifyMerkleRoot = message.merkleBlock.header.merkleRoot.toString('hex').match(/.{2}/g).reverse().join("");
-
-            if (verifyMerkleRoot != localMerkleRoot) {
-                reject('merkle roots mismatch')
+            if (utils.getCorrectedHash(message.merkleBlock.header.merkleRoot) != localMerkleRoot) {
+                reject('merkle roots does not match on spv chain')
             }
             else {
                 let bmp = require('bitcoin-merkle-proof');

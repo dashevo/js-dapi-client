@@ -1,4 +1,3 @@
-'use strict';
 const utils = require('./utils');
 
 const EventEmitter = require('events').EventEmitter,
@@ -23,7 +22,7 @@ let getDefaultGenesisBlock = function() {
     )
 }
 
-var ForkedChain = require('./forkedChain')
+var ForkedChain = require('./forkedchain')
 
 var Blockchain = module.exports = function(genesisHeader = getDefaultGenesisBlock()) {
     this.store = new BlockStore();
@@ -52,6 +51,7 @@ Blockchain.prototype._initStore = function() {
 
 Blockchain.prototype.putStore = function(block) {
     this.POW += block.bits;
+    this.chainHeight++;
     return this.store.put(block);
 }
 
@@ -96,7 +96,7 @@ Blockchain.prototype._addHeader = function(header) {
         throw new Exception('Block does not conform to header consensus rules');
     }
     else {
-        console.log(`${header.bits} ${utils.getDifficulty(header.bits)}`)
+        // console.log(`${header.bits} ${utils.getDifficulty(header.bits)}`)
         this.addCachedBlock(header);
         this.processMaturedChains();
     }
@@ -114,7 +114,6 @@ Blockchain.prototype.getChainHeight = function() {
     return this.chainHeight;
 }
 
-let
-
-
-
+Blockchain.prototype.getBlock = function(blockhash) {
+    return this.store.get(blockHash); //promise
+}

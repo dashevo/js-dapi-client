@@ -95,22 +95,6 @@ getNewBlock = function(prev, bits) {
     return utils.createBlock(prev, parseInt(bits, 16));
 }
 
-getCustomGenesis = function() {
-    //Custom genesis to test with lower difficulty
-
-    return utils._normalizeHeader(
-        {
-            "version": 1,
-            "previousblockhash": null,
-            "merkleroot": DashUtil.nullHash.toString('hex'),
-            "time": 1504510163, //1390095618 for livenet
-            "bits": '1fffffff',
-            "nonce": 2307, //28917698 for livenet
-            // "hash": '0071fdcecd3747f1dddc090d836d79c40d239e3b80ccbfed8e5c009dd8b42e23'
-        }
-    )
-}
-
 getForkedHeaders = function() {
 
     var headers = [];

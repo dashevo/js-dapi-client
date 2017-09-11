@@ -5,7 +5,8 @@ DAPISDK = () => {
         Discover: require('../Discover/').Discover(),
         BWS: require('../BWS/').BWS(),
         Blockchain: require('../Blockchain/').Blockchain(),
-        _config: require('../config.js')
+        SPV: require('../SPV/'),
+        _config: require('../config.js'),
     }
 }
 

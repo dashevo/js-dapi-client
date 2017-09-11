@@ -1,34 +1,25 @@
 
+//TODO: still just in POC code - optimisations needed to make it lib worthy 
+//All node/ pool sockets & communication, etc + bloom filters 
+//should be moved from here and handled in dapi - sdk Discovery services
 
-module.exports = getMerkleProof = function(blockHash, txHash, filterAddr) {
+const utils = require('./utils');
 
-    this.store.get(blockHash)
-        .then(localBlock => {
-            if (!localBlock) {
-                throw new Exception(`header block with hash ${blockHash} not found on local spv chain`)
-            }
-            else {
-                return getMerkleProofs(localBlock.hash, localBlock.merkleRoot, filterAddr);
-            }
-        })
+module.exports = isIncluded = function(localBlock, txHash) {
+
+    return getMerkleProofs(localBlock.hash, localBlock.merkleRoot)
         .then(proofs => {
 
-            if (proofs.length == 0) {
+            if (proofs.map(p => utils.getCorrectedHash(p)).includes(txHash)) {
                 //coinbase tx only so 
                 //merkle root matches txHash so can do this check here
-                console.log('SPV VALIDTION SUCCESS')
-            }
-            else if (proofs.contains(txHash)) {//wont execute (pseudo code)
-                //because its difficult to build a chain form genesis up to a block that contains more than the coinbase tx
-                //a check still needs to be done here (the txHash should be in the set of proofs which is matching transactions of the bloom filter)
-                //earlier versions of the POC did sucessfully test this without depending on the locally constructed SPV chain
-                console.log('SPV VALIDTION SUCCESS')
+                // console.log('SPV VALIDTION SUCCESS')
+                return true;
             }
             else {
-                console.log('SPV FAILED')
+                // console.log('SPV FAILED')
+                return false;
             }
-
-
         })
         .catch(err => {
             console.log(err);
@@ -65,7 +56,7 @@ getMerkleProofs = function(localBlockHash, localMerkleRoot, filterAddr = null) {
 
         pool.on('peermerkleblock', function(peer, message) {
 
-            if (utils.getCorrectedHash(message.merkleBlock.header.merkleRoot) != localMerkleRoot) {
+            if (utils.getCorrectedHash(message.merkleBlock.header.merkleRoot) != utils.getCorrectedHash(localMerkleRoot)) {
                 reject('merkle roots does not match on spv chain')
             }
             else {

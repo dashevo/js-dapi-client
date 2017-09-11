@@ -56,6 +56,7 @@ const TRUSTSDK = function(options = {}) {
     //Prepare EventEmitter
     self.emitter = new EE2();
 
+    self.SPV = require('../SPV');
 
     //Init masternode fetching
     //This part is now dynamic.

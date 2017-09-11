@@ -1,12 +1,10 @@
+'use strict'
+
 // create blockchain
 const blockchain = require('../lib/spvchain');
 const chainManager = require('./chainmanager');
-const bitcore = require('bitcore-lib-dash');
-const utils = require('../lib/utils');
-const DashUtil = require('dash-util');
 const should = require('should');
-
-
+const config = require('../config/config')
 
 var initChainFromStorage = function() {
     //todo
@@ -74,7 +72,7 @@ var chain = null;
 var headers = []
 var initChain = function() {
     return new Promise((resolve, reject) => {
-        chain = new blockchain(getCustomGenesis())
+        chain = new blockchain(config.getLowDiffGenesis())
         chain.on('ready', function() {
             resolve(true)
         }, this);
@@ -115,36 +113,8 @@ describe('SPV-DASH (forks & re-orgs)', function() {
 });
 
 describe('SPV-DASH (merkle proofs)', function() {
-
-    it('should wait for chain to be ready', function() {
-        return initChain()
-            .then(res => {
-                res.should.be.true();
-            })
-
-    });
-
-    //save to disk to speedup
-    it('should mine 5 test headers', function() {
-        headers = chainManager.fetchHeaders();
-        headers.length.should.equal(5);
-    });
-
-    it('should create a fork when adding header 0', function() {
-        chain._addHeader(headers[0]);
-        chain.forkedChains.length.should.equal(1);
-    });
-
-    it('should create a second fork when adding header 1', function() {
-        chain._addHeader(headers[1]);
-        chain.forkedChains.length.should.equal(2);
-    });
-
-    it('should have 1 matured block on chain 2 after adding headers 2,3 and 4', function() {
-        chain._addHeaders(headers.slice(2, 5));
-        chain.getChainHeight().should.equal(2); //genesis block + 1 matured block
-    });
-
+    //Tests included in dapi-sdk
+    //possibly add further tests here    
 });
 
 

@@ -1,52 +1,73 @@
+'use strict'
 const utils = require('./utils');
 
 const EventEmitter = require('events').EventEmitter,
     BlockStore = require('./blockstore'),
     bitcore = new require('bitcore-lib-dash'),
-    inherits = require('inherits');
+    inherits = require('inherits'),
+    config = require('../config/config'),
+    ForkedChain = require('./forkedchain')
 
-//Todo:move to seperate file
-let getDefaultGenesisBlock = function() {
-
-    //Testnet genesis
-    return utils._normalizeHeader(
-        {
-            "version": 1,
-            "previousblockhash": null,
-            "merkleroot": 'e0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7',
-            "time": 1390666206, //1390095618 for livenet
-            "bits": '1e0ffff0',
-            "nonce": 3861367235, //28917698 for livenet
-            "hash": '00000bafbc94add76cb75e2ec92894837288a481e5c005f6563d91623bf8bc2c'
-        }
-    )
-}
-
-var ForkedChain = require('./forkedchain')
-
-var Blockchain = module.exports = function(genesisHeader = getDefaultGenesisBlock()) {
+var Blockchain = module.exports = function(fileStream, chainType) {
     this.store = new BlockStore();
     this.chainHeight = 0;
     this.forkedChains = [];
-    this.genesisHeader = genesisHeader;
     this.POW = 0; //difficulty summed
+    this.genesisHeader = null;
+    this.ready = false;
 
-    this._initStore();
+    this._initStore(fileStream, chainType);
 }
 inherits(Blockchain, EventEmitter);
 
-Blockchain.prototype._initStore = function() {
+Blockchain.prototype.loadBlocksFromFile = function() {
+    //Todo load
+
+    //Todo confirm genesis match
+
+    //Do re-scan/re-verification?
+
+    self.emit('ready');
+}
+
+Blockchain.prototype._initStore = function(fileStream, chainType) {
+
+    switch (chainType || 'lowdiff') {
+        case 'testnet':
+            this.genesisHeader = config.getTestnetGenesis();
+            break;
+        case 'livenet':
+            break;
+            this.genesisHeader = config.getLivenetGenesis();
+        case 'lowdiff':
+            this.genesisHeader = config.getLowDiffGenesis();
+            break;
+    }
+
+    if (fileStream) {
+        loadBlocksFromFile();
+    }
     let self = this;
 
     if (!this.store.getTipHash()) {
         this.putStore(self.genesisHeader)
             .then(() => {
+                this.ready = true;
                 self.emit('ready');
             })
     }
     else {
+        this.ready = true;
         self.emit('ready');
     }
+}
+
+Blockchain.prototype.getTipHash = function() {
+    return this.store.getTipHash();
+}
+
+Blockchain.prototype.isChainReady = function() {
+    return this.ready;
 }
 
 Blockchain.prototype.putStore = function(block) {
@@ -78,10 +99,14 @@ Blockchain.prototype.addCachedBlock = function(block) {
     }
 }
 
+Blockchain.prototype.getBestFork = function() {
+    let maxDifficulty = Math.max.apply(Math, this.forkedChains.map(f => f.getPOW()));
+    return this.forkedChains.find(f => f.getPOW() == maxDifficulty)
+}
+
 Blockchain.prototype.processMaturedChains = function() {
 
-    let maxDifficulty = Math.max.apply(Math, this.forkedChains.map(f => f.getPOW()));
-    let bestChainMaturedBlocks = this.forkedChains.find(f => f.getPOW() == maxDifficulty).getMaturedBlocks();
+    let bestChainMaturedBlocks = this.getBestFork().getMaturedBlocks();
 
     for (let i = 0; i < bestChainMaturedBlocks.length; i++) {
         this.putStore(bestChainMaturedBlocks.pop());
@@ -91,6 +116,10 @@ Blockchain.prototype.processMaturedChains = function() {
 }
 
 Blockchain.prototype._addHeader = function(header) {
+
+    if (!(header instanceof bitcore.BlockHeader)) {
+        header = utils._normalizeHeader(header);
+    }
 
     if (!this.isValidBlock(header)) {
         throw new Exception('Block does not conform to header consensus rules');
@@ -111,9 +140,24 @@ Blockchain.prototype._addHeaders = function(headers) {
 }
 
 Blockchain.prototype.getChainHeight = function() {
-    return this.chainHeight;
+    //Total chain = db committed chain + strongest fork/temp chain
+    return this.chainHeight + this.getBestFork().getForkHeight();
 }
 
 Blockchain.prototype.getBlock = function(blockhash) {
-    return this.store.get(blockHash); //promise
+    return this.store.get(blockhash)
+        .then(blockInDB => {
+            if (blockInDB) {
+                return blockInDB
+            }
+            else {
+                let blockInFork = this.getBestFork().blocks.filter(b => b.hash == blockhash);
+                if (blockInFork.length == 1) {
+                    return blockInFork[0];
+                }
+                else {
+                    return null;
+                }
+            }
+        })
 }

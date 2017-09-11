@@ -1,4 +1,7 @@
+'use strict'
+
 //blocks that can be considered part of the main chain/removed from this forkedChain
+//probably 100 for production?
 const matureHeight = 2;
 const utils = require('./utils');
 
@@ -62,6 +65,10 @@ class ForkedChain {
 
     getPOW() {
         return this.POW;
+    }
+
+    getForkHeight() {
+        return this.blocks.length + this.maturedBlocks.length;
     }
 }
 

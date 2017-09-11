@@ -1,3 +1,5 @@
+'use strict'
+
 const DashUtil = require('dash-util')
 const bitcore = new require('bitcore-lib-dash');
 const u256 = require('dark-gravity-wave-js/lib/u256')

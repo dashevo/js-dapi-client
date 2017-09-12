@@ -45,7 +45,7 @@ Blockchain.prototype._initStore = function(fileStream, chainType) {
     }
 
     if (fileStream) {
-        loadBlocksFromFile();
+        //loadBlocksFromFile() todo;
     }
     let self = this;
 

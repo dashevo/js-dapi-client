@@ -72,7 +72,7 @@ var chain = null;
 var headers = []
 var initChain = function() {
     return new Promise((resolve, reject) => {
-        chain = new blockchain(config.getLowDiffGenesis())
+        chain = new blockchain(null, 'testnet')
         chain.on('ready', function() {
             resolve(true)
         }, this);
@@ -105,9 +105,9 @@ describe('SPV-DASH (forks & re-orgs)', function() {
         chain.forkedChains.length.should.equal(2);
     });
 
-    it('should have 1 matured block on chain 2 after adding headers 2,3 and 4', function() {
+    it('should have 4 total blocks on chain 2 (strongest chain) after adding headers 2,3 and 4', function() {
         chain._addHeaders(headers.slice(2, 5));
-        chain.getChainHeight().should.equal(2); //genesis block + 1 matured block
+        chain.getChainHeight().should.equal(4); //genesis block + 1 matured block + 2 forked/pending blocks
     });
 
 });

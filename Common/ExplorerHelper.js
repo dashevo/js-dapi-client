@@ -2,12 +2,8 @@ const axios = require('axios')
 
 function explorerPost(apiMethod, data) {
     return new Promise(function(resolve, reject) {
-        SDK.Discover.getConnectorCandidateURI()
-            .then(uri => {
-                uri += apiMethod;
-                if (SDK._config.debug) console.log(`[EXPLORER][POST] ${uri}`);
-                return axios.post(uri, data);
-            })
+
+        axios.post(SDK.Discover.getConnectorCandidateURI() + apiMethod, data)
             .then(response => {
                 resolve(response.data)
             })
@@ -15,15 +11,11 @@ function explorerPost(apiMethod, data) {
                 reject(error);
             })
     })
-}; 124
+};
+
 function explorerGet(apiMethod) {
     return new Promise(function(resolve, reject) {
-        SDK.Discover.getConnectorCandidateURI()
-            .then(uri => {
-                uri += apiMethod;
-                if (SDK._config.debug) console.log(`[EXPLORER][GET] ${uri}`);
-                return axios.get(uri);
-            })
+        axios.get(SDK.Discover.getConnectorCandidateURI() + apiMethod)
             .then(response => {
                 resolve(response.data);
             })

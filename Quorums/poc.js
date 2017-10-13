@@ -1,4 +1,3 @@
-const should = require('should');
 const _config = require('../config')
 
 const REFSDK = _config.useTrustedServer ? require('../Connector/trustedFactory.js') : require('../Connector/dapiFactory.js');
@@ -26,15 +25,15 @@ const options = { //no effect for dapi - using defaults
     }
 };
 
-describe('Init DAPI-SDK', function() {
-    REFSDK(options)
-        .then(success => {
-            it('should have the right components', function() {
-                should.exist(global.SDK);
-                global.SDK.should.have.property('Accounts');
-                global.SDK.should.have.property('Discover');
-                global.SDK.should.have.property('Explorer');
-            })
-        })
-
-});
+REFSDK(options)
+    .then(ready => {
+        if (ready) {
+            SDK.Explorer.API.getLastBlockHeight()
+                .then(h => {
+                    console.log(h);
+                })
+        }
+        else {
+            console.log("SDK not initialised")
+        }
+    })

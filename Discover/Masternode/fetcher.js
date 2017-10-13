@@ -1,6 +1,6 @@
 const axios = require('axios'),
     SpvUtils = require('../../util/SpvUtils'),
-    _ = require('underscore'),
+    _ = require('lodash'),
     fs = require('fs')
 
 
@@ -42,14 +42,6 @@ getMnListsFromSeeds = () => {
 
 }
 
-
-const mnCount = 10; //random number of mns to connect to (move to config)
-chooseRandomMns = (mnLists) => {
-    return mnLists.map(mnList => {
-        return _.sample(mnList, Math.round(mnLists.length / mnCount));
-    })
-}
-
 exports.fetcher = () => {
     return new Promise((resolve, reject) => {
         getStoredMasternodes()
@@ -69,6 +61,8 @@ exports.fetcher = () => {
             })
             .then(validMnList => {
                 if (validMnList) {
+                    //todo: temp dev to return only first server (local running dapi)
+                    validMnList = [validMnList[0]]
                     resolve(validMnList);
                 }
                 else {

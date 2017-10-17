@@ -1,3 +1,5 @@
+//common code present in dapi + sdk (to be extracted to single lib)
+
 const _ = require('lodash');
 const quorumSize = 1;
 
@@ -16,7 +18,8 @@ var mockUser = JSON.parse(require('../../Accounts/User/mocks/registeredUser'));
 
 //2: to discuss - weakness in same mn's in same quorums while for the same mnLists
 
-//As per (1) remove zeros and pad with end to get a truely random value within the 256-bit search space 
+//As per (1) remove zeros and pad with end to get a truely random value within the 256-bit search space
+//We can also hash the blockhash for same effect with slightly more - albeit negligible - overhead for clients 
 var GetTruelyRandomBlockHash = function(blockHash) {
     let leadingZeros = _.takeWhile(blockHash.split(""), e => e == '0').length;
     return blockHash.substring(blockHash.length - leadingZeros, blockHash.length) + blockHash.substring(leadingZeros, blockHash.length);

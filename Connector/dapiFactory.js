@@ -1,5 +1,5 @@
 //Todo: apply init process for trustedFactory.js
-const quorumManager = require('../libs/quorum-dash')
+const quorums = require('quorums-dash')
 
 DAPISDK = (useQuorums = true) => {
     global.SDK = {
@@ -43,7 +43,7 @@ var updateQuorum = function(mnList) {
         .then(height => {
             return SDK.Explorer.API.getHashFromHeight(height - refHeight)
         }).then(hash => {
-            return quorumManager.getQuorum(mnList, hash);
+            return quorums.getQuorum(mnList, hash, JSON.parse(require('../Accounts/User/mocks/registeredUser')).txid);
         })
 }
 

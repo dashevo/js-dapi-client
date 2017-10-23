@@ -23,6 +23,7 @@
     "lodash": "^4.17.4",
     "memdown": "^1.2.4",
     "moment": "^2.18.1",
+    "quorums-dash": "file:../quorums-dash",
     "socket.io-client": "^2.0.3",
     "webcoin-dash": "^3.1.4",
     "ws": "^3.1.0"

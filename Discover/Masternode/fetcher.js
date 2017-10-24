@@ -61,8 +61,6 @@ exports.fetcher = () => {
             })
             .then(validMnList => {
                 if (validMnList) {
-                    //todo: temp dev to return only first server (local running dapi)
-                    validMnList = [validMnList[0]]
                     resolve(validMnList);
                 }
                 else {

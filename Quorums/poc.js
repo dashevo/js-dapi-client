@@ -28,7 +28,6 @@ const options = { //no effect for dapi - using defaults
     }
 };
 
-
 REFSDK(options)
     .then(ready => {
         if (ready) {
@@ -50,3 +49,10 @@ REFSDK(options)
             console.log("SDK not initialised")
         }
     })
+
+//Override node promises (workaround debug issues)
+global.Promise = require("bluebird");
+
+// new Promise((resolve, reject) => {
+//     breaksomething() //won't pause
+// })

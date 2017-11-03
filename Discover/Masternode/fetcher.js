@@ -19,21 +19,19 @@ getStoredMasternodes = () => {
     })
 }
 
-getSeedUris = () => {
-    return SDK._config.DISCOVER.DAPI_SEEDS
-        .map(n => {
-            return `${n.protocol}://${n.base}:${n.port}`
-        })
+//Return a random uri from any in provided list of mns (or seeds if no mns provided)
+getUri = (mns) => {
+    let canditate = _.sample(mns || SDK._config.DISCOVER.DAPI_SEEDS)
+    return `${canditate.protocol}://${canditate.base}:${canditate.port}`
 }
 
-getMnListsFromSeeds = () => {
+getMnLists = (mns) => {
 
     return new Promise((resolve, reject) => {
-        Promise.all(getSeedUris().map(uri => {
-            return axios.get(`${uri}/masternodes/list`)
-        }))
+
+        return axios.get(`${getUri(mns)}/masternodes/updateList/${SDK.Discover.Masternode.masternodeList.hash}`)
             .then(res => {
-                resolve(res.map(r => { return r.data }));
+                resolve(res.data);
             })
             .catch(err => {
                 console.log(err);
@@ -42,23 +40,26 @@ getMnListsFromSeeds = () => {
 
 }
 
-exports.fetcher = () => {
+exports.fetcher = (mns) => {
     return new Promise((resolve, reject) => {
         getStoredMasternodes()
-            .then(mns => {
+            .then(stroredMns => {
                 if (mns) {
-                    resolve(mns);
+                    resolve(stroredMns);
                 }
                 else {
-                    return getMnListsFromSeeds();
+                    return getMnLists(mns)
                 }
             })
-            .then(mnLists => {
-                return SpvUtils.getMnListOnLongestChain(mnLists);
-            })
-            .then(bestMnList => {
-                return SpvUtils.getSpvValidMns(bestMnList);
-            })
+
+            //Todo: Implement finding mnList on longest chain once dips has been finalised
+            // .then(mnLists => {
+            //     return SpvUtils.getMnListOnLongestChain(mnLists);
+            // })
+            // .then(bestMnList => {
+            //     return SpvUtils.getSpvValidMns(bestMnList);
+            // })
+
             .then(validMnList => {
                 if (validMnList) {
                     resolve(validMnList);

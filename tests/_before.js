@@ -1,2 +1,1 @@
-if(!global.hasOwnProperty('SDK'))
-    require('./_test_suite');
+if (!global.hasOwnProperty('SDK')) { require('./_test_suite'); }

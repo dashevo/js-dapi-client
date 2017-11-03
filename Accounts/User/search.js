@@ -3,9 +3,9 @@ const { uuid } = require('khal');
 const ax = require('axios');
 
 
-exports.search = function(query) {
-    return ax.get('http://localhost:4000/graphql/graphiql?' + "query={RootBase" + query.returns + "}");
-}
+exports.search = function (query) {
+  return ax.get(`${'http://localhost:4000/graphql/graphiql?' + 'query={RootBase'}${query.returns}}`);
+};
 
 // if(
 //     query &&

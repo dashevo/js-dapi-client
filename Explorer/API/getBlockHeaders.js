@@ -2,17 +2,12 @@ const _fetch = require('../../util/fetcher.js')._fetch;
 const axios = require('axios');
 const explorerGet = require('../../Common/ExplorerHelper').explorerGet;
 
-exports.getBlockHeaders = function(identifier = 0, nbOfBlocks = 25, isAscending = true) {
-
-    return (!Number.isInteger(identifier) ?
-        Promise.resolve(SDK.Explorer.API.getHeightFromHash(identifier)) :
-        Promise.resolve(identifier))
-        .then(height => {
-            return explorerGet(`/block-headers/${Math.max(0, isAscending ? height : height - 1)}/${nbOfBlocks}`)
-                .then(data => {
-                    return data.headers;
-                })
-        })
+exports.getBlockHeaders = function (identifier = 0, nbOfBlocks = 25, isAscending = true) {
+  return (!Number.isInteger(identifier) ?
+    Promise.resolve(SDK.Explorer.API.getHeightFromHash(identifier)) :
+    Promise.resolve(identifier))
+    .then(height => explorerGet(`/block-headers/${Math.max(0, isAscending ? height : height - 1)}/${nbOfBlocks}`)
+      .then(data => data.headers));
 };
 
 // exports.getBlockHeaders = function() {

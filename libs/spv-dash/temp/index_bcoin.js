@@ -1,42 +1,38 @@
-var bcoin = require('bcoin').set('testnet');
+const bcoin = require('bcoin').set('testnet');
 
 // SPV chains only store the chain headers.
-var chain = new bcoin.chain({
-    db: 'leveldb',
-    location: process.env.HOME + '/spvchain',
-    spv: true
+const chain = new bcoin.chain({
+  db: 'leveldb',
+  location: `${process.env.HOME}/spvchain`,
+  spv: true,
 });
 
-var pool = new bcoin.pool({
-    chain: chain,
-    spv: true,
-    maxPeers: 8
+const pool = new bcoin.pool({
+  chain,
+  spv: true,
+  maxPeers: 8,
 });
 
-var walletdb = new bcoin.walletdb({ db: 'memory' });
+const walletdb = new bcoin.walletdb({ db: 'memory' });
 
-pool.open().then(function() {
-    return walletdb.open();
-}).then(function() {
-    return walletdb.create();
-}).then(function(wallet) {
-    console.log('Created wallet with address %s', wallet.getAddress('base58'));
+pool.open().then(() => walletdb.open()).then(() => walletdb.create()).then((wallet) => {
+  console.log('Created wallet with address %s', wallet.getAddress('base58'));
 
-    // Add our address to the spv filter.
-    pool.watchAddress(wallet.getAddress());
+  // Add our address to the spv filter.
+  pool.watchAddress(wallet.getAddress());
 
-    // Connect, start retrieving and relaying txs
-    pool.connect().then(function() {
-        // Start the blockchain sync.
-        pool.startSync();
+  // Connect, start retrieving and relaying txs
+  pool.connect().then(() => {
+    // Start the blockchain sync.
+    pool.startSync();
 
-        pool.on('tx', function(tx) {
-            walletdb.addTX(tx);
-        });
-
-        wallet.on('balance', function(balance) {
-            console.log('Balance updated.');
-            console.log(bcoin.amount.btc(balance.unconfirmed));
-        });
+    pool.on('tx', (tx) => {
+      walletdb.addTX(tx);
     });
+
+    wallet.on('balance', (balance) => {
+      console.log('Balance updated.');
+      console.log(bcoin.amount.btc(balance.unconfirmed));
+    });
+  });
 });

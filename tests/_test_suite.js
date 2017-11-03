@@ -1,15 +1,15 @@
 require('./index.js');
 require('./SPV/spv');
 // require('./Accounts/Authentication/auth.js');
-require('./Accounts/User/create.js'); //sendtx gives an issue to be investigated
+require('./Accounts/User/create.js'); // sendtx gives an issue to be investigated
 require('./Accounts/User/login.js');
 // require('./BWS/broadcastRawTx.js'); //test does not make sense (rewrite), sendtx does not seem to work on dapi
-require('./BWS/getBalance.js'); //takes too long (yb21342iADyqAotjwcn4imqjvAcdYhnzeH 37k trx)
+require('./BWS/getBalance.js'); // takes too long (yb21342iADyqAotjwcn4imqjvAcdYhnzeH 37k trx)
 // require('./BWS/getFeeLevels.js'); //siampm does not implement /api/utils/estimatefee
 require('./BWS/getFiatRate.js');
 require('./BWS/getMainAddress.js');
 // require('./BWS/getTx.js');
-// require('./BWS/getTxHistory.js'); //takes too long (yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4 2.5k trx) 
+// require('./BWS/getTxHistory.js'); //takes too long (yj6xVHMyZGBdLqGUfoGc9gDvU8tHx6iqb4 2.5k trx)
 // require('./BWS/getUtxos.js'); //takes too long (yb21342iADyqAotjwcn4imqjvAcdYhnzeH)
 require('./Explorer/API/getStatus.js');
 require('./Explorer/API/getBlock.js');

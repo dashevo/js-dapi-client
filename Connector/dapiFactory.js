@@ -28,54 +28,19 @@ var initDapi = function(useQuorums) {
                     nodes: fetched.list
                 }
                 SDK.Discover.Masternode.candidateList = SDK.Discover.Masternode.masternodeList.nodes
+                return updateMnList()
 
-                if (useQuorums) {
-
-                    updateQuorum()
-                        .then(success => {
-                            SDK.Discover.Masternode.candidateList = quorum
-                            resolve(true)
-                        })
-
-                    startQuorumUpdater()
-                }
-                else {
-                    resolve(true)
-                }
+            }).then(res => {
+                startMnListUpdater()
+                resolve(true)
             })
     })
 }
 
-
 //todo: no need to update quorum each time
 //only mnList periodically, quorums only on quorum request
-var startQuorumUpdater = function() {
-    setInterval(updateQuorum, 60 * 1 * 1000) //1min todo: move to config
-}
-
-var updateQuorum = function() {
-    return upDateMnList()
-        .then(res => {
-            return getQuorum()
-        })
-        .then(quorum => {
-            SDK.Discover.Masternode.candidateList = quorum
-            Promise.resolve(true)
-        })
-}
-
-const refHeight = 100; //todo: move to config
-
-var getQuorum = function() {
-
-    return SDK.Explorer.API.getLastBlockHeight()
-        .then(height => {
-            return SDK.Explorer.API.getHashFromHeight(height - refHeight)
-        })
-        .then((lastHash) => {
-            return quorums.getQuorum(SDK.Discover.Masternode.masternodeList.nodes, lastHash,
-                JSON.parse(require('../Accounts/User/mocks/registeredUser')).txid);
-        })
+var startMnListUpdater = function() {
+    setInterval(updateMnList, 60 * 1 * 1000) //1min todo: move to config
 }
 
 var updateMnList = function() {
@@ -89,10 +54,11 @@ var updateMnList = function() {
                     }
                     break;
                 case 'update':
-                    SDK.Discover.Masternode.masternodeList = {
-                        hash: quorums.getHash(fetced.list),
-                        nodes: fetched.list
-                    }
+                    //todo: improve code
+                    SDK.Discover.Masternode.masternodeList.nodes =
+                        SDK.Discover.Masternode.masternodeList.nodes.filter(n => n.vin != fetched.list.deletions)
+                    SDK.Discover.Masternode.masternodeList.nodes = SDK.Discover.Masternode.masternodeList.nodes.concat(fetched.list.additions)
+                    SDK.Discover.Masternode.masternodeList.hash = quorums.getHash(SDK.Discover.Masternode.masternodeList.nodes)
                     break;
                 case 'none':
                     //Nothing to do    

@@ -1,6 +1,3 @@
-exports.Wallet = function () {
-  const self = this;
-  return {
+const Wallet = () => ({});
 
-  };
-};
+module.exports = { Wallet };

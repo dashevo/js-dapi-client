@@ -1,71 +1,63 @@
-const levelup = require('levelup'); // required dpt for BSPVDash
+const levelup = require('levelup');
 const memdown = require('memdown');
 
-const validParameters = function (params) {
-  return typeof params.genesisHeader === 'object';
-  // typeof params.shouldRetarget === 'function' &&
-  // typeof params.calculateTarget === 'function' &&
-  // typeof params.miningHash === 'function'
-};
-const Blockchain = function (params, options) {
+const validParameters = params => typeof params.genesisHeader === 'object';
+
+const Blockchain = (params) => {
   if (!params || !validParameters(params)) throw new Error('Invalid blockchain parameters');
-  // We will store here all our block headers with hash as a key and blockheader as a value
-  this.chain = levelup('dash.chain', { db: require('memdown') });
-  // We will here store all our height as an indexed db with height as a key, and hash as the value
-  this.height = levelup('dash.height', { db: require('memdown') });
+  // Block headers with hash as a key and blockheader as a value
+  this.chain = levelup('dash.chain', { db: memdown });
+  // Height as an indexed db with height as a key, and hash as the value
+  this.height = levelup('dash.height', { db: memdown });
   this.tip = -1;
-  const self = this;
-  return this.addHeader(params.genesisHeader).then(() => self);
+  return this.addHeader(params.genesisHeader).then(() => this);
 };
-Blockchain.prototype.put = function (dbName, key, value) {
-  const self = this;
-  return new Promise(((resolve, reject) => {
-    if (dbName === 'chain' || dbName === 'height') {
-      self[dbName].put(key, value, (err) => {
-        if (err) return resolve(false);
-        return resolve(true);
-      });
-    }
-  }));
-};
-Blockchain.prototype.get = function (dbName, key) {
-  const self = this;
-  return new Promise(((resolve, reject) => {
-    if (dbName === 'chain' || dbName === 'height') {
-      self[dbName].get(key, (err, result) => {
-        if (err) return resolve(false);
-        return resolve(result);
-      });
-    }
-  }));
-};
-Blockchain.prototype.getTip = async function () {
-  const self = this;
-  return new Promise(((resolve, reject) => {
-    const tipHeight = self.tip;
-    console.log(self.tip);
-    return resolve(self.getBlock(tipHeight));
-  }));
-};
-Blockchain.prototype.addHeader = async function (header) {
-  const self = this;
-  return new Promise(((resolve, reject) => {
-    const hash = Buffer.from(header.hash);
-    const height = header.height;
-    const value = Buffer.from(JSON.stringify(header));
-    const addHeader = self.put('chain', hash, value);
-    const addHeight = self.put('height', height, hash);
-    Promise
-      .all([addHeader, addHeight])
-      .then((result) => {
-        if (height > self.tip) {
-          self.tip = height;
-        }
-        return resolve(true);
-      });
-  }));
-};
-Blockchain.prototype.getBlock = function (identifier) {
+
+Blockchain.prototype.put = (dbName, key, value) => new Promise(((resolve) => {
+  if (dbName === 'chain' || dbName === 'height') {
+    this[dbName].put(key, value, (err) => {
+      if (err) {
+        resolve(false);
+      }
+      resolve(true);
+    });
+  }
+}));
+
+Blockchain.prototype.get = (dbName, key) => new Promise(((resolve) => {
+  if (dbName === 'chain' || dbName === 'height') {
+    this[dbName].get(key, (err, result) => {
+      if (err) {
+        resolve(false);
+      }
+      resolve(result);
+    });
+  }
+}));
+
+Blockchain.prototype.getTip = async () => new Promise(((resolve) => {
+  const tipHeight = this.tip;
+  console.log(this.tip);
+  return resolve(this.getBlock(tipHeight));
+}));
+
+Blockchain.prototype.addHeader = async header => new Promise(((resolve) => {
+  const hash = Buffer.from(header.hash);
+  const { height } = header;
+  const value = Buffer.from(JSON.stringify(header));
+  const addHeader = this.put('chain', hash, value);
+  const addHeight = this.put('height', height, hash);
+  Promise
+    .all([addHeader, addHeight])
+    .then(() => {
+      if (height > this.tip) {
+        this.tip = height;
+      }
+      return resolve(true);
+    });
+}));
+
+Blockchain.prototype.getBlock = (identifier) => {
   if (identifier.constructor.name === 'Buffer') {
     return this.getBlockByBufferedHash(identifier);
   } else if (identifier.constructor.name === 'Number') {
@@ -75,34 +67,30 @@ Blockchain.prototype.getBlock = function (identifier) {
   const hash = identifier;
   return this.getBlockByHash(hash);
 };
-Blockchain.prototype.getBlockByBufferedHash = function (bufferedHash) {
-  const self = this;
-  return new Promise(((resolve, reject) => self.get('chain', bufferedHash)
-    .then((header) => {
-      header = JSON.parse(header.toString());
-      return resolve(header);
-    })));
-};
-Blockchain.prototype.getBlockByHash = function (hash) {
-  const self = this;
-  return new Promise(((resolve, reject) => {
-    const bufferedHash = Buffer.from(hash);
-    return self.get('chain', bufferedHash)
-      .then((header) => {
-        header = JSON.parse(header.toString());
-        return resolve(header);
-      });
-  }));
-};
-Blockchain.prototype.getBlockByHeight = async function (height) {
-  const self = this;
-  return new Promise(((resolve, reject) => self
-    .get('height', height)
-    .then(_bufferedHash => self.get('chain', _bufferedHash)
-      .then((header) => {
-        header = JSON.parse(header.toString());
-        return resolve(header);
-      }))));
-};
 
-module.exports = Blockchain;
+Blockchain.prototype.getBlockByBufferedHash = bufferedHash =>
+  new Promise((resolve => this.get('chain', bufferedHash)
+    .then((header) => {
+      const jsonHeader = JSON.parse(header.toString());
+      return resolve(jsonHeader);
+    })));
+
+Blockchain.prototype.getBlockByHash = hash => new Promise(((resolve) => {
+  const bufferedHash = Buffer.from(hash);
+  return this.get('chain', bufferedHash)
+    .then((header) => {
+      const jsonHeader = JSON.parse(header.toString());
+      return resolve(jsonHeader);
+    });
+}));
+
+Blockchain.prototype.getBlockByHeight = async height =>
+  new Promise((resolve => this
+    .get('height', height)
+    .then(_bufferedHash => this.get('chain', _bufferedHash)
+      .then((header) => {
+        const jsonHeader = JSON.parse(header.toString());
+        return resolve(jsonHeader);
+      }))));
+
+module.exports = { Blockchain };

@@ -2,7 +2,7 @@ const url = require('url');
 const http = require('http');
 const https = require('https');
 
-const timeout = 10 * 1000;// 60 seconde timeout (time to get the response)
+const timeout = 10 * 1000;// 60 second timeout (time to get the response)
 const { is } = require('khal');
 
 const requesterJSON = {
@@ -129,4 +129,5 @@ const requesterJSON = {
     }));
   },
 };
+
 module.exports = requesterJSON;

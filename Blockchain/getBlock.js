@@ -1,11 +1,8 @@
-exports.getBlock = function () {
-  const self = this;
-  return async function (height) {
-    return new Promise((async (resolve, reject) => {
-      if (!self.Blockchain.blocks.hasOwnProperty(height)) {
-        const block = await self.Blockchain.blocks[height];
-        return resolve(block);
-      }
-    }));
-  };
-};
+const getBlock = () => async height => new Promise((async (resolve) => {
+  if (!this.Blockchain.blocks.height) {
+    const block = await this.Blockchain.blocks[height];
+    resolve(block);
+  }
+}));
+
+module.exports = { getBlock };

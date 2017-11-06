@@ -1,19 +1,13 @@
-const Transaction = require('bitcore-lib-dash').Transaction;
+const { Transaction } = require('bitcore-lib-dash');
 
-function getSpendingOutput(utxos) {
-  const arr = JSON.parse(utxos);
-  const res = Math.max(...arr.map(o => o.amount));
-  const obj = arr.find(o => o.amount == res);
-}
-
-getTransaction = function (utxos, authHeadAddresss, changeAddr, accData, privateKey) {
+const getTransaction = (utxos, authHeadAddresss, changeAddr, accData, privateKey) => {
   /* pvr: only 1 input used for now
       output with largest available amount is used
       to implement selectCoins algo (or is this already done on protocol level?)
     */
   const arr = utxos;
   const res = Math.max(...arr.map(o => o.amount));
-  const obj = arr.find(o => o.amount == res);
+  const obj = arr.find(o => o.amount === res);
 
   const utxo = new Transaction.UnspentOutput({
     address: obj.address,
@@ -28,7 +22,9 @@ getTransaction = function (utxos, authHeadAddresss, changeAddr, accData, private
 
   return new Transaction()
     .from(utxo)
-    .to(authHeadAddresss, MIN_SEND_AMT) // pvr: to send full amount in production (min amount just used to not deplete fundedAddr for tests)
+    // pvr: to send full amount in production
+    // (min amount just used to not deplete fundedAddr for tests)
+    .to(authHeadAddresss, MIN_SEND_AMT)
     .change(changeAddr)
     .addData(JSON.stringify(accData))
     .fee(MIN_FEE)
@@ -36,17 +32,15 @@ getTransaction = function (utxos, authHeadAddresss, changeAddr, accData, private
     .serialize(true);
 };
 
-getAccountData = function (username, authHeadAddresss) {
-  return {
-    action: '',
-    type: '',
-    accKey: username,
-    pubKey: authHeadAddresss,
-  };
-};
+const getAccountData = (username, authHeadAddresss) => ({
+  action: '',
+  type: '',
+  accKey: username,
+  pubKey: authHeadAddresss,
+});
 
-exports.create = function (fundedAddr, username, authHeadAddresss, privKey) {
-  return SDK.Explorer.API.getUTXO(fundedAddr, username)
+const create = (fundedAddr, username, authHeadAddresss, privKey, SDK) =>
+  SDK.Explorer.API.getUTXO(fundedAddr, username)
     .then(utxos => SDK.Explorer.API.send(getTransaction(
       utxos,
       authHeadAddresss,
@@ -54,4 +48,7 @@ exports.create = function (fundedAddr, username, authHeadAddresss, privKey) {
       getAccountData(username, authHeadAddresss),
       privKey,
     )));
+
+module.exports = {
+  create,
 };

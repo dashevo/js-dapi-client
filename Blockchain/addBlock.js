@@ -1,26 +1,22 @@
-const { clone } = require('khal');
-const Buffer = require('../util/Buffer');
-const DashUtil = require('dash-util');
-const Bitcore = require('bitcore-lib-dash');
+/* eslint-disable no-underscore-dangle */
+// TODO: The implementation needs to be in line with Airbnb rules of not using dangling underscores
 
-exports.addBlock = function () {
-  const self = this;
-  return async function (blocks) {
-    return new Promise((async (resolve, reject) => {
-      let listOfHeader = [];
-      if (!Array.isArray(blocks)) {
-        listOfHeader.push(blocks);
-      } else if (blocks.length > 0) {
-        listOfHeader = blocks;
-      } else {
-        return resolve(false);
-      }
-      listOfHeader = listOfHeader.map(_bh => self.Blockchain._normalizeHeader(_bh));
-      self.Blockchain.chain.addHeaders(listOfHeader, (err) => {
-        if (err) console.error(err);
-        return resolve(true);
-      });
-      // return resolve(true);
-    }));
-  };
+const addBlock = () => async function (blocks) {
+  return new Promise((async (resolve) => {
+    let listOfHeader = [];
+    if (!Array.isArray(blocks)) {
+      listOfHeader.push(blocks);
+    } else if (blocks.length > 0) {
+      listOfHeader = blocks;
+    } else {
+      resolve(false);
+    }
+    listOfHeader = listOfHeader.map(_bh => this.Blockchain._normalizeHeader(_bh));
+    this.Blockchain.chain.addHeaders(listOfHeader, (err) => {
+      if (err) console.error(err);
+      resolve(true);
+    });
+  }));
 };
+
+module.exports = { addBlock };

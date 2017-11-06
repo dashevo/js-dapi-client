@@ -1,10 +1,6 @@
-const has = require('../../util/has.js');
-const { uuid } = require('khal');
+const remove = query => new Promise(((resolve) => {
+  console.log(query); // TODO: Remove this in production
+  resolve(true);
+}));
 
-exports.remove = function (query) {
-  return new Promise(((resolve, reject) => {
-    const res = {};
-    console.log(query);
-    resolve(true);
-  }));
-};
+module.exports = { remove };

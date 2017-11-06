@@ -1,7 +1,9 @@
-const explorerGet = require('../../Common/ExplorerHelper').explorerGet;
+const { explorerGet } = require('../../Common/ExplorerHelper');
 
-exports.AuthService =
-    {
-      getChallenge: identifier => explorerGet(`/auth/challenge/${identifier}`),
-    };
+const AuthService = {
+  getChallenge: identifier => explorerGet(`/auth/challenge/${identifier}`),
+};
 
+module.exports = {
+  AuthService,
+};

@@ -1,27 +1,29 @@
+/* eslint-disable no-underscore-dangle */
+// TODO: The implementation needs to be in line with Airbnb rules of not using dangling underscores
+
 const has = require('../../util/has.js');
 const { uuid } = require('khal');
 
-exports.send = function (query) {
-  const self = this;
-
-  return new Promise(((resolve, reject) => {
+const send = query =>
+  new Promise(((resolve, reject) => {
     const res = { error: null, result: 'success' };
 
     if (query && has(query, 'type')) {
       switch (query.type) {
-        case 'friendRequest':
+        case 'friendRequest': {
           const msg = {
             type: 'user',
             action: 'friendRequest',
-            user: self.USER._id,
+            user: this.USER._id,
             params: {
               action: 'send',
               to: query._id,
             },
             _reqId: uuid.generate.v4(),
           };
-          self.socket.send(JSON.stringify(msg));
+          this.socket.send(JSON.stringify(msg));
           break;
+        }
         default:
           res.error = '100 - Missing Params';
           res.result = 'Missing Query';
@@ -34,4 +36,5 @@ exports.send = function (query) {
       resolve(res);
     }
   }));
-};
+
+module.exports = { send };

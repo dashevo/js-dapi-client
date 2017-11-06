@@ -1,9 +1,7 @@
-const has = require('../../util/has.js');
-const { uuid } = require('khal');
+// TODO: Implement this method
 
-exports.update = function (query, update) {
-  const self = this;
-  return new Promise(((resolve, reject) => {
-    resolve(true);
-  }));
-};
+const update = () => new Promise(((resolve) => {
+  resolve(true);
+}));
+
+module.exports = { update };

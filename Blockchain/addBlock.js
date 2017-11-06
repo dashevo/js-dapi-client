@@ -1,22 +1,22 @@
-/* eslint-disable no-underscore-dangle */
-// TODO: The implementation needs to be in line with Airbnb rules of not using dangling underscores
-
-const addBlock = () => async function (blocks) {
-  return new Promise((async (resolve) => {
-    let listOfHeader = [];
-    if (!Array.isArray(blocks)) {
-      listOfHeader.push(blocks);
-    } else if (blocks.length > 0) {
-      listOfHeader = blocks;
-    } else {
-      resolve(false);
-    }
-    listOfHeader = listOfHeader.map(_bh => this.Blockchain._normalizeHeader(_bh));
-    this.Blockchain.chain.addHeaders(listOfHeader, (err) => {
-      if (err) console.error(err);
-      resolve(true);
-    });
-  }));
-};
+const addBlock = () =>
+  async blocks =>
+    new Promise((async (resolve, reject) => {
+      let blockHeaders = [];
+      if (!Array.isArray(blocks)) {
+        blockHeaders.push(blocks);
+      } else if (blocks.length > 0) {
+        blockHeaders = blocks;
+      } else {
+        resolve(false);
+      }
+      blockHeaders = blockHeaders.map(blockHeader => this.Blockchain.normalizeHeader(blockHeader));
+      this.Blockchain.chain.addHeaders(blockHeaders, (error) => {
+        if (error) {
+          console.error(error);
+          reject(error);
+        }
+        resolve(true);
+      });
+    }));
 
 module.exports = { addBlock };

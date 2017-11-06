@@ -9,7 +9,7 @@ const { getLastBlock } = require('./getLastBlock');
 // TODO: Fix dangling comma use
 const Blockchain = () => ({
   restore,
-  _normalizeHeader: normalizeHeader,
+  normalizeHeader,
   init,
   expectNextDifficulty,
   addBlock,

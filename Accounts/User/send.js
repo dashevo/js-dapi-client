@@ -14,7 +14,7 @@ const send = query =>
           const msg = {
             type: 'user',
             action: 'friendRequest',
-            user: this.USER._id,
+            user: this.User._id,
             params: {
               action: 'send',
               to: query._id,

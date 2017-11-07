@@ -8,7 +8,9 @@ DAPISDK = (options) => {
         Discover: require('../Discover/').Discover(),
         BWS: require('../BWS/').BWS(),
         Quorum: require('../Quorums'),
-        _config: require('../config.js')
+        Blockchain: require('../Blockchain/').Blockchain(),
+        SPV: require('../SPV/'),
+        _config: require('../config.js'),
     }
 
     return initDapi();

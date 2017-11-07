@@ -1,4 +1,5 @@
 require('./index.js');
+require('./Quorums')
 require('./Accounts/Authentication/auth.js');
 require('./Accounts/User/create.js'); //sendtx gives an issue to be investigated
 require('./Accounts/User/login.js');

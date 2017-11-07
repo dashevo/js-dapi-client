@@ -12,7 +12,7 @@ getStoredMasternodes = () => {
             resolve(fs.readFileSync());
         }
         else {
-            resolve(null);
+            resolve(false);
         }
 
         //todo: filter out old/outdated mastnernodes & some other logic?
@@ -20,16 +20,15 @@ getStoredMasternodes = () => {
 }
 
 //Return a random uri from any in provided list of mns (or seeds if no mns provided)
-getUri = (mns) => {
-    let canditate = _.sample(mns || SDK._config.DISCOVER.DAPI_SEEDS)
-    return `${canditate.protocol}://${canditate.base}:${canditate.port}`
+getUri = () => {
+    return `http://${_.sample(SDK.Discover.Masternode.masternodeList.nodes).ip}`
 }
 
-getMnLists = (mns) => {
+getMnLists = () => {
 
     return new Promise((resolve, reject) => {
 
-        return axios.get(`${getUri(mns)}/masternodes/updateList/${SDK.Discover.Masternode.masternodeList.hash}`)
+        return axios.get(`${getUri()}/masternodes/updateList/${SDK.Discover.Masternode.masternodeList.hash}`)
             .then(res => {
                 resolve(res.data);
             })
@@ -40,15 +39,15 @@ getMnLists = (mns) => {
 
 }
 
-exports.fetcher = (mns) => {
+exports.fetcher = (ns) => {
     return new Promise((resolve, reject) => {
         getStoredMasternodes()
             .then(stroredMns => {
-                if (mns) {
+                if (stroredMns) {
                     resolve(stroredMns);
                 }
                 else {
-                    return getMnLists(mns)
+                    return getMnLists()
                 }
             })
 
@@ -68,6 +67,8 @@ exports.fetcher = (mns) => {
                     reject('No valid MN found');
                 }
             })
-            .catch(err => console.log(err))
+            .catch(err => {
+                console.log(err)
+            })
     })
 }

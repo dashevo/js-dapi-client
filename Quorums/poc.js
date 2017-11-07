@@ -36,7 +36,7 @@ REFSDK(options)
 
             let mnemonic = new Mnemonic('jaguar paddle monitor scrub stage believe odor frown honey ahead harsh talk');
             let privKey = mnemonic.toHDPrivateKey().derive("m/1").privateKey;
-            var _signature = message(_data.toString()).sign(privKey);
+            var _signature = message(JSON.stringify(_data)).sign(privKey);
 
             explorerPost(`/quorum`, {
                 verb: 'add',

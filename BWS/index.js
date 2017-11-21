@@ -1,12 +1,19 @@
-exports.BWS = function () {
-  return {
-    broadcastRawTx: require('./broadcastRawTx').broadcastRawTx,
-    getBalance: require('./getBalance').getBalance,
-    getFeeLevels: require('./getFeeLevels').getFeeLevels,
-    getFiatRate: require('./getFiatRate').getFiatRate,
-    getMainAddress: require('./getMainAddress').getMainAddress,
-    getTx: require('./getTx').getTx,
-    getTxHistory: require('./getTxHistory').getTxHistory,
-    getUtxos: require('./getUtxos').getUtxos,
-  };
+const { broadcastRawTx } = require('./broadcastRawTx');
+const { getBalance } = require('./getBalance');
+const { getFeeLevels } = require('./getFeeLevels');
+const { getFiatRate } = require('./getFiatRate');
+const { getMainAddress } = require('./getMainAddress');
+const { getTx } = require('./getTx');
+const { getTxHistory } = require('./getTxHistory');
+const { getUtxos } = require('./getUtxos');
+
+module.exports = {
+  broadcastRawTx,
+  getBalance,
+  getFeeLevels,
+  getFiatRate,
+  getMainAddress,
+  getTx,
+  getTxHistory,
+  getUtxos,
 };

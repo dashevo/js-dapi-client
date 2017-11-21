@@ -50,7 +50,6 @@ const requesterJSON = {
         } else if (statusCode === 302 || statusCode === 301) {
           // Redirection
           const newURL = response.headers.location;
-          console.log('Redirect to', newURL);
           // throw("Moved to ",newURL)
           resolve(requester.get(newURL));
         } else if (statusCode === 404) {
@@ -111,7 +110,6 @@ const requesterJSON = {
         } else if (statusCode === 302 || statusCode === 301) {
           // Redirection
           const newURL = response.headers.location;
-          console.log('Redirect to', newURL);
           // throw("Moved to ",newURL)
           resolve(req.get(newURL));
         } else if (statusCode === 404) {

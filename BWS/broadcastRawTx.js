@@ -1,7 +1,8 @@
-const explorerGet = require('../Common/ExplorerHelper').explorerGet;
+// TODO: Implement this
+// const { explorerGet } = require('../Common/ExplorerHelper');
 
-exports.broadcastRawTx = function (opts, network, rawTx) {
-  return new Promise(((resolve, reject) => SDK
+const broadcastRawTx = (opts, network, rawTx, SDK) =>
+  new Promise(((resolve, reject) => SDK
     .Explorer
     .API
     .send(rawTx)
@@ -13,4 +14,7 @@ exports.broadcastRawTx = function (opts, network, rawTx) {
       console.log(err);
       reject(err);
     })));
+
+module.exports = {
+  broadcastRawTx,
 };

@@ -31,8 +31,10 @@ const init = () => async () => new Promise((async () => {
   this.Blockchain.chain = await new Blkchain({ genesisHeader });
   const { chain } = this.Blockchain;
   this.Blockchain.isChainReady = true;
-  if (this._config.verbose) console.log('Blockchain - init - blockchain ready');
-  if (this._config.verbose) console.log('Blockchain - init - selecting a socket to connect with');
+  if (this._config.verbose) {
+    console.log('Blockchain - init - blockchain ready');
+    console.log('Blockchain - init - selecting a socket to connect with');
+  }
   const socketURI = (await this.Discover.getSocketCandidate()).URI;
   socket(socketURI, {
     reconnect: true,
@@ -50,15 +52,15 @@ const init = () => async () => new Promise((async () => {
 
     socket.on('block', async (_block) => {
       const blockHash = _block.toString();
-      if (this._config.verbose) console.log('Received Block', blockHash);
+      if (this._config.verbose) { console.log('Received Block', blockHash); }
       // Checkout the full block from Explorer (insightAPI)
       // TODO : We want this to be async.
       const block = await this.Explorer.API.getBlock(blockHash);
       await chain.addHeader(block);
-      console.log('tip is', await chain.tip);
+      if (this._config.verbose) { console.log('tip is', await chain.tip); }
     });
   });
-  if (this._config.verbose) console.log('Blockchain ready \n');
+  if (this._config.verbose) { console.log('Blockchain ready') };
 }));
 
 module.exports = { init };

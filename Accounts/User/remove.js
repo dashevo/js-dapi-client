@@ -1,6 +1,6 @@
-const remove = query => new Promise(((resolve) => {
-  console.log(query); // TODO: Remove this in production
-  resolve(true);
-}));
+const remove = () =>
+  new Promise(((resolve) => {
+    resolve(true);
+  }));
 
 module.exports = { remove };

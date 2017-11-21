@@ -11,7 +11,6 @@ const addBlock = blocks =>
     blockHeaders = blockHeaders.map(blockHeader => this.Blockchain.normalizeHeader(blockHeader));
     this.Blockchain.chain.addHeaders(blockHeaders, (error) => {
       if (error) {
-        console.error(error);
         reject(error);
       }
       resolve(true);

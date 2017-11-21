@@ -37,7 +37,6 @@ Blockchain.prototype.get = (dbName, key) => new Promise(((resolve) => {
 
 Blockchain.prototype.getTip = async () => new Promise(((resolve) => {
   const tipHeight = this.tip;
-  console.log(this.tip);
   return resolve(this.getBlock(tipHeight));
 }));
 

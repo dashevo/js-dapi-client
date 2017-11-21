@@ -1,12 +1,16 @@
+/* eslint-disable no-underscore-dangle */
+// TODO: Fix implementation to not use dangling underscores
 const axios = require('axios');
 
-function explorerPost(apiMethod, data) {
-  return new Promise(((resolve, reject) => {
+const explorerPost = (apiMethod, data, SDK) =>
+  new Promise(((resolve, reject) => {
     SDK.Discover.getConnectorCandidateURI()
       .then((uri) => {
-        uri += apiMethod;
-        if (SDK._config.debug) console.log(`[EXPLORER][POST] ${uri}`);
-        return axios.post(uri, data);
+        const completeUri = uri + apiMethod;
+        if (SDK._config.debug) {
+          console.log(`[EXPLORER][POST] ${uri}`);
+        }
+        return axios.post(completeUri, data);
       })
       .then((response) => {
         resolve(response.data);
@@ -15,22 +19,26 @@ function explorerPost(apiMethod, data) {
         reject(error);
       });
   }));
-}
-function explorerGet(apiMethod) {
-  return new Promise(((resolve, reject) => {
-    SDK.Discover.getConnectorCandidateURI()
-      .then((uri) => {
-        uri += apiMethod;
-        if (SDK._config.debug) console.log(`[EXPLORER][GET] ${uri}`);
-        return axios.get(uri);
-      })
-      .then((response) => {
-        resolve(response.data);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-  }));
-}
 
-module.exports = { explorerGet, explorerPost };
+const explorerGet = (apiMethod, SDK) =>
+  new Promise(((resolve, reject) => {
+    SDK.Discover.getConnectorCandidateURI()
+      .then((uri) => {
+        const completeUri = uri + apiMethod;
+        if (SDK._config.debug) {
+          console.log(`[EXPLORER][GET] ${completeUri}`);
+        }
+        return axios.get(completeUri);
+      })
+      .then((response) => {
+        resolve(response.data);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  }));
+
+module.exports = {
+  explorerGet,
+  explorerPost,
+};

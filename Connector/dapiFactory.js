@@ -1,11 +1,17 @@
-DAPISDK = () => ({
-  Accounts: require('../Accounts/').Accounts(),
-  Explorer: require('../Explorer/').Explorer(),
-  Discover: require('../Discover/').Discover(),
-  BWS: require('../BWS/').BWS(),
-  Blockchain: require('../Blockchain/').Blockchain(),
-  SPV: require('../SPV/'),
-  _config: require('../config.js'),
-});
+const Accounts = require('../Accounts/').Accounts();
+const Explorer = require('../Explorer/').Explorer();
+const Discover = require('../Discover/').Discover();
+const BWS = require('../BWS/').BWS();
+const Blockchain = require('../Blockchain/').Blockchain();
+const SPV = require('../SPV/');
+const config = require('../config.js');
 
-module.exports = DAPISDK;
+module.exports = {
+  Accounts,
+  Explorer,
+  Discover,
+  BWS,
+  Blockchain,
+  SPV,
+  config,
+};

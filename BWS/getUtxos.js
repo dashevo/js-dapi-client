@@ -1,17 +1,19 @@
-const moment = require('moment');
-const explorerGet = require('../Common/ExplorerHelper').explorerGet;
-const lastHeight = require('../Explorer/API/getLastBlockHeight').getLastBlockHeight;
+const { explorerGet } = require('../Common/ExplorerHelper');
+// TODO: Implement this
+// const { getLastBlockHeight } = require('../Explorer/API/getLastBlockHeight');
 
-exports.getUtxos = function (opts, addresses) {
-  return new Promise(((resolve, reject) => {
-    console.log(addresses);
+const getUtxos = (opts, addresses) =>
+  new Promise(((resolve, reject) => {
     const promises = [];
-    addresses.forEach((addr) => {
-      promises.push(explorerGet(`/addr/${addr}/utxo`));
+    addresses.forEach((address) => {
+      promises.push(explorerGet(`/addr/${address}/utxo`));
     });
     return Promise
       .all(promises)
       .then(res => resolve(res[1]))
       .catch(err => reject(err));
   }));
+
+module.exports = {
+  getUtxos,
 };

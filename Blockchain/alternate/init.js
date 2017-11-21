@@ -60,7 +60,7 @@ const init = () => async () => new Promise((async () => {
       if (this._config.verbose) { console.log('tip is', await chain.tip); }
     });
   });
-  if (this._config.verbose) { console.log('Blockchain ready') };
+  if (this._config.verbose) { console.log('Blockchain ready'); }
 }));
 
 module.exports = { init };

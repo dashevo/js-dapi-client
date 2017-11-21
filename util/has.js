@@ -1,3 +1,5 @@
-module.exports = function (obj, val) {
-  return (obj && obj.hasOwnProperty(val));
+const has = (obj, val) => obj && {}.hasOwnProperty.call(obj, val);
+
+module.exports = {
+  has,
 };

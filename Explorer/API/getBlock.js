@@ -1,9 +1,7 @@
-const explorerGet = require('../../Common/ExplorerHelper').explorerGet;
+const { explorerGet } = require('../../Common/ExplorerHelper');
 
-exports.getBlock = function (identifier) {
-  return new Promise(((resolve, reject) => {
-    const _id = null;
-
+const getBlock = (identifier, SDK) =>
+  new Promise(((resolve, reject) => {
     Promise.resolve(Number.isInteger(identifier))
       .then(isInt => (isInt ? SDK.Explorer.API.getHashFromHeight(identifier) : identifier))
       .then(id => explorerGet(`/block/${id}`))
@@ -14,4 +12,7 @@ exports.getBlock = function (identifier) {
         reject(error);
       });
   }));
+
+module.exports = {
+  getBlock,
 };

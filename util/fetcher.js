@@ -3,24 +3,24 @@ const requesterJSON = require('./requesterJSON');
 const get = (options, callback) => {
   requesterJSON
     .get(options.url)
-    .then((r) => {
-      callback(null, r);
+    .then((result) => {
+      callback(null, result);
     })
-    .catch((e) => {
-      console.error('Error while fetching :', e);
-      callback(e, null);
+    .catch((error) => {
+      console.error('Error while fetching :', error);
+      callback(error, null);
     });
 };
 
 const post = (options, callback) => {
   requesterJSON
     .post({ host: options.host, port: options.port, auth: options.auth }, options.data)
-    .then((r) => {
-      callback(null, r);
+    .then((result) => {
+      callback(null, result);
     })
-    .catch((e) => {
-      console.error('Error while fetching :', e);
-      callback(e, null);
+    .catch((error) => {
+      console.error('Error while fetching :', error);
+      callback(error, null);
     });
 };
 

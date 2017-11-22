@@ -33,7 +33,6 @@ const options = {
 global.SDK = {};
 const start = async () => {
   global.SDK = await DAPISDK(options);
-  const { SDK } = global;
   // await SDK.Blockchain.init({
   //     autoConnect:false,
   //     numberOfHeadersToFetch:25,

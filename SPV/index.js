@@ -7,7 +7,7 @@ const merkleproof = require('../libs/spv-dash/lib/merkleproof');
 let chain = null;
 
 
-const initChain = (fileStream, chainType) => new Promise((resolve, reject) => {
+const initChain = (fileStream, chainType) => new Promise((resolve) => {
   chain = new Spvchain(fileStream, chainType);
 
   chain.on('ready', () => {

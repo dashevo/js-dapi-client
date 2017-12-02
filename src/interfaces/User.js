@@ -1,9 +1,10 @@
 const { PrivateKey } = require('bitcore-lib-dash');
 
 const Address = require('./Address');
-const SubscriptionTransaction = require('./SubscriptionTransaction');
+const SubscriptionTransaction = require('./subscriptionTransactions/SubscriptionTransaction');
 const { userApi } = require('../api');
-const { userEvents, servicesEvents, subTxTypes } = require('../constants');
+const { RegSubTx } = require('./subscriptionTransactions');
+const { userEvents, servicesEvents } = require('../constants');
 const { blockchainNotificationsService } = require('../services');
 
 class User extends EventEmitter {
@@ -18,23 +19,24 @@ class User extends EventEmitter {
     blockchainNotificationsService.on(servicesEvents.NEW_BLOCK, this._fetchState);
   }
 
+  /**
+   * Create registration subscription transaction for that user.
+   * Funding must be greater that unspent balance on address related to user's public key.
+   * @param {number} funding
+   * @returns {Promise<User>}
+   */
+  async register(funding) {
+    const regSubTx = new RegSubTx(this.username, this.publicKey);
+    await regSubTx.fund(funding);
+    regSubTx.sign(this.privateKey);
+    await regSubTx.send();
+    return this;
+  }
+
   static async findUsers() {}
 
   async authenticate() {}
-  async register(funding) {
-    const utxo = await this.address.getUTXO();
-    const regSubTx = new SubscriptionTransaction(
-        subTxTypes.register,
-        this.username,
-        this.publicKey,
-        funding
-      )
-      .from(utxo)
-      .change(this.address)
-      .sign(this.privateKey);
-    await regSubTx.send();
-  }
-  async topup(funding) {}
+  async topUp(funding) {}
   async closeSubscription() {}
   async changeKey(newKey) {}
   async getUserData() {}
@@ -55,5 +57,27 @@ class User extends EventEmitter {
   async _fetchState() {
     // ...
     this.emit(userEvents.STATE_UPDATED)
+  }
+
+  fromString() {
+
+  }
+
+  fromBuffer() {
+
+  }
+
+  // todo
+  toJson() {
+
+  }
+  // todo
+  toHex() {
+
+  }
+
+  // todo
+  toString() {
+
   }
 }

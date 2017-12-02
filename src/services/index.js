@@ -1,5 +1,6 @@
 const services = {
-  blockchainNotificationsService: require('./blockchainNotificationsService')
+  blockchainNotificationsService: require('./blockchainNotificationsService'),
+  MNDiscoveryService: require('./MNDiscoveryService')
 };
 
 module.exports = services;

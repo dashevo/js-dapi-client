@@ -1,10 +1,10 @@
-exports.getBlockConfirmations = function(identifier) {
+const getBlockConfirmations = identifier =>
+  new Promise(((resolve, reject) => SDK.Explorer.API.getBlock(identifier)
+    .then((_block) => {
+      resolve(_block.confirmations);
+    })
+    .catch(error => reject(error))));
 
-    return new Promise(function(resolve, reject) {
-        return SDK.Explorer.API.getBlock(identifier)
-            .then(function(_block) {
-                resolve(_block.confirmations);
-            })
-            .catch(error => reject(error));
-    });
-}
+module.exports = {
+  getBlockConfirmations,
+};

@@ -1,14 +1,16 @@
-const explorerGet = require('../Common/ExplorerHelper').explorerGet;
+// TODO: Implement this
+// const { explorerGet } = require('../Common/ExplorerHelper');
 
-exports.getBalance = function(twoStep, cb, addy) {
-    return new Promise(function(resolve, reject) {
-        SDK
-            .Explorer
-            .API
-            .getBalance(addy)
-            .then(function(res) {
-                return resolve(res);
-            })
-            .catch(err => reject(err))
-    });
+const getBalance = (twoStep, cb, addy, SDK) =>
+  new Promise(((resolve, reject) => {
+    SDK
+      .Explorer
+      .API
+      .getBalance(addy)
+      .then(res => resolve(res))
+      .catch(err => reject(err));
+  }));
+
+module.exports = {
+  getBalance,
 };

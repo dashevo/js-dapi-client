@@ -1,11 +1,13 @@
-const User = require('./User/').User;
-const AuthService = require('./AuthService/authService').AuthService;
+const { User } = require('./User/');
+const { AuthService } = require('./AuthService/authService');
 
-exports.Accounts = function() {
-    return {
-        API: {
-            User: User(),
-            AuthService: AuthService
-        }
-    }
+const Accounts = () => ({
+  API: {
+    User: User(),
+    AuthService,
+  },
+});
+
+module.exports = {
+  Accounts,
 };

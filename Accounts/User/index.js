@@ -1,12 +1,19 @@
-const User = function() {
-    return {
-        create: require('./create').create,
-        login: require('./login').login,
-        search: require('./search').search,
-        send: require('./send').send,
-        update: require('./update').update,
-        remove: require('./remove').remove,
-    }
-};
+const { create } = require('./create');
+const { login } = require('./login');
+const { search } = require('./search');
+const { send } = require('./send');
+const { update } = require('./update');
+const { remove } = require('./remove');
 
-exports.User = User;
+const User = () => ({
+  create,
+  login,
+  search,
+  send,
+  update,
+  remove,
+});
+
+module.exports = {
+  User,
+};

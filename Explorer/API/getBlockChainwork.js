@@ -1,10 +1,10 @@
-exports.getBlockChainwork = function(identifier) {
+const getBlockChainwork = (identifier, SDK) =>
+  new Promise(((resolve, reject) => SDK.Explorer.API.getBlock(identifier)
+    .then((_block) => {
+      resolve(_block.chainwork);
+    })
+    .catch(err => reject(err))));
 
-    return new Promise(function(resolve, reject) {
-        return SDK.Explorer.API.getBlock(identifier)
-            .then(function(_block) {
-                resolve(_block.chainwork);
-            })
-            .catch(err => reject(err));
-    });
-}
+module.exports = {
+  getBlockChainwork,
+};

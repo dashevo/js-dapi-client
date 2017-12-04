@@ -1,40 +1,37 @@
-'use strict'
-const spvchain = require('../libs/spv-dash/lib/spvchain'),
-    merkleproof = require('../libs/spv-dash/lib/merkleproof')
+// TODO: Fix implementation of library to remove dangling underscore
+// TODO: Fix library to use proper casing for class-like data structures
+/* eslint-disable no-underscore-dangle */
+const Spvchain = require('../libs/spv-dash/lib/spvchain');
+const merkleproof = require('../libs/spv-dash/lib/merkleproof');
 
-var chain = null;
+let chain = null;
+
+
+const initChain = (fileStream, chainType) => new Promise((resolve) => {
+  chain = new Spvchain(fileStream, chainType);
+
+  chain.on('ready', () => {
+    resolve(true);
+  });
+});
+
+const getTipHash = () => chain.getTipHash();
+
+const addBlockHeaders = (headers) => {
+  chain._addHeaders(headers);
+  return chain.getChainHeight();
+};
+
+const validateTx = (blockHash, txHash) => chain.getBlock(blockHash)
+  .then(block => merkleproof(block, txHash));
+
+// TODO: Implement this function
+const applyBloomFilter = addr => addr;
 
 module.exports = {
-
-    initChain: function(fileStream, chainType) {
-
-        return new Promise((resolve, reject) => {
-            chain = new spvchain(fileStream, chainType);
-
-            chain.on('ready', function() {
-                resolve(true);
-            });
-        })
-    },
-
-    getTipHash: function() {
-        return chain.getTipHash();
-    },
-
-    addBlockHeaders: function(headers) {
-        chain._addHeaders(headers);
-        return chain.getChainHeight();
-    },
-
-    validateTx: function(blockHash, txHash) {
-
-        return chain.getBlock(blockHash)
-            .then(block => {
-                return merkleproof(block, txHash);
-            })
-    },
-
-    applyBloomFilter: function(addr) {
-        //Todo
-    }
+  initChain,
+  getTipHash,
+  addBlockHeaders,
+  validateTx,
+  applyBloomFilter,
 };

@@ -1,4 +1,5 @@
 const { PrivateKey } = require('bitcore-lib-dash');
+const EventEmitter = require('eventemitter2');
 
 const Address = require('./Address');
 const SubscriptionTransaction = require('./subscriptionTransactions/SubscriptionTransaction');
@@ -26,7 +27,7 @@ class User extends EventEmitter {
    * @returns {Promise<User>}
    */
   async register(funding) {
-    const regSubTx = new RegSubTx(this.username, this.publicKey);
+    const regSubTx = new RegSubTx(this.username, this.privateKey);
     await regSubTx.fund(funding);
     regSubTx.sign(this.privateKey);
     await regSubTx.send();
@@ -81,3 +82,5 @@ class User extends EventEmitter {
 
   }
 }
+
+module.exports = User;

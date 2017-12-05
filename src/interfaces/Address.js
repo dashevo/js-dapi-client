@@ -12,3 +12,5 @@ class Address extends BitcoreAddress {
   }
 
 }
+
+module.exports = Address;

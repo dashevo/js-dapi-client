@@ -1,140 +1,133 @@
 const url = require('url');
 const http = require('http');
 const https = require('https');
-const timeout = 10 * 1000;//60 seconde timeout (time to get the response)
-const {is} = require('khal');
 
-const requesterJSON = {
-    prepareRequest: function (URL) {
-        const parseURL = url.parse(URL);
-        const PORT = parseURL.port;
-        const protocol = parseURL.protocol;
-        const hostname = parseURL.hostname;
-        const path = parseURL.path;
-        URL = (protocol === null) ? 'http://' + URL : URL;
-        return {path:path, hostname:hostname,URL: URL, port:PORT, requester: (protocol === 'https:') ? https : http};
-    },
-    get: function (URL) {
-        if (!URL) throw("Require URL");
+const requesterJSON = require('./requesterJSON');
 
-        return new Promise(function (resolve, reject) {
-            const prepare = requesterJSON.prepareRequest(URL);
-            const _url = prepare.URL;
-            const _hostname = prepare.hostname;
-            const _path = prepare.path;
-            const _req = prepare.requester;
-            const _port = prepare.port;
-            const get_options = {
-                hostname:_hostname,
-                path:_path,
-                port:_port,
-                method: 'GET',
-                // headers: {
-                //     "User-Agent": 'Node-Client'
-                // }
-            };
-            let request = _req.request(get_options, function (response) {
-                const statusCode = response.statusCode;
-                if (statusCode === 200) {
-                    response.setEncoding('utf8');
-                    let rawData = '';
-                    response.on('data', (chunk) => rawData += chunk);
-                    response.on('end', () => {
-                        try {
-                            return resolve(rawData);
-                        } catch (e) {
-                            return resolve(e.message);
-                        }
-                    });
-                } else if (statusCode == 302 || statusCode == 301) {
-                    //Redirection
-                    let newURL = response.headers.location;
-                    console.log("Redirect to", newURL);
-                    // throw("Moved to ",newURL)
-                    return resolve(requester.get(newURL));
-                } else if (statusCode === 404) {
-                    // throw("Unreachable domain", statusCode);
-                    return resolve(statusCode);
-                }
-                else {
-                    // throw("Got an statusCode", statusCode);
-                    return resolve(statusCode);
-                }
-            })
-                .on('error', function (e) {
-                    return reject(e);
-                });
-            request.setTimeout(timeout, function () {
-                request.abort();
-                //Gateway time-out
-                return resolve(504);
-            })
-            request.end();
+const timeout = 10 * 1000;// 60 second timeout (time to get the response)
 
-        });
-
-
-    },
-    post: function (options, data) {
-        return new Promise(function (resolve, reject) {
-            const _hostname = options.host;
-            const _path = options.path || '/';
-            const _port = options.port || 80;
-            const _req = http;
-            const _requestData = data;
-
-            const post_options = {
-                hostname:_hostname,
-                path:_path,
-                port:_port,
-                method: 'POST',
-                headers: {
-                    'Content-Length': _requestData.length
-                }
-            };
-            if (options.auth) {
-                post_options.auth = (options.auth);
-            }
-            let request = _req.request(post_options, function (response) {
-                const statusCode = response.statusCode;
-                if (statusCode === 200) {
-                    response.setEncoding('utf8');
-                    let rawData = '';
-                    response.on('data', (chunk) => rawData += chunk);
-                    response.on('end', () => {
-                        try {
-                            return resolve(rawData);
-                        } catch (e) {
-                            return resolve(e.message);
-                        }
-                    });
-                } else if (statusCode == 302 || statusCode == 301) {
-                    //Redirection
-                    let newURL = response.headers.location;
-                    console.log("Redirect to", newURL);
-                    // throw("Moved to ",newURL)
-                    return resolve(requester.get(newURL));
-                } else if (statusCode === 404) {
-                    // throw("Unreachable domain", statusCode);
-                    return resolve(statusCode);
-                }
-                else {
-                    // throw("Got an statusCode", statusCode);
-                    return resolve(statusCode);
-                }
-            })
-                .on('error', function (e) {
-                    return reject(e);
-                });
-            request.setTimeout(timeout, function () {
-                request.abort();
-                //Gateway time-out
-                return resolve(504);
-            })
-            request.end(_requestData);
-
-
-        });
-    }
+const prepareRequest = (incomingUrl) => {
+  const parseURL = url.parse(incomingUrl);
+  const {
+    port, protocol, hostname, path,
+  } = parseURL;
+  const URL = (protocol === null) ? `http://${incomingUrl}` : incomingUrl;
+  const requester = protocol === 'https:' ? https : http;
+  return {
+    path, hostname, URL, port, requester,
+  };
 };
-module.exports = requesterJSON;
+
+const get = (incomingUrl) => {
+  if (!incomingUrl) {
+    throw new Error('Require URL');
+  }
+
+  return new Promise(((resolve, reject) => {
+    const preparedRequest = requesterJSON.prepareRequest(incomingUrl);
+    const {
+      hostname, path, requester, port,
+    } = preparedRequest;
+    const getOptions = {
+      hostname,
+      path,
+      port,
+      method: 'GET',
+    };
+    const request = requester.request(getOptions, (response) => {
+      const { statusCode } = response;
+      if (statusCode === 200) {
+        response.setEncoding('utf8');
+        let rawData = '';
+        response.on('data', (chunk) => { rawData += chunk; });
+        response.on('end', () => {
+          try {
+            resolve(rawData);
+          } catch (e) {
+            resolve(e.message);
+          }
+        });
+      } else if (statusCode === 302 || statusCode === 301) {
+        // Redirection
+        const newURL = response.headers.location;
+        console.log('Redirect to', newURL);
+        // throw("Moved to ",newURL)
+        resolve(requester.get(newURL));
+      } else if (statusCode === 404) {
+        // throw("Unreachable domain", statusCode);
+        resolve(statusCode);
+      } else {
+        // throw("Got an statusCode", statusCode);
+        resolve(statusCode);
+      }
+    })
+      .on('error', e => reject(e));
+    request.setTimeout(timeout, () => {
+      request.abort();
+      // Gateway time-out
+      resolve(504);
+    });
+    request.end();
+  }));
+};
+
+const post = (options, data) => new Promise(((resolve, reject) => {
+  const { host: hostname, path = '/', port = 80 } = options;
+  // const _path = options.path || '/';
+  // const _port = options.port || 80;
+  const requester = http;
+  const requestData = data;
+
+  const postOptions = {
+    hostname,
+    path,
+    port,
+    method: 'POST',
+    headers: {
+      'Content-Length': requestData.length,
+    },
+  };
+  if (options.auth) {
+    postOptions.auth = (options.auth);
+  }
+  const request = requester.request(postOptions, (response) => {
+    const { statusCode } = response;
+    if (statusCode === 200) {
+      response.setEncoding('utf8');
+      let rawData = '';
+      response.on('data', (chunk) => { rawData += chunk; });
+      response.on('end', () => {
+        try {
+          resolve(rawData);
+        } catch (e) {
+          resolve(e.message);
+        }
+      });
+    } else if (statusCode === 302 || statusCode === 301) {
+      // Redirection
+      const newURL = response.headers.location;
+      console.log('Redirect to', newURL);
+      // throw("Moved to ",newURL)
+      resolve(requester.get(newURL));
+    } else if (statusCode === 404) {
+      // throw("Unreachable domain", statusCode);
+      resolve(statusCode);
+    } else {
+      // throw("Got an statusCode", statusCode);
+      resolve(statusCode);
+    }
+  })
+    .on('error', e => reject(e));
+  request.setTimeout(timeout, () => {
+    request.abort();
+    // Gateway time-out
+    return resolve(504);
+  });
+  request.end(requestData);
+}));
+
+module.exports = {
+  prepareRequest,
+  get,
+  post,
+};

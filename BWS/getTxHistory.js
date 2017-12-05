@@ -1,31 +1,32 @@
-const explorerGet = require('../Common/ExplorerHelper').explorerGet;
+const { explorerGet } = require('../Common/ExplorerHelper');
+const { has } = require('../util/has');
 
-exports.getTxHistory = function(opts, skip = 0, limit = 0, includeExtendedInfo) {
-    return new Promise(function(resolve, reject) {
-        let promises = [];
+const getTxHistory = (opts, skip = 0, limit = 0, includeExtendedInfo) =>
+  new Promise(((resolve, reject) => {
+    const promises = [];
 
-        function fetchingTxHistoryWithExtendedInfo(response) {
-            response.transactions.forEach(txId => {
-                promises.push(explorerGet(`/tx/${txId}`));
-            });
-            return Promise
-                .all(promises)
-                .then(res => {
-                    return resolve(res);
-                })
-
-        };
-        if (!opts.hasOwnProperty('addr')) {
-            return reject('Missing param addr in opts');
+    const fetchingTxHistoryWithExtendedInfo = (response) => {
+      response.transactions.forEach((txId) => {
+        promises.push(explorerGet(`/tx/${txId}`));
+      });
+      return Promise
+        .all(promises)
+        .then(res => resolve(res));
+    };
+    if (!has(opts, 'addr')) {
+      reject(new Error('Missing param addr in opts'));
+    }
+    return explorerGet(`/addr/${opts.addr}?from=${skip}&to=${limit}`)
+      .then(response =>
+        (includeExtendedInfo ? fetchingTxHistoryWithExtendedInfo(response) :
+          resolve(response.transactions)))
+      .catch((error) => {
+        if (error) {
+          reject(new Error(`An error was triggered getting getTxHistory${error}`));
         }
-        return explorerGet(`/addr/${opts.addr}?from=${skip}&to=${limit}`)
-            .then(function(response) {
-                return includeExtendedInfo ? fetchingTxHistoryWithExtendedInfo(response) : resolve(response.transactions);
-            })
-            .catch(function(error) {
-                if (error) {
-                    return reject(`An error was triggered getting getTxHistory` + error);
-                }
-            });
-    });
+      });
+  }));
+
+module.exports = {
+  getTxHistory,
 };

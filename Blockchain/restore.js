@@ -1,8 +1,5 @@
-exports.restore = function() {
-    let self = this;
-    return async function(query, update) {
-        return new Promise(function(resolve, reject) {
-            return resolve(true);
-        });
-    }
-}
+const restore = () => async () => new Promise((resolve => resolve(true)));
+
+module.exports = {
+  restore,
+};

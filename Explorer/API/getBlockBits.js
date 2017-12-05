@@ -1,12 +1,12 @@
-exports.getBlockBits = function(identifier) {
+const getBlockBits = (identifier, SDK) =>
+  new Promise(((resolve, reject) => SDK.Explorer.API.getBlock(identifier)
+    .then((_block) => {
+      resolve(_block.bits);
+    })
+    .catch((err) => {
+      reject(err);
+    })));
 
-    return new Promise(function(resolve, reject) {
-        return SDK.Explorer.API.getBlock(identifier).
-            then(function(_block) {
-                resolve(_block.bits);
-            })
-            .catch(err => {
-                reject(err);
-            })
-    });
-}
+module.exports = {
+  getBlockBits,
+};

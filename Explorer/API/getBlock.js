@@ -1,22 +1,18 @@
-const explorerGet = require('../../Common/ExplorerHelper').explorerGet;
+const { explorerGet } = require('../../Common/ExplorerHelper');
 
-exports.getBlock = function(identifier) {
+const getBlock = (identifier, SDK) =>
+  new Promise(((resolve, reject) => {
+    Promise.resolve(Number.isInteger(identifier))
+      .then(isInt => (isInt ? SDK.Explorer.API.getHashFromHeight(identifier) : identifier))
+      .then(id => explorerGet(`/block/${id}`))
+      .then((block) => {
+        resolve(block);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  }));
 
-    return new Promise(function(resolve, reject) {
-        let _id = null;
-
-        Promise.resolve(Number.isInteger(identifier))
-            .then(isInt => {
-                return isInt ? SDK.Explorer.API.getHashFromHeight(identifier) : identifier
-            })
-            .then(id => {
-                return explorerGet(`/block/${id}`)
-            })
-            .then(block => {
-                resolve(block);
-            })
-            .catch(function(error) {
-                reject(error);
-            })
-    })
-}
+module.exports = {
+  getBlock,
+};

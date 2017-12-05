@@ -1,11 +1,12 @@
-const explorerGet = require('../Common/ExplorerHelper').explorerGet;
+const { explorerGet } = require('../Common/ExplorerHelper');
 
-exports.getTx = function(txid) {
-    return new Promise(function(resolve, reject) {
-        explorerGet(`/tx/${txid}`)
-            .then(resp => {
-                return resolve(resp);
-            })
-            .catch(err => reject(err))
-    });
+const getTx = txid =>
+  new Promise(((resolve, reject) => {
+    explorerGet(`/tx/${txid}`)
+      .then(resp => resolve(resp))
+      .catch(err => reject(err));
+  }));
+
+module.exports = {
+  getTx,
 };

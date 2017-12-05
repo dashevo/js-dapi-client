@@ -1,8 +1,12 @@
-const mockServer = require("./mocks/server");
+const MockServer = require('./mocks/server');
 const Message = require('bitcore-message-dash');
 
-exports.login = function(txId, privateKey) {
-    var server = new mockServer();
-    var signature = new Message(server.challengeMsg).sign(privateKey);
-    return server.resolveChallenge(txId, signature);
-}
+const login = (txId, privateKey) => {
+  const server = new MockServer();
+  const signature = new Message(server.challengeMsg).sign(privateKey);
+  return server.resolveChallenge(txId, signature);
+};
+
+module.exports = {
+  login,
+};

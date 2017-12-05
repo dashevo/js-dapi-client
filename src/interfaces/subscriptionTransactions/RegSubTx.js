@@ -8,7 +8,6 @@ const SubscriptionTransaction = require('./SubscriptionTransaction');
 const { subTxTypes, nVersion } = require('../../constants');
 
 class RegSubscriptionTransaction extends SubscriptionTransaction {
-
   constructor(username, privateKey) {
     super();
     this.username = username;
@@ -45,7 +44,7 @@ class RegSubscriptionTransaction extends SubscriptionTransaction {
       .add('OP_NOP10')
       .add(registrationData);
 
-    const output = new Output({satoshis: funding, script});
+    const output = new Output({ satoshis: funding, script });
 
     let utxo = inputs;
     if (!inputs) {
@@ -56,7 +55,6 @@ class RegSubscriptionTransaction extends SubscriptionTransaction {
     this.addOutput(output);
     return this;
   }
-
 }
 
 module.exports = RegSubscriptionTransaction;

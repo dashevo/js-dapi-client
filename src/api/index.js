@@ -5,7 +5,7 @@ const TransactionAPI = require('./TransactionAPI');
 const api = {
   addressApi: new AddressAPI(),
   userApi: new UserAPI(),
-  transactionApi: new TransactionAPI()
+  transactionApi: new TransactionAPI(),
 };
 
 module.exports = api;

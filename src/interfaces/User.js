@@ -9,7 +9,6 @@ const { userEvents, servicesEvents } = require('../constants');
 const { blockchainNotificationsService } = require('../services');
 
 class User extends EventEmitter {
-
   constructor(username, privateKeyString) {
     super();
     this.username = username;
@@ -47,7 +46,7 @@ class User extends EventEmitter {
    * some events on EventEmitter it will prevent object from being garbage collected
    */
   destroySession() {
-    blockchainNotificationsService.off(servicesEvents.NEW_BLOCK, this._fetchState)
+    blockchainNotificationsService.off(servicesEvents.NEW_BLOCK, this._fetchState);
   }
 
   /**
@@ -57,7 +56,7 @@ class User extends EventEmitter {
    */
   async _fetchState() {
     // ...
-    this.emit(userEvents.STATE_UPDATED)
+    this.emit(userEvents.STATE_UPDATED);
   }
 
   fromString() {

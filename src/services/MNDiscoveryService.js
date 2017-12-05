@@ -1,5 +1,5 @@
 const MNDiscoverService = {
-  getNextMN() {}
+  getNextMN() {},
 };
 
 module.exports = MNDiscoverService;

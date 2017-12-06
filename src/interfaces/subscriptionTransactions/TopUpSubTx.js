@@ -21,12 +21,14 @@ class RegSubscriptionTransaction extends SubscriptionTransaction {
    * @returns {Promise<RegSubscriptionTransaction>}
    */
   async fund(funding, inputs, changeAddress) {
+    // We should reverse tx id binary data, as in the core all binary representations
+    // of hashes are reversed because of a mistake on early bitcoin development stage
+    const regTxId = Buffer.from(this.registrationSubTxId, 'hex').reverse();
+
     const topUpData = new BufferWriter()
       .writeUInt32LE(nVersion)
       .writeUInt8(subTxTypes.topup)
-      // .writeVarintNum(username.length)
-      // .write(username)
-      .write(Buffer.from(this.registrationSubTxId, 'hex'))
+      .write(regTxId)
       .toBuffer();
 
     const script = new Script()

@@ -27,7 +27,6 @@ class RegSubscriptionTransaction extends SubscriptionTransaction {
     const reversedPubKey = this.publicKey._getID().reverse();
     const pubKeyId = this.publicKey._getID();
     const message = new Message(`register|${this.username}|${reversedPubKey.toString('hex')}`);
-    console.log(this.privateKey instanceof PrivateKey);
     const signature = Buffer.from(message.sign(this.privateKey), 'base64');
     const username = Buffer.from(this.username, 'utf8');
 

@@ -2,9 +2,8 @@ const { PrivateKey } = require('bitcore-lib-dash');
 const EventEmitter = require('eventemitter2');
 
 const Address = require('./Address');
-const SubscriptionTransaction = require('./subscriptionTransactions/SubscriptionTransaction');
 const { userApi } = require('../api');
-const { RegSubTx } = require('./subscriptionTransactions');
+const { RegSubTx, TopUpSubTx } = require('./subscriptionTransactions');
 const { userEvents, servicesEvents } = require('../constants');
 const { blockchainNotificationsService } = require('../services');
 
@@ -29,11 +28,16 @@ class User extends EventEmitter {
     const regSubTx = new RegSubTx(this.username, this.privateKey);
     await regSubTx.fund(funding);
     regSubTx.sign(this.privateKey);
-    await regSubTx.send();
+    this.regTxId = await regSubTx.send();
     return this;
   }
 
-  async topUp(funding) {}
+  async topUp(funding, inputs, changeAddress, privateKey) {
+    const topUpSubTx = new TopUpSubTx(this.regTxId);
+    await topUpSubTx.fund(funding, inputs, changeAddress);
+    topUpSubTx.sign(privateKey);
+    return topUpSubTx.send();
+  }
 
   static async findUsers() {}
 

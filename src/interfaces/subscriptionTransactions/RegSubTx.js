@@ -1,13 +1,14 @@
 const Message = require('bitcore-message-dash');
 const { Script, PrivateKey } = require('bitcore-lib-dash');
-const { Output } = require('bitcore-lib-dash').Transaction;
 const { BufferWriter } = require('bitcore-lib-dash').encoding;
 
 const Address = require('../Address');
-const SubscriptionTransaction = require('./SubscriptionTransaction');
+const Transaction = require('../Transaction');
 const { subTxTypes, nVersion } = require('../../constants');
 
-class RegSubscriptionTransaction extends SubscriptionTransaction {
+const { Output } = Transaction;
+
+class RegSubscriptionTransaction extends Transaction {
   constructor(username, privateKey) {
     super();
     this.username = username;

@@ -3,7 +3,7 @@ const { transactionApi } = require('../api');
 
 class Transaction extends BitcoreTransaction {
   async send() {
-    await transactionApi.sendRawTransaction(this.toHex());
+    await transactionApi.sendRawTransaction(this.serialize());
   }
 }
 

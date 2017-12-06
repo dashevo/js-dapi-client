@@ -33,10 +33,11 @@ class User extends EventEmitter {
     return this;
   }
 
+  async topUp(funding) {}
+
   static async findUsers() {}
 
   async authenticate() {}
-  async topUp(funding) {}
   async closeSubscription() {}
   async changeKey(newKey) {}
   async getUserData() {}

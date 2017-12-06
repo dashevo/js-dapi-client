@@ -1,38 +1,32 @@
-const Message = require('bitcore-message-dash');
-const { Script, PrivateKey } = require('bitcore-lib-dash');
+const { Script } = require('bitcore-lib-dash');
 const { Output } = require('bitcore-lib-dash').Transaction;
 const { BufferWriter } = require('bitcore-lib-dash').encoding;
 
-const Address = require('../Address');
 const SubscriptionTransaction = require('./SubscriptionTransaction');
 const { subTxTypes, nVersion } = require('../../constants');
 
 class RegSubscriptionTransaction extends SubscriptionTransaction {
-  constructor(username, privateKey) {
+  constructor(registrationSubTxId) {
     super();
-    this.username = username;
-    this.privateKey = new PrivateKey(privateKey);
-    this.publicKey = this.privateKey.toPublicKey();
-    this.address = Address.fromPublicKey(this.publicKey);
+    this.registrationSubTxId = registrationSubTxId;
   }
 
   /**
    * Uses utxo from public key address to fund transactions and adds change output to same address.
    * After funding transaction you need to sign it and send it.
    * @param {number} funding in duffs
-   * @param [inputs]
+   * @param {array|object} inputs that will be used for topup.
+   * Inputs can be obtained by calling address.getUTXO
+   * @param {string|Address} changeAddress address to which not spent amount of dash should return
    * @returns {Promise<RegSubscriptionTransaction>}
    */
-  async fund(funding, inputs) {
-    const pubKeyId = this.publicKey._getID();
-    const username = Buffer.from(this.username, 'utf8');
-
+  async fund(funding, inputs, changeAddress) {
     const topUpData = new BufferWriter()
       .writeUInt32LE(nVersion)
       .writeUInt8(subTxTypes.topup)
-      .writeVarintNum(username.length)
-      .write(username)
-      .write(pubKeyId)
+      // .writeVarintNum(username.length)
+      // .write(username)
+      .write(Buffer.from(this.registrationSubTxId, 'hex'))
       .toBuffer();
 
     const script = new Script()
@@ -41,12 +35,8 @@ class RegSubscriptionTransaction extends SubscriptionTransaction {
 
     const output = new Output({ satoshis: funding, script });
 
-    let utxo = inputs;
-    if (!inputs) {
-      utxo = await this.address.getUTXO();
-    }
-    this.from(utxo);
-    this.change(this.address);
+    this.from(inputs);
+    this.change(changeAddress);
     this.addOutput(output);
     return this;
   }

@@ -1,4 +1,5 @@
-const _ = require('lodash')
+const _ = require('lodash');
 
 exports.getConnectorCandidateURI = function() {
-    return `http://${_.sample(SDK.Discover.Masternode.candidateList).ip}`;
+  return `http://${_.sample(SDK.Discover.Masternode.candidateList).ip}`;
+};

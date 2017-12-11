@@ -43,7 +43,7 @@
   "scripts": {
     "build": "webpack --display-error-details",
     "eslint": "eslint . --fix",
-    "test": "mocha tests/_test_suite.js --no-timeouts"
+    "test": "mocha --no-timeouts"
   },
   "author": "",
   "license": "ISC"

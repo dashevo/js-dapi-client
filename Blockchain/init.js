@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 // TODO: Performance wise we might want to make Bluebird default for promise everywhere.
 const Promise = require('bluebird');
 const levelup = require('levelup');

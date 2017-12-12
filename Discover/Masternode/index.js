@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const Masternode = function () {
   const self = this;
   return {

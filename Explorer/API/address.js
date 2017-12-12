@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const explorerGet = require('../../Common/ExplorerHelper').explorerGet;
 
 exports.getBalance = function (addr) {

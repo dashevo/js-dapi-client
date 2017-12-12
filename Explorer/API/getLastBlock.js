@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 exports.getLastBlock = function () {
   return new Promise(((resolve, reject) => {
     SDK.Explorer.API.getLastBlockHash()

@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 // created with /tests/User/create which uses the depricated way of OP_RETURN user registration
 
 mockUser = `{

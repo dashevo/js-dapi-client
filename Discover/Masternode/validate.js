@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const has = require('../../util/has.js');
 const requesterJSON = require('../../util/requesterJSON.js');
 const { uuid } = require('khal');

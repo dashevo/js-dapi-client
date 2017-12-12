@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const jayson = require('jayson/promise');
 const Transaction = require('bitcore-lib-dash').Transaction;
 const Bitcore = require('bitcore-lib-dash');

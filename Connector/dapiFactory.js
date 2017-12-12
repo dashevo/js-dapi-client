@@ -1,4 +1,6 @@
-// Todo: apply init process for trustedFactory.js
+/* eslint-disable */
+// TODO: Make this file pass linting!
+// TODO: apply init process for trustedFactory.js
 const qDash = require('quorums-dash');
 
 DAPISDK = (options) => {

@@ -1,9 +1,9 @@
 const { Transaction: BitcoreTransaction } = require('bitcore-lib-dash');
-const { transactionApi } = require('../api');
+const { transaction } = require('../api');
 
 class Transaction extends BitcoreTransaction {
   async send() {
-    await transactionApi.sendRawTransaction(this.serialize());
+    return transaction.sendRaw(this.serialize());
   }
 }
 

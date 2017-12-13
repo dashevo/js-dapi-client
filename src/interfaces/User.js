@@ -2,7 +2,7 @@ const { PrivateKey } = require('bitcore-lib-dash');
 const EventEmitter = require('eventemitter2');
 
 const Address = require('./Address');
-const { userApi } = require('../api');
+const { user } = require('../api');
 const { RegSubTx, TopUpSubTx } = require('./subscriptionTransactions');
 const { userEvents, servicesEvents } = require('../constants');
 const { blockchainNotificationsService } = require('../services');
@@ -26,7 +26,12 @@ class User extends EventEmitter {
    */
   async register(funding) {
     const regSubTx = new RegSubTx(this.username, this.privateKey);
-    await regSubTx.fund(funding);
+    const inputs = await this.address.getUTXO();
+    // todo: check that unspent inputs are bigger than funding
+    if (!inputs || !inputs.length) {
+      throw new Error(`No inputs were found on address ${this.address.toString()} to fund registration`);
+    }
+    await regSubTx.fund(funding, inputs);
     regSubTx.sign(this.privateKey);
     this.regTxId = await regSubTx.send();
     return this;
@@ -44,7 +49,10 @@ class User extends EventEmitter {
   async authenticate() {}
   async closeSubscription() {}
   async changeKey(newKey) {}
-  async getUserData() {}
+  async getUserData() {
+    // todo
+    return user.getData();
+  }
 
   /**
    * It is crucial for EventEmitters to remove listeners, since if object method still listening to

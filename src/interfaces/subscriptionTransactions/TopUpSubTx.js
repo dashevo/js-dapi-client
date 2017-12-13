@@ -16,7 +16,7 @@ class RegSubscriptionTransaction extends Transaction {
    * Uses utxo from public key address to fund transactions and adds change output to same address.
    * After funding transaction you need to sign it and send it.
    * @param {number} funding in duffs
-   * @param {array|object} inputs that will be used for topup.
+   * @param {array|object} inputs that will be used for TOP_UP.
    * Inputs can be obtained by calling address.getUTXO
    * @param {string|Address} changeAddress address to which not spent amount of dash should return
    * @returns {Promise<RegSubscriptionTransaction>}
@@ -28,7 +28,7 @@ class RegSubscriptionTransaction extends Transaction {
 
     const topUpData = new BufferWriter()
       .writeUInt32LE(nVersion)
-      .writeUInt8(subTxTypes.topup)
+      .writeUInt8(subTxTypes.TOP_UP)
       .write(regTxId)
       .toBuffer();
 

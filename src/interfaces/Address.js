@@ -1,5 +1,5 @@
 const { Address: BitcoreAddress } = require('bitcore-lib-dash');
-const { addressApi } = require('../api');
+const { address: addressApi } = require('../api');
 
 class Address extends BitcoreAddress {
   async getUTXO() {

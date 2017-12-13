@@ -21,7 +21,7 @@ class RegSubscriptionTransaction extends Transaction {
    * Uses utxo from public key address to fund transactions and adds change output to same address.
    * After funding transaction you need to sign it and send it.
    * @param {number} funding in duffs
-   * @param [inputs]
+   * @param inputs
    * @returns {Promise<RegSubscriptionTransaction>}
    */
   async fund(funding, inputs) {
@@ -33,7 +33,7 @@ class RegSubscriptionTransaction extends Transaction {
 
     const registrationData = new BufferWriter()
       .writeUInt32LE(nVersion)
-      .writeUInt8(subTxTypes.register)
+      .writeUInt8(subTxTypes.REGISTER)
       .writeVarintNum(username.length)
       .write(username)
       .write(pubKeyId)
@@ -47,11 +47,7 @@ class RegSubscriptionTransaction extends Transaction {
 
     const output = new Output({ satoshis: funding, script });
 
-    let utxo = inputs;
-    if (!inputs) {
-      utxo = await this.address.getUTXO();
-    }
-    this.from(utxo);
+    this.from(inputs);
     this.change(this.address);
     this.addOutput(output);
     return this;

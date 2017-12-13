@@ -6,8 +6,13 @@ module.exports = {
     NEW_BLOCK: 'NEW_BLOCK',
   },
   subTxTypes: {
-    register: 1,
-    topup: 2,
+    REGISTER: 1,
+    TOP_UP: 2,
+  },
+  stateTransitionsTypes: {
+    UPDATE_DATA: 1,
+    RESET_KEY: 2,
+    CLOSE_ACCOUNT: 3,
   },
   nVersion: 0x00010000,
 };

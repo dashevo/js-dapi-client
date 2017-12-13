@@ -1,11 +1,18 @@
-const AddressAPI = require('./AddressAPI');
-const UserAPI = require('./UserAPI');
-const TransactionAPI = require('./TransactionAPI');
+// TODO: move explorer to that folder
+
+const Explorer = require('../../Explorer');
+const address = require('../../Explorer/API/user');
+const user = require('../../Explorer/API/user');
 
 const api = {
-  addressApi: new AddressAPI(),
-  userApi: new UserAPI(),
-  transactionApi: new TransactionAPI(),
+  address,
+  user,
+  transactions: {
+    sendRaw: Explorer.send,
+  },
+  transitions: {
+    async sendRaw() { /* todo */ },
+  },
 };
 
 module.exports = api;

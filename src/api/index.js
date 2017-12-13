@@ -1,7 +1,7 @@
 // TODO: move explorer to that folder
 
 const Explorer = require('../../Explorer');
-const address = require('../../Explorer/API/user');
+const address = require('../../Explorer/API/address');
 const user = require('../../Explorer/API/user');
 
 const api = {

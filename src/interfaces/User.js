@@ -19,6 +19,15 @@ class User extends EventEmitter {
   }
 
   /**
+   * Makes call to dapi in order to retrieve user data
+   * @param {string} usernameOrRegTxId
+   * @returns {Promise<Buffer|undefined|*|string>}
+   */
+  static async getUserData(usernameOrRegTxId) {
+    return user.getData(usernameOrRegTxId);
+  }
+
+  /**
    * Create registration subscription transaction for that user.
    * Funding must be greater that unspent balance on address related to user's public key.
    * @param {number} funding
@@ -49,10 +58,6 @@ class User extends EventEmitter {
   async authenticate() {}
   async closeSubscription() {}
   async changeKey(newKey) {}
-  async getUserData() {
-    // todo
-    return user.getData();
-  }
 
   /**
    * It is crucial for EventEmitters to remove listeners, since if object method still listening to

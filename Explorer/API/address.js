@@ -13,13 +13,5 @@ exports.getBalance = function (addr) {
 };
 
 exports.getUTXO = function (addr) {
-  return new Promise(((resolve, reject) => {
-    explorerGet(`/addr/${addr}/utxo`)
-      .then((data) => {
-        resolve(data);
-      })
-      .catch((error) => {
-        reject(`An error was triggered while fetching address ${addr} :${error}`);
-      });
-  }));
+  return explorerGet(`/addr/${addr}/utxo`);
 };

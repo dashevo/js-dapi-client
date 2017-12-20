@@ -2,7 +2,7 @@ const { PrivateKey } = require('bitcore-lib-dash');
 const EventEmitter = require('eventemitter2');
 
 const Address = require('./Address');
-const { user } = require('../api');
+const api = require('../api');
 const { RegSubTx, TopUpSubTx } = require('./subscriptionTransactions');
 const { userEvents, servicesEvents } = require('../constants');
 const { blockchainNotificationsService } = require('../services');
@@ -24,7 +24,7 @@ class User extends EventEmitter {
    * @returns {Promise<Buffer|undefined|*|string>}
    */
   static async getUserData(usernameOrRegTxId) {
-    return user.getData(usernameOrRegTxId);
+    return api.user.getData(usernameOrRegTxId);
   }
 
   /**

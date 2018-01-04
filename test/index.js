@@ -3,7 +3,7 @@ const _config = require('../config');
 
 const REFSDK = _config.useTrustedServer ? require('../Connector/trustedFactory.js') : require('../Connector/dapiFactory.js');
 
-describe('Init DAPI-SDK', () => {
+xdescribe('Init DAPI-SDK', () => {
   it('should have the right components', () => REFSDK()
     .then((success) => {
       should.exist(global.SDK);

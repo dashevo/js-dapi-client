@@ -1,7 +1,7 @@
 const should = require('should');
 const _config = require('../config');
 
-const REFSDK = _config.useTrustedServer ? require('../Connector/trustedFactory.js') : require('../Connector/dapiFactory.js');
+const REFSDK = require('../Connector/dapiFactory.js');
 
 const options = { // no effect for dapi - using defaults
   verbose: false,

@@ -1,4 +1,3 @@
-const Accounts = require('./Accounts');
 const Blockchain = require('./Blockchain');
 const Discover = require('./Discover');
 const SPV = require('./SPV');
@@ -8,7 +7,6 @@ const api = (options) => {
     console.warn('Logging levels have not been implemented yet');
   }
   return {
-    Accounts,
     Blockchain,
     Discover,
     SPV,

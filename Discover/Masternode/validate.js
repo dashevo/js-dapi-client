@@ -1,7 +1,7 @@
 /* eslint-disable */
 // TODO: Make this file pass linting!
-const has = require('../../util/has.js');
-const requesterJSON = require('../../util/requesterJSON.js');
+const has = require('../../src/util/has.js');
+const requesterJSON = require('../../src/util/requesterJSON.js');
 const { uuid } = require('khal');
 
 canPing = mn => new Promise(((resolve, reject) => {

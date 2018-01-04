@@ -39,8 +39,8 @@ const api = {
     },
   },
   transition: {
-    async sendRaw(rawTs) {
-      const response = await dapi.request('sendRawTransition', [rawTs]);
+    async sendRaw(rawTransition, dataPacket) {
+      const response = await dapi.request('sendRawTransition', [rawTransition, dataPacket]);
       if (response.error) {
         throw new Error(`DAPI error: ${response.error.message}`);
       }

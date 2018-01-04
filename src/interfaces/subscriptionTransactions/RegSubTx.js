@@ -1,5 +1,4 @@
-const Message = require('bitcore-message-dash');
-const { Script, PrivateKey } = require('bitcore-lib-dash');
+const { Script, PrivateKey, Message } = require('bitcore-lib-dash');
 const { BufferWriter } = require('bitcore-lib-dash').encoding;
 
 const Address = require('../Address');

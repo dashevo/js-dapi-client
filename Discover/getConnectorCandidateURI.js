@@ -1,4 +1,3 @@
-/* eslint-disable */
 // TODO: Make this file pass linting!
 const _ = require('lodash');
 

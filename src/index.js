@@ -1,1 +1,3 @@
-module.exports = require('./interfaces');
+module.exports.Interfaces = require('./interfaces');
+module.exports.DAPI = require('./api');
+

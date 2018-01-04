@@ -1,9 +1,5 @@
-const interfaces = {
-  User: require('./User'),
-  Address: require('./Address'),
-  Transaction: require('./Transaction'),
-  RegSubTx: require('./subscriptionTransactions/RegSubTx'),
-  TopUpSubTx: require('./subscriptionTransactions/TopUpSubTx'),
-};
-
-module.exports = interfaces;
+module.exports.User = require('./User');
+module.exports.Address = require('./Address');
+module.exports.Transaction = require('./Transaction');
+module.exports.RegSubTx = require('./subscriptionTransactions/RegSubTx');
+module.exports.TopUpSubTx = require('./subscriptionTransactions/TopUpSubTx');

@@ -1,9 +1,6 @@
-/* eslint-disable */
-// TODO: Make this file pass linting!
-const Masternode = require('./Masternode/').Masternode;
+const { Masternode } = require('./Masternode');
 
 exports.Discover = function () {
-  const self = this;
   return {
     _state: 'waiting',
     Masternode: Masternode(),

@@ -1,21 +1,24 @@
 /* eslint-disable */
 // TODO: Make this file pass linting!
 const qDash = require('quorums-dash');
-const registeredUser = require('../Accounts/User/mocks/registeredUser');
+const registeredUser = require('../mocks/registeredUser');
+const Discover = require('../Discover').Discover();
 
-const getQuorum = (SDK) => {
-  return SDK.Explorer.API.getLastBlockHeight()
-    .then(height => SDK.Explorer.API.getHashFromHeight(qDash.getRefHeight(height)))
+const { block: blockApi } = require('../src/api');
+
+const getQuorum = () => {
+  return blockApi.getBestBlockHeight()
+    .then(height => blockApi.getBlockHash(qDash.getRefHeight(height)))
     .then(lastHash => qDash.getQuorum(
-      SDK.Discover.Masternode.masternodeList.nodes, lastHash,
+      Discover.Masternode.masternodeList.nodes, lastHash,
       JSON.parse(registeredUser).txid,
     ));
 };
 
-const updateQuorum = (SDK) => {
+const updateQuorum = () => {
   return getQuorum()
     .then((quorum) => {
-      SDK.Discover.Masternode.candidateList = quorum;
+      Discover.Masternode.candidateList = quorum;
     });
 };
 

@@ -4,7 +4,7 @@ const message = require('bitcore-message-dash');
 const Mnemonic = require('bitcore-mnemonic-dash');
 const should = require('should');
 
-const mockUser = JSON.parse(require('../../Accounts/User/mocks/registeredUser'));
+const mockUser = JSON.parse(require('../../mocks/registeredUser'));
 
 const _data = {
   owner: 'Alice', receiver: 'Bob', type: 'contactReq', txId: mockUser.txid,

@@ -2,7 +2,7 @@ const config = require('../config');
 const { explorerPost } = require('../Common/ExplorerHelper');
 const message = require('bitcore-message-dash');
 const Mnemonic = require('bitcore-mnemonic-dash');
-const registeredUser = require('../Accounts/User/mocks/registeredUser');
+const registeredUser = require('../mocks/registeredUser');
 
 const REFSDK = config.useTrustedServer ? require('../Connector/dapiFactory.js');
 

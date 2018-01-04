@@ -47,6 +47,22 @@ const api = {
       return response.result;
     },
   },
+  block: {
+    async getBestBlockHeight() {
+      const response = await dapi.request('getBestBlockHeight');
+      if (response.error) {
+        throw new Error(`DAPI error: ${response.error.message}`);
+      }
+      return response.result;
+    },
+    async getBlockHash(blockHeight) {
+      const response = await dapi.request('getBlockHash', [blockHeight]);
+      if (response.error) {
+        throw new Error(`DAPI error: ${response.error.message}`);
+      }
+      return response.result;
+    },
+  },
 };
 
 module.exports = api;

@@ -1,4 +1,3 @@
-/* eslint-disable */
 // TODO: Make this file pass linting!
 // Choose a random socket.io endpoint to connect
 const { math } = require('khal');

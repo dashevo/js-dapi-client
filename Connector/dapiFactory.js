@@ -2,20 +2,17 @@ const Discover = require('../Discover').Discover();
 const Blockchain = require('../Blockchain').Blockchain();
 const SPV = require('../SPV');
 const config = require('../config.js');
-/* eslint-disable */
+
 // TODO: Make this file pass linting!
 // TODO: apply init process for trustedFactory.js
 const qDash = require('quorums-dash');
 
 DAPISDK = (options) => {
   global.SDK = {
-    Accounts: require('../Accounts/').Accounts(),
-    Explorer: require('../Explorer/').Explorer(),
-    Discover: require('../Discover/').Discover(),
-    BWS: require('../BWS/').BWS(),
+    Discover: require('../Discover').Discover(),
     Quorum: require('../Quorums'),
-    Blockchain: require('../Blockchain/').Blockchain(),
-    SPV: require('../SPV/'),
+    Blockchain: require('../Blockchain').Blockchain(),
+    SPV: require('../SPV'),
     _config: require('../config.js'),
   };
 

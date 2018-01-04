@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const bcoin = require('bcoin').set('testnet');
 
 // SPV chains only store the chain headers.

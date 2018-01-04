@@ -13,4 +13,6 @@ const api = (options) => {
   };
 };
 
-module.exports = api;
+module.exports = {
+  api,
+};

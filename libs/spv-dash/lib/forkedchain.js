@@ -1,5 +1,3 @@
-
-
 // blocks that can be considered part of the main chain/removed from this forkedChain
 // probably 100 for production?
 const matureHeight = 2;
@@ -15,7 +13,7 @@ class ForkedChain {
   }
 
   isOrphan() {
-    return this.mainchainTipHash != utils.getCorrectedHash(this.getHead().prevHash);
+    return this.mainchainTipHash !== utils.getCorrectedHash(this.getHead().prevHash);
   }
 
   processMaturedBlocks() {
@@ -48,7 +46,7 @@ class ForkedChain {
   }
 
   isConnectedToHead(block) {
-    return this.isOrphan() && this.getHead().hash == block.hash;
+    return this.isOrphan() && this.getHead().hash === block.hash;
   }
 
   getMaturedBlocks() {

@@ -1,4 +1,5 @@
-
+/* eslint-disable */
+// TODO: Make this file pass linting!
 // TODO: still just in POC code - optimisations needed to make it lib worthy
 // All node/ pool sockets & communication, etc + bloom filters
 // should be moved from here and handled in dapi - sdk Discovery services

@@ -4,8 +4,7 @@ const message = require('bitcore-message-dash');
 const Mnemonic = require('bitcore-mnemonic-dash');
 const registeredUser = require('../Accounts/User/mocks/registeredUser');
 
-const REFSDK = config.useTrustedServer ?
-  require('../Connector/trustedFactory.js') : require('../Connector/dapiFactory.js');
+const REFSDK = config.useTrustedServer ? require('../Connector/dapiFactory.js');
 
 const options = { // no effect for dapi - using defaults
   verbose: false,

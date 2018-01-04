@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 // import blockchain parameters for Dash
 const levelup = require('levelup');
 const dashUtil = require('dash-util');

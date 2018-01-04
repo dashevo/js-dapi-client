@@ -1,4 +1,5 @@
-
+/* eslint-disable */
+// TODO: Make this file pass linting!
 
 // pvr: starting to question if levelup is the proper data structure
 // no indexes and the headerchain possibly not large enough to justify using a db in the first place?

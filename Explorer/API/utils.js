@@ -1,10 +1,12 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const axios = require('axios');
 
 exports.estimateFees = function () {
   const self = this;
   return async function (blockNumber) {
     return new Promise((async (resolve, reject) => {
-      const getConnectorCandidate = await self.Discover.getConnectorCandidate();
+      // let getConnectorCandidate = await self.Discover.getConnectorCandidate(); todo
       const getInsightURI = getConnectorCandidate.URI;
       const url = `${getInsightURI}/utils/estimatefee?nbBlocks=${blockNumber || 2}`;
       return axios

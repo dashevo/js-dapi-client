@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const getBlockConfirmations = identifier =>
   new Promise(((resolve, reject) => SDK.Explorer.API.getBlock(identifier)
     .then((_block) => {

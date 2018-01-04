@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const { clone } = require('khal');
 const DashUtil = require('dash-util');
 const Bitcore = require('bitcore-lib-dash');

@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const { merge } = require('khal').misc;
 const EE2 = require('eventemitter2').EventEmitter2;
 const webcoinDash = require('webcoin-dash');

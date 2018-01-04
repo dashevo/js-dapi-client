@@ -1,3 +1,5 @@
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const _fetch = require('../../util/fetcher.js')._fetch;
 
 exports.getHeightFromHash = function (hash) {

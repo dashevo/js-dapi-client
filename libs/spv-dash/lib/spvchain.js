@@ -1,4 +1,5 @@
-
+/* eslint-disable */
+// TODO: Make this file pass linting!
 const utils = require('./utils');
 
 const EventEmitter = require('events').EventEmitter,

@@ -1,7 +1,6 @@
 const Accounts = require('./Accounts');
 const Blockchain = require('./Blockchain');
 const Discover = require('./Discover');
-const Explorer = require('./Explorer');
 const SPV = require('./SPV');
 
 const api = (options) => {
@@ -12,7 +11,6 @@ const api = (options) => {
     Accounts,
     Blockchain,
     Discover,
-    Explorer,
     SPV,
   };
 };

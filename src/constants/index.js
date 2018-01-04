@@ -14,5 +14,5 @@ module.exports = {
     RESET_KEY: 2,
     CLOSE_ACCOUNT: 3,
   },
-  nVersion: 0x00010000,
+  evoVersion: 0x00010000,
 };

@@ -3,7 +3,7 @@ const { BufferWriter } = require('bitcore-lib-dash').encoding;
 
 const Address = require('../Address');
 const Transaction = require('../Transaction');
-const { subTxTypes, nVersion } = require('../../constants');
+const { subTxTypes, evoVersion } = require('../../constants');
 
 const { Output } = Transaction;
 
@@ -31,7 +31,7 @@ class RegSubscriptionTransaction extends Transaction {
     const username = Buffer.from(this.username, 'utf8');
 
     const registrationData = new BufferWriter()
-      .writeUInt32LE(nVersion)
+      .writeUInt32LE(evoVersion)
       .writeUInt8(subTxTypes.REGISTER)
       .writeVarintNum(username.length)
       .write(username)

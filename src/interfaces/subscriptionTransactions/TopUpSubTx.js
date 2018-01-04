@@ -2,7 +2,7 @@ const { Script } = require('bitcore-lib-dash');
 const { BufferWriter } = require('bitcore-lib-dash').encoding;
 
 const Transaction = require('../Transaction');
-const { subTxTypes, nVersion } = require('../../constants');
+const { subTxTypes, evoVersion } = require('../../constants');
 
 const { Output } = Transaction;
 
@@ -27,7 +27,7 @@ class RegSubscriptionTransaction extends Transaction {
     const regTxId = Buffer.from(this.registrationSubTxId, 'hex').reverse();
 
     const topUpData = new BufferWriter()
-      .writeUInt32LE(nVersion)
+      .writeUInt32LE(evoVersion)
       .writeUInt8(subTxTypes.TOP_UP)
       .write(regTxId)
       .toBuffer();

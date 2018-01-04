@@ -20,21 +20,11 @@ const TRUSTSDK = function (options = {}) {
   // The Account part will be use to provide Account functionnality,
   // Therefore it will allow to connect and retrieve user information
   self.Accounts = require('../Accounts/').Accounts();
-  // The Wallet part will be used to do stuff based on manipulating the Dash.
-  // Data will be provided from Accounts which will store the Pub/Prv keys.
-  // It will perform action such as sending a payment, analyzing tx history and stuff like this.
-  // It should allow InstantSend and PrivateSend as well.
-  self.Wallet = require('../Wallet/').Wallet();
 
   // The Discover part will be use to checkout a Masternode List (and therefore the insightAPI associated)
   // It will validate these Masternode in order to be sure to have a quorum of masternode delivering data that will follow the consensus.
   // It will also verify that theses Masternode still have the 1000 collateral
   self.Discover = require('../Discover').Discover();
-
-  // The Explorer will be the connector with Insight-API.
-  // It will for instance checkout headers from insight API based on the list of masternode from Discover
-  // It will then validate the headers and store it to the Blockchain.
-  self.Explorer = require('../Explorer').Explorer();
 
   // Blockchain is where will be stored all the blockchain information
   // This will include for exemple all the headers for exemple
@@ -45,8 +35,6 @@ const TRUSTSDK = function (options = {}) {
 
   // Theses are some dependencies of DAPI-SDK that because there are creatly built, do not need to be redone again.
   // Therefore I've set them as direct part of the SDK
-
-  self.BWS = require('../BWS/').BWS();
 
   self.tools = {};
 

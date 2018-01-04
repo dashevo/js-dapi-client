@@ -1,6 +1,3 @@
-const services = {
-  blockchainNotificationsService: require('./blockchainNotificationsService'),
-  MNDiscoveryService: require('./MNDiscoveryService'),
-};
+const services = {};
 
 module.exports = services;

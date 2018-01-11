@@ -1,7 +1,9 @@
 const jayson = require('jayson/promise');
 
 // Local dapi instance. For testing purposes only
-const dapi = jayson.client.http({ port: 4019 });
+const LOCAL_DAPI_PORT = 3000;
+const MN_BOOTSTRAP_DAPI_PORT = 6001;
+const dapi = jayson.client.http({ port: MN_BOOTSTRAP_DAPI_PORT });
 
 const api = {
   address: {

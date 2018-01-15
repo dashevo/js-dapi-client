@@ -1,0 +1,5 @@
+const MNDiscoveryService = {
+  async getMNList() {
+
+  }
+};

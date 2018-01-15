@@ -3,19 +3,33 @@ const jayson = require('jayson/promise');
 // Local dapi instance. For testing purposes only
 const LOCAL_DAPI_PORT = 3000;
 const MN_BOOTSTRAP_DAPI_PORT = 6001;
-const dapi = jayson.client.http({ port: MN_BOOTSTRAP_DAPI_PORT });
+
+const DAPIService = {
+  lastClient: 0,
+  clients: [
+    jayson.client.http({ port: MN_BOOTSTRAP_DAPI_PORT }),
+  ],
+  getClient() {
+    this.lastClient = (this.lastClient + 1) % this.clients.length;
+    return this.clients[this.lastClient];
+  },
+  request(method, args) {
+    const client = this.getClient();
+    return client.request(method, args);
+  },
+};
 
 const api = {
   address: {
     getUTXO: async (address) => {
-      const response = await dapi.request('getUTXO', [address]);
+      const response = await DAPIService.request('getUTXO', [address]);
       if (response.error) {
         throw new Error(`DAPI error: ${response.error.message}`);
       }
       return response.result;
     },
     getBalance: async (address) => {
-      const response = await dapi.request('getBalance', [address]);
+      const response = await DAPIService.request('getBalance', [address]);
       if (response.error) {
         throw new Error(`DAPI error: ${response.error.message}`);
       }
@@ -24,7 +38,7 @@ const api = {
   },
   user: {
     getData: async (usernameOrRegTxId) => {
-      const response = await dapi.request('getUser', [usernameOrRegTxId]);
+      const response = await DAPIService.request('getUser', [usernameOrRegTxId]);
       if (response.error) {
         throw new Error(`DAPI error: ${response.error.message}`);
       }
@@ -33,7 +47,7 @@ const api = {
   },
   transaction: {
     sendRaw: async (rawTx) => {
-      const response = await dapi.request('sendRawTransaction', [rawTx]);
+      const response = await DAPIService.request('sendRawTransaction', [rawTx]);
       if (response.error) {
         throw new Error(`DAPI error: ${response.error.message}`);
       }
@@ -42,7 +56,7 @@ const api = {
   },
   transition: {
     async sendRaw(rawTransition, dataPacket) {
-      const response = await dapi.request('sendRawTransition', [rawTransition, dataPacket]);
+      const response = await DAPIService.request('sendRawTransition', [rawTransition, dataPacket]);
       if (response.error) {
         throw new Error(`DAPI error: ${response.error.message}`);
       }
@@ -51,14 +65,14 @@ const api = {
   },
   block: {
     async getBestBlockHeight() {
-      const response = await dapi.request('getBestBlockHeight');
+      const response = await DAPIService.request('getBestBlockHeight');
       if (response.error) {
         throw new Error(`DAPI error: ${response.error.message}`);
       }
       return response.result;
     },
     async getBlockHash(blockHeight) {
-      const response = await dapi.request('getBlockHash', [blockHeight]);
+      const response = await DAPIService.request('getBlockHash', [blockHeight]);
       if (response.error) {
         throw new Error(`DAPI error: ${response.error.message}`);
       }

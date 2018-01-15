@@ -1,21 +1,28 @@
-const jayson = require('jayson/promise');
+/*
+This module is making requests to DAPI and used by API module.
+ */
 
-const LOCAL_DAPI_PORT = 3000;
-const MN_BOOTSTRAP_DAPI_PORT = 6001;
+const { Client: RPCClient } = require('jayson/promise');
+const { port } = require('../config').DAPI;
+const MNDiscoveryService = require('./MNDiscoveryService');
+
+async function getRandomClient() {
+  const randomMasternode = await MNDiscoveryService.getRandomMasternode();
+  // todo: do we need to take port from masternode list?
+  return RPCClient.http({ host: randomMasternode.ip, port });
+}
+
+async function getClient() {
+  return getRandomClient();
+}
+
+async function request(method, args) {
+  const client = getClient();
+  return client.request(method, args);
+}
 
 const DAPIService = {
-  lastClient: 0,
-  clients: [
-    jayson.client.http({ port: MN_BOOTSTRAP_DAPI_PORT }),
-  ],
-  getClient() {
-    this.lastClient = (this.lastClient + 1) % this.clients.length;
-    return this.clients[this.lastClient];
-  },
-  request(method, args) {
-    const client = this.getClient();
-    return client.request(method, args);
-  },
+  request,
 };
 
 module.exports = DAPIService;

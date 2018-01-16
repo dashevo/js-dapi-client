@@ -1,15 +1,7 @@
-const quorums = require('quorums-dash');
-const sample = require('lodash/sample');
 const { Client: RPCClient } = require('jayson/promise');
-const config = require('../config');
+const sample = require('lodash/sample');
+const config = require('../../config/index');
 
-/*
-* This module responsibility is to obtain masternode IPs in order to
-* provide those IPs for DAPIService, which provides an interface for making
-* requests to DAPI.
-* Initial masternode list is dns seed - trusted servers which returns list of
-* other nodes in the network.
-*/
 const masternodeListProvider = {
   /**
    * Masternode list. Initial masternode list is DNS seed from SDK config.
@@ -62,16 +54,4 @@ const masternodeListProvider = {
   },
 };
 
-const MNDiscoveryService = {
-  /**
-   *
-   * @returns {Promise<*>}
-   */
-  async getRandomMasternode() {
-    const MNList = await masternodeListProvider.getMNList();
-    console.log(MNList);
-    return sample(MNList);
-  },
-};
-
-module.exports = MNDiscoveryService;
+module.exports = masternodeListProvider;

@@ -2,6 +2,11 @@ const { Client: RPCClient } = require('jayson/promise');
 const sample = require('lodash/sample');
 const config = require('../../config/index');
 
+/**
+ * This module is needed for discovering masternode addresses.
+ * No need to use this module manually - it's part of MNDiscoveryService.
+ * @type {{masternodeList: {protocol: string, host: string, port: number}[], lastUpdateDate: number, fetchMNList(): Promise<Array>, updateMNList(): Promise<void>, needsUpdate(): boolean, getMNList(): Promise<Array>}}
+ */
 const masternodeListProvider = {
   /**
    * Masternode list. Initial masternode list is DNS seed from SDK config.

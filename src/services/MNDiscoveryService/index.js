@@ -1,4 +1,3 @@
-const quorums = require('quorums-dash');
 const sample = require('lodash/sample');
 const MasternodeListProvider = require('./MasternodeListProvider');
 

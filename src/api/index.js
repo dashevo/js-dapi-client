@@ -1,12 +1,4 @@
-const { DAPIService } = require('../services');
-
-async function request(method, params) {
-  const response = await DAPIService.request(method, params);
-  if (response.error) {
-    throw new Error(`DAPI error: ${method}: ${response.error.message}`);
-  }
-  return response.result;
-}
+const request = require('./request');
 
 const api = {
   address: {

@@ -1,6 +1,6 @@
 const Discover = require('../Discover').Discover();
 const Blockchain = require('../Blockchain').Blockchain();
-const SPV = require('../SPV');
+const SPV = require('../src/services/SPV');
 const config = require('../config.js');
 
 // TODO: Make this file pass linting!
@@ -12,7 +12,7 @@ DAPISDK = (options) => {
     Discover: require('../Discover').Discover(),
     Quorum: require('../Quorums'),
     Blockchain: require('../Blockchain').Blockchain(),
-    SPV: require('../SPV'),
+    SPV: require('../src/services/SPV'),
     _config: require('../config.js'),
   };
 

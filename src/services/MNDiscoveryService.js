@@ -1,46 +1,71 @@
-/*
-This module responsibility is to obtain masternode IPs in order to
-provide this IPs for DAPIService, which provides an interface
-for making requests to DAPI.
- */
-
-const { DAPISeeds, masternodeUpdateInterval } = require('../config');
 const quorums = require('quorums-dash');
 const sample = require('lodash/sample');
-const { Client: RPCClient } = require('jayson');
+const { Client: RPCClient } = require('jayson/promise');
+const config = require('../config');
 
-let masternodesList = Object.assign({}, DAPISeeds);
-let masternodesListLastUpdate = 0;
-
-async function fetchMNList() {
-  const randomMasternode = sample(masternodesList);
-  const client = RPCClient.http({
-    host: randomMasternode.host,
-    port: randomMasternode.port,
-  });
-  const newMNList = await client.request('getMNList', []);
-  return newMNList;
-}
-
-async function updateQuorum() {
-  // todo: what this function should do?
-}
-
-async function updateMasternodesList() {
-  if (Date.now() - masternodeUpdateInterval > masternodesListLastUpdate) {
-    const newMNList = await fetchMNList();
-    masternodesList = newMNList;
-    masternodesListLastUpdate = Date.now();
-  }
-}
+/*
+* This module responsibility is to obtain masternode IPs in order to
+* provide those IPs for DAPIService, which provides an interface for making
+* requests to DAPI.
+* Initial masternode list is dns seed - trusted servers which returns list of
+* other nodes in the network.
+*/
+const masternodeListProvider = {
+  /**
+   * Masternode list. Initial masternode list is DNS seed from SDK config.
+   */
+  masternodeList: config.DAPIDNSSeeds.slice(),
+  lastUpdateDate: 0,
+  /**
+   * @private
+   * Fetches masternode list from DAPI.
+   * @returns {Promise<Array>}
+   */
+  async fetchMNList() {
+    const randomMasternode = sample(this.masternodeList);
+    const client = RPCClient.http({
+      host: randomMasternode.host,
+      port: randomMasternode.port,
+    });
+    const res = await client.request('getMNList', []);
+    return res.result;
+  },
+  /**
+   * @private
+   * Updates masternodes list. No need to call it manually
+   * @returns {Promise<void>}
+   */
+  async updateMNList() {
+    const newMNList = await this.fetchMNList();
+    this.masternodeList = config.DAPIDNSSeeds.slice().concat(newMNList);
+    this.lastUpdateDate = Date.now();
+  },
+  /**
+   * Checks whether masternode list needs update
+   * @returns {boolean}
+   */
+  needsUpdate() {
+    return Date.now() - config.masternodeUpdateInterval > this.lastUpdateDate;
+  },
+  /**
+   * Returns masternode list
+   * @returns {Promise<Array>}
+   */
+  async getMNList() {
+    if (this.needsUpdate()) {
+      await this.updateMNList();
+    }
+    return this.masternodeList;
+  },
+};
 
 const MNDiscoveryService = {
-  async getMNList() {
-    await updateMasternodesList();
-    return masternodesList;
-  },
+  /**
+   *
+   * @returns {Promise<*>}
+   */
   async getRandomMasternode() {
-    const MNList = await this.getMNList();
+    const MNList = await masternodeListProvider.getMNList();
     return sample(MNList);
   },
 };

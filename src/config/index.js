@@ -4,7 +4,7 @@ const config = {
   },
   masternodeUpdateInterval: 60000,
   quorumUpdateInterval: 60000,
-  DAPISeeds: [
+  DAPIDNSSeeds: [
     {
       protocol: 'http',
       host: '127.0.0.1',

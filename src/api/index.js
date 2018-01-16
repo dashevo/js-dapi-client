@@ -1,64 +1,32 @@
 const { DAPIService } = require('../services');
 
+async function request(method, params) {
+  const response = await DAPIService.request(method, params);
+  if (response.error) {
+    throw new Error(`DAPI error: ${method}: ${response.error.message}`);
+  }
+  return response.result;
+}
+
 const api = {
   address: {
-    getUTXO: async (address) => {
-      const response = await DAPIService.request('getUTXO', [address]);
-      if (response.error) {
-        throw new Error(`DAPI error: ${response.error.message}`);
-      }
-      return response.result;
-    },
-    getBalance: async (address) => {
-      const response = await DAPIService.request('getBalance', [address]);
-      if (response.error) {
-        throw new Error(`DAPI error: ${response.error.message}`);
-      }
-      return response.result;
-    },
+    getUTXO: address => request('getUTXO', [address]),
+    getBalance: address => request('getBalance', [address]),
   },
   user: {
-    getData: async (usernameOrRegTxId) => {
-      const response = await DAPIService.request('getUser', [usernameOrRegTxId]);
-      if (response.error) {
-        throw new Error(`DAPI error: ${response.error.message}`);
-      }
-      return response.result;
-    },
+    getData: usernameOrRegTxId => request('getUser', [usernameOrRegTxId]),
   },
   transaction: {
-    sendRaw: async (rawTx) => {
-      const response = await DAPIService.request('sendRawTransaction', [rawTx]);
-      if (response.error) {
-        throw new Error(`DAPI error: ${response.error.message}`);
-      }
-      return response.result;
-    },
+    sendRaw: rawTx => request('sendRawTransaction', [rawTx]),
   },
   transition: {
-    async sendRaw(rawTransition, dataPacket) {
-      const response = await DAPIService.request('sendRawTransition', [rawTransition, dataPacket]);
-      if (response.error) {
-        throw new Error(`DAPI error: ${response.error.message}`);
-      }
-      return response.result;
+    sendRaw(rawTransition, dataPacket) {
+      return request('sendRawTransition', [rawTransition, dataPacket]);
     },
   },
   block: {
-    async getBestBlockHeight() {
-      const response = await DAPIService.request('getBestBlockHeight');
-      if (response.error) {
-        throw new Error(`DAPI error: ${response.error.message}`);
-      }
-      return response.result;
-    },
-    async getBlockHash(blockHeight) {
-      const response = await DAPIService.request('getBlockHash', [blockHeight]);
-      if (response.error) {
-        throw new Error(`DAPI error: ${response.error.message}`);
-      }
-      return response.result;
-    },
+    getBestBlockHeight: () => request('getBestBlockHeight'),
+    getBlockHash: blockHeight => request('getBlockHash', [blockHeight]),
   },
 };
 

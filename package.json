@@ -15,6 +15,7 @@
     "bluebird": "^3.5.1",
     "clear": "0.0.1",
     "dark-gravity-wave-js": "github:alex-werner/dark-gravity-wave-js",
+    "dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git",
     "dash-util": "^2.0.3",
     "eventemitter2": "^4.1.2",
     "graphql": "^0.10.5",

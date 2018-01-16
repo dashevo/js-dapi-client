@@ -1,8 +1,8 @@
 // TODO: Fix implementation of library to remove dangling underscore
 // TODO: Fix library to use proper casing for class-like data structures
 /* eslint-disable no-underscore-dangle */
-const Spvchain = require('../libs/spv-dash/lib/spvchain');
-const merkleproof = require('../libs/spv-dash/lib/merkleproof');
+const Spvchain = require('dash-spv/lib/spvchain');
+const merkleproof = require('dash-spv/lib/merkleproof');
 
 let chain = null;
 

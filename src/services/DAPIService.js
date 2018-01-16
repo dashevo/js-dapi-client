@@ -4,7 +4,7 @@ const MNDiscoveryService = require('./MNDiscoveryService');
 async function getRandomClient() {
   const randomMasternode = await MNDiscoveryService.getRandomMasternode();
   return RPCClient.http({
-    host: randomMasternode.ip,
+    host: randomMasternode.host,
     port: randomMasternode.port,
   });
 }

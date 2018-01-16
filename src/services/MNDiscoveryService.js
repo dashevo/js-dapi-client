@@ -28,6 +28,9 @@ const masternodeListProvider = {
       port: randomMasternode.port,
     });
     const res = await client.request('getMNList', []);
+    if (res.error) {
+      throw new Error(res.error.message);
+    }
     return res.result;
   },
   /**
@@ -66,6 +69,7 @@ const MNDiscoveryService = {
    */
   async getRandomMasternode() {
     const MNList = await masternodeListProvider.getMNList();
+    console.log(MNList);
     return sample(MNList);
   },
 };

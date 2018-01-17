@@ -17,7 +17,7 @@ const api = {
     },
   },
   block: {
-    getBestBlockHeight: () => request('getBestBlockHeight'),
+    getBestBlockHeight: () => request('getBestBlockHeight', []),
     getBlockHash: blockHeight => request('getBlockHash', [blockHeight]),
   },
 };

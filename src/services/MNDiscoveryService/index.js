@@ -18,6 +18,9 @@ const MNDiscoveryService = {
     const MNList = await MasternodeListProvider.getMNList();
     return sample(MNList);
   },
+  async getMNList() {
+    return MasternodeListProvider.getMNList();
+  },
 };
 
 module.exports = MNDiscoveryService;

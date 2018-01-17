@@ -24,7 +24,7 @@ class User extends EventEmitter {
    * @returns {Promise<Buffer|undefined|*|string>}
    */
   static async getUserData(usernameOrRegTxId) {
-    return api.user.getData(usernameOrRegTxId);
+    return api.user.getUser(usernameOrRegTxId);
   }
 
   /**

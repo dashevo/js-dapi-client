@@ -1,10 +1,10 @@
-const config = require('../config');
+const config = require('../../config');
 const { explorerPost } = require('../Common/ExplorerHelper');
-const message = require('bitcore-message-dash');
+const { Message } = require('bitcore-lib-dash');
 const Mnemonic = require('bitcore-mnemonic-dash');
-const registeredUser = require('../mocks/registeredUser');
+const registeredUser = require('../../mocks/registeredUser');
 
-const REFSDK = config.useTrustedServer ? require('../Connector/dapiFactory.js');
+const REFSDK = config.useTrustedServer ? require('../../Connector/dapiFactory.js');
 
 const options = { // no effect for dapi - using defaults
   verbose: false,
@@ -39,7 +39,7 @@ REFSDK(options)
 
       const mnemonic = new Mnemonic('jaguar paddle monitor scrub stage believe odor frown honey ahead harsh talk');
       const privKey = mnemonic.toHDPrivateKey().derive('m/1').privateKey;
-      const signature = message(JSON.stringify(data)).sign(privKey);
+      const signature = Message(JSON.stringify(data)).sign(privKey);
 
       explorerPost('/quorum', {
         verb: 'add',

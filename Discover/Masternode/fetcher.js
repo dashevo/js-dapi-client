@@ -1,7 +1,6 @@
 /* eslint-disable */
 // TODO: Make this file pass linting!
 const axios = require('axios'),
-  SpvUtils = require('../../src/util/SpvUtils'),
   _ = require('lodash'),
   fs = require('fs');
 

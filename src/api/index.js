@@ -6,7 +6,7 @@ const api = {
     getBalance: address => request('getBalance', [address]),
   },
   user: {
-    getData: usernameOrRegTxId => request('getUser', [usernameOrRegTxId]),
+    getUser: usernameOrRegTxId => request('getUser', [usernameOrRegTxId]),
   },
   transaction: {
     sendRaw: rawTx => request('sendRawTransaction', [rawTx]),

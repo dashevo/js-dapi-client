@@ -19,7 +19,7 @@ async function makeRequestToRandomDAPINode(method, args) {
  * Makes request to random DAPI node.
  * @param {string} method
  * @param {array|object} params
- * @returns {Promise<void>}
+ * @returns {Promise<*>}
  */
 async function request(method, params) {
   const response = await makeRequestToRandomDAPINode(method, params);

@@ -36,8 +36,8 @@ const masternodeListProvider = {
   async fetchMNList() {
     const randomMasternode = sample(this.masternodeList);
     const client = RPCClient.http({
-      host: randomMasternode.host,
-      port: randomMasternode.port,
+      host: randomMasternode.ip,
+      port: config.DAPI.port,
     });
     const res = await client.request('getMNList', []);
     if (res.error) {
@@ -52,7 +52,10 @@ const masternodeListProvider = {
    */
   async updateMNList() {
     const newMNList = await this.fetchMNList();
-    this.masternodeList = config.DAPIDNSSeeds.slice().concat(newMNList);
+    // If mn list was updated
+    if (newMNList.length) {
+      this.masternodeList = newMNList;
+    }
     this.lastUpdateDate = Date.now();
   },
   /**

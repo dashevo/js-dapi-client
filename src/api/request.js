@@ -1,11 +1,12 @@
 const { Client: RPCClient } = require('jayson/promise');
 const MNDiscoveryService = require('../services/MNDiscoveryService');
+const config = require('../config');
 
 async function getRandomClient() {
   const randomMasternode = await MNDiscoveryService.getRandomMasternode();
   return RPCClient.http({
-    host: randomMasternode.host,
-    port: randomMasternode.port,
+    host: randomMasternode.ip,
+    port: config.DAPI.port,
   });
 }
 

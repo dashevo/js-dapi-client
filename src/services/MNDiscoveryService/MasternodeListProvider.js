@@ -1,22 +1,37 @@
+/**
+ * This module provides list of masternode addresses.
+ * No need to use this module manually - it's part of MNDiscoveryService.
+ * @module MasternodeListProvider
+ */
+
 const { Client: RPCClient } = require('jayson/promise');
 const sample = require('lodash/sample');
 const config = require('../../config/index');
 
 /**
- * This module is needed for discovering masternode addresses.
- * No need to use this module manually - it's part of MNDiscoveryService.
- * @type {{masternodeList: {protocol: string, host: string, port: number}[], lastUpdateDate: number, fetchMNList(): Promise<Array>, updateMNList(): Promise<void>, needsUpdate(): boolean, getMNList(): Promise<Array>}}
+ @typedef Masternode
+ @type {Object}
+ @property {string} vin
+ @property {string} status
+ @property {number} rank
+ @property {string} ip - including port
+ @property {string} protocol - protocol version
+ @property {string} payee
+ @property {number} activeseconds
+ @property {number} lastseen
  */
+
 const masternodeListProvider = {
   /**
    * Masternode list. Initial masternode list is DNS seed from SDK config.
+   * @type Array<Masternode>
    */
   masternodeList: config.DAPIDNSSeeds.slice(),
   lastUpdateDate: 0,
   /**
    * @private
    * Fetches masternode list from DAPI.
-   * @returns {Promise<Array>}
+   * @returns {Promise<Array<Masternode>>}
    */
   async fetchMNList() {
     const randomMasternode = sample(this.masternodeList);
@@ -41,6 +56,7 @@ const masternodeListProvider = {
     this.lastUpdateDate = Date.now();
   },
   /**
+   * @private
    * Checks whether masternode list needs update
    * @returns {boolean}
    */
@@ -49,7 +65,7 @@ const masternodeListProvider = {
   },
   /**
    * Returns masternode list
-   * @returns {Promise<Array>}
+   * @returns {Promise<Array<Masternode>>}
    */
   async getMNList() {
     if (this.needsUpdate()) {

@@ -1,8 +1,6 @@
 const should = require('should');
 const _config = require('../config');
 
-const REFSDK = require('../Connector/dapiFactory.js');
-
 xdescribe('Init DAPI-SDK', () => {
   it('should have the right components', () => REFSDK()
     .then((success) => {

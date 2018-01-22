@@ -1,18 +1,10 @@
-const { Client: RPCClient } = require('jayson/promise');
 const MNDiscoveryService = require('../services/MNDiscoveryService');
+const rpcClient = require('../util/rpcClient');
 const config = require('../config');
 
-async function getRandomClient() {
+async function makeRequestToRandomDAPINode(method, params) {
   const randomMasternode = await MNDiscoveryService.getRandomMasternode();
-  return RPCClient.http({
-    host: randomMasternode.ip,
-    port: config.DAPI.port,
-  });
-}
-
-async function makeRequestToRandomDAPINode(method, args) {
-  const client = await getRandomClient();
-  return client.request(method, args);
+  return rpcClient.request({ host: randomMasternode.ip, port: config.DAPI.port }, method, params);
 }
 
 /**

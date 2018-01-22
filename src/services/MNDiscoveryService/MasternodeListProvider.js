@@ -4,7 +4,7 @@
  * @module MasternodeListProvider
  */
 
-const { Client: RPCClient } = require('jayson/promise');
+const rpcClient = require('../../util/rpcClient');
 const sample = require('lodash/sample');
 const config = require('../../config/index');
 
@@ -35,11 +35,10 @@ const masternodeListProvider = {
    */
   async fetchMNList() {
     const randomMasternode = sample(this.masternodeList);
-    const client = RPCClient.http({
+    const res = await rpcClient.request({
       host: randomMasternode.ip,
       port: config.DAPI.port,
-    });
-    const res = await client.request('getMNList', []);
+    }, 'getMNList', []);
     if (res.error) {
       throw new Error(res.error.message);
     }

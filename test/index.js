@@ -1,5 +1,4 @@
 const should = require('should');
-const _config = require('../config');
 
 xdescribe('Init DAPI-SDK', () => {
   it('should have the right components', () => REFSDK()

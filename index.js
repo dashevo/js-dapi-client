@@ -1,5 +1,4 @@
 const Blockchain = require('./Blockchain');
-const Discover = require('./Discover');
 
 const api = (options) => {
   if (options) {
@@ -7,7 +6,6 @@ const api = (options) => {
   }
   return {
     Blockchain,
-    Discover,
   };
 };
 

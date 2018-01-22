@@ -1,5 +1,7 @@
 ### Blockchain : 
 
+This is arhived service, nothing using it right now. Probably need to be removed.
+
 Unstable stage for usage right now.
 
 - init

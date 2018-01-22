@@ -7,7 +7,7 @@
     "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git",
     "app-module-path": "^2.2.0",
     "axios": "^0.16.2",
-    "bip39": "^2.4.0",
+    "bip39": "^2.5.0",
     "bitcoinjs-lib": "^3.3.2",
     "bitcore-lib-dash": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#feature-state-transition",
     "bitcore-message-dash": "^1.0.9",
@@ -34,7 +34,7 @@
   "devDependencies": {
     "base58": "^1.0.1",
     "blockchain-spv-dash": "git+https://github.com/pvrooyen/blockchain-spv-dash.git",
-    "eslint": "^4.14.0",
+    "eslint": "^4.16.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",

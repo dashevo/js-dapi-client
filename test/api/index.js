@@ -3,15 +3,24 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const DAPIClient = require('../../src/api/DAPIClient');
 
-sinon.stub(DAPIClient, 'request').callsFake(function(method, params) {
-  if (method === 'getUTXO') {
-    if (typeof params[0] === 'string') {
-      return [{}];
-    }
-  }
-});
-
 describe('api', () => {
+
+  before(() => {
+    // stub requests to DAPI
+    sinon.stub(DAPIClient, 'request').callsFake(function(method, params) {
+      if (method === 'getUTXO') {
+        if (typeof params[0] === 'string') {
+          return [{}];
+        }
+      }
+    });
+  });
+
+  after(() => {
+    // Restore stubbed DAPI request
+    DAPIClient.request.restore();
+  });
+
   describe('.address.getUTXO', () => {
     it('Should return list with unspent outputs for correct address, if there are any', async () => {
       const address = '123';

@@ -21,4 +21,4 @@ async function request(method, params) {
   return response.result;
 }
 
-module.exports = request;
+module.exports = { request };

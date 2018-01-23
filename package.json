@@ -27,6 +27,7 @@
   "devDependencies": {
     "base58": "^1.0.1",
     "blockchain-spv-dash": "git+https://github.com/pvrooyen/blockchain-spv-dash.git",
+    "chai": "^4.1.2",
     "eslint": "^4.16.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
@@ -34,6 +35,7 @@
     "eslint-plugin-react": "^7.5.1",
     "mocha": "^3.3.0",
     "should": "^11.2.1",
+    "sinon": "^4.2.0",
     "webcoin-dash-testnet": "git+https://github.com/pvrooyen/webcoin-dash-testnet.git"
   },
   "scripts": {

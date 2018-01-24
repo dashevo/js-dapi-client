@@ -3,6 +3,7 @@ const { expect } = require('chai');
 const sinon = require('sinon');
 const DAPIClient = require('../../src/api/DAPIClient');
 
+
 describe('api', () => {
 
   before(() => {
@@ -37,7 +38,12 @@ describe('api', () => {
     });
   });
   describe('.address.getBalance', () => {
-    it('', async () => {
+    it('Should return sum of unspent outputs for address', async () => {
+
+    });
+  });
+  describe('.user.getUser', () => {
+    it('Should return error if address is incorrect', async () => {
 
     });
   });

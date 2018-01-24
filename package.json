@@ -35,7 +35,7 @@
     "eslint-plugin-react": "^7.5.1",
     "mocha": "^3.3.0",
     "should": "^11.2.1",
-    "sinon": "^4.2.0",
+    "sinon": "^4.2.1",
     "webcoin-dash-testnet": "git+https://github.com/pvrooyen/webcoin-dash-testnet.git"
   },
   "scripts": {

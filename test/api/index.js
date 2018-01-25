@@ -8,6 +8,10 @@ const { Address } = require('bitcore-lib-dash');
 chai.use(chaiAsPromised);
 const { expect } = chai;
 
+const validAddressWithOutputs = 'yXdxAYfK8eJgQmHpUzMaKEBhqwKQWKSezS';
+const validAddressWithoutOutputs = 'yVWnW3MY3QHNXgptKg1iQuCkqmtFhMGyPF';
+const invalidAddress = '123';
+
 describe('api', () => {
 
   before(() => {
@@ -17,9 +21,13 @@ describe('api', () => {
         if (!Address.isValid(params[0])) {
           throw new Error('Address is not valid');
         }
-        if (typeof params[0] === 'string') {
+        if (params[0] === validAddressWithOutputs) {
           return [{}];
         }
+        if (params[0] === validAddressWithoutOutputs) {
+          return [];
+        }
+        throw new Error('Address not found');
       }
       if (method === 'getBalance') {
         if (!Address.isValid(params[0])) {
@@ -57,18 +65,21 @@ describe('api', () => {
 
   describe('.address.getUTXO', () => {
     it('Should return list with unspent outputs for correct address, if there are any', async () => {
-      const address = '123';
-      const utxo = await api.address.getUTXO(address);
+      const utxo = await api.address.getUTXO(validAddressWithOutputs);
       expect(utxo).to.be.an('array');
       const output = utxo[0];
       expect(output).to.be.an('object');
     });
     it('Should return empty list if there is no unspent output', async () => {
-
+      const utxo = await api.address.getUTXO(validAddressWithoutOutputs);
+      expect(utxo).to.be.an('array');
+      expect(utxo.length).to.be.equal(0);
     });
     it('Should throw error if address is invalid', async () => {
-      const address = '123';
-      return expect(api.address.getUTXO(address)).to.be.rejected;
+      return expect(api.address.getUTXO(invalidAddress)).to.be.rejected;
+    });
+    it('Should throw error if address not existing', async () => {
+      return expect(api.address.getUTXO(invalidAddress)).to.be.rejected;
     });
   });
   describe('.address.getBalance', () => {

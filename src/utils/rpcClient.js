@@ -24,7 +24,11 @@ async function request(url, method, params) {
   if (res.status !== 200) {
     throw new Error(res.statusMessage);
   }
-  return res.data;
+  const { data } = res;
+  if (data.error) {
+    throw new Error(`RPC error: ${method}: ${data.error.message}`);
+  }
+  return data.result;
 }
 
 module.exports = {

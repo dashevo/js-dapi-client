@@ -14,11 +14,7 @@ async function makeRequestToRandomDAPINode(method, params) {
  * @returns {Promise<*>}
  */
 async function request(method, params) {
-  const response = await makeRequestToRandomDAPINode(method, params);
-  if (response.error) {
-    throw new Error(`DAPI error: ${method}: ${response.error.message}`);
-  }
-  return response.result;
+  return makeRequestToRandomDAPINode(method, params);
 }
 
 module.exports = { request };

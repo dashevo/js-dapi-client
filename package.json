@@ -35,6 +35,7 @@
     "eslint-plugin-jsx-a11y": "^6.0.3",
     "eslint-plugin-react": "^7.5.1",
     "mocha": "^3.3.0",
+    "nyc": "^11.4.1",
     "should": "^11.2.1",
     "sinon": "^4.2.1",
     "webcoin-dash-testnet": "git+https://github.com/pvrooyen/webcoin-dash-testnet.git"
@@ -42,7 +43,8 @@
   "scripts": {
     "build": "webpack --display-error-details",
     "lint": "eslint . --fix",
-    "test": "mocha --no-timeouts"
+    "test": "mocha --no-timeouts --recursive",
+    "coverage": "nyc mocha --recursive"
   },
   "author": "",
   "license": "ISC"

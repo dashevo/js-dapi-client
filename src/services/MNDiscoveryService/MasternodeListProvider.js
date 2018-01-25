@@ -4,7 +4,7 @@
  * @module MasternodeListProvider
  */
 
-const rpcClient = require('../../util/rpcClient');
+const rpcClient = require('../../utils/rpcClient');
 const sample = require('lodash/sample');
 const config = require('../../config/index');
 
@@ -35,14 +35,10 @@ const masternodeListProvider = {
    */
   async fetchMNList() {
     const randomMasternode = sample(this.masternodeList);
-    const res = await rpcClient.request({
+    return rpcClient.request({
       host: randomMasternode.ip,
       port: config.DAPI.port,
     }, 'getMNList', []);
-    if (res.error) {
-      throw new Error(res.error.message);
-    }
-    return res.result;
   },
   /**
    * @private

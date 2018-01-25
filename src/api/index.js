@@ -1,26 +1,24 @@
-const DAPI = require('./DAPIClient');
-// There is no destructuring for a purpose of testability - request method of that object is stubbed
-// in test, which is not possible when using destructuring.
+const { request } = require('./DAPIClient');
 
 const api = {
   address: {
-    getUTXO: address => DAPI.request('getUTXO', [address]),
-    getBalance: address => DAPI.request('getBalance', [address]),
+    getUTXO: address => request('getUTXO', [address]),
+    getBalance: address => request('getBalance', [address]),
   },
   user: {
-    getUser: usernameOrRegTxId => DAPI.request('getUser', [usernameOrRegTxId]),
+    getUser: usernameOrRegTxId => request('getUser', [usernameOrRegTxId]),
   },
   transaction: {
-    sendRaw: rawTx => DAPI.request('sendRawTransaction', [rawTx]),
+    sendRaw: rawTx => request('sendRawTransaction', [rawTx]),
   },
   transition: {
     sendRaw(rawTransition, dataPacket) {
-      return DAPI.request('sendRawTransition', [rawTransition, dataPacket]);
+      return request('sendRawTransition', [rawTransition, dataPacket]);
     },
   },
   block: {
-    getBestBlockHeight: () => DAPI.request('getBestBlockHeight', []),
-    getBlockHash: blockHeight => DAPI.request('getBlockHash', [blockHeight]),
+    getBestBlockHeight: () => request('getBestBlockHeight', []),
+    getBlockHash: blockHeight => request('getBlockHash', [blockHeight]),
   },
 };
 

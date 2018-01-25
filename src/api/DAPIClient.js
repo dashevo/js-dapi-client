@@ -1,5 +1,5 @@
 const MNDiscoveryService = require('../services/MNDiscoveryService');
-const rpcClient = require('../util/rpcClient');
+const rpcClient = require('../utils/rpcClient');
 const config = require('../config');
 
 async function makeRequestToRandomDAPINode(method, params) {

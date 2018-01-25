@@ -1,25 +1,58 @@
 const { DAPI: api } = require('../../src');
-const { expect } = require('chai');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const DAPIClient = require('../../src/api/DAPIClient');
+const rpcClient = require('../../src/utils/rpcClient');
+const { Address } = require('bitcore-lib-dash');
 
+chai.use(chaiAsPromised);
+const { expect } = chai;
 
 describe('api', () => {
 
   before(() => {
     // stub requests to DAPI
-    sinon.stub(DAPIClient, 'request').callsFake(function(method, params) {
+    sinon.stub(rpcClient, 'request').callsFake(async function(url, method, params) {
       if (method === 'getUTXO') {
+        if (!Address.isValid(params[0])) {
+          throw new Error('Address is not valid');
+        }
         if (typeof params[0] === 'string') {
           return [{}];
         }
+      }
+      if (method === 'getBalance') {
+        if (!Address.isValid(params[0])) {
+          throw new Error('Address is not valid');
+        }
+        if (typeof params[0] === 'string') {
+          return 1;
+        }
+      }
+      if (method === 'getUser') {
+        // First parameter should be string - username or regtxhash
+      }
+      if (method === 'sendRawTransaction') {
+        // Validate HEX
+      }
+      if (method === 'sendRawTransition') {
+        // Validate transition
+      }
+      if (method === 'getBestBlockHeight') {
+        return 100;
+      }
+      if (method === 'getBlockHash') {
+        return 100;
+      }
+      if (method === 'getMNList') {
+        return [];
       }
     });
   });
 
   after(() => {
     // Restore stubbed DAPI request
-    DAPIClient.request.restore();
+    rpcClient.request.restore();
   });
 
   describe('.address.getUTXO', () => {
@@ -33,26 +66,38 @@ describe('api', () => {
     it('Should return empty list if there is no unspent output', async () => {
 
     });
-    it('Should throw error if something went wrong', async () => {
-
+    it('Should throw error if address is invalid', async () => {
+      const address = '123';
+      return expect(api.address.getUTXO(address)).to.be.rejected;
     });
   });
   describe('.address.getBalance', () => {
     it('Should return sum of unspent outputs for address', async () => {
 
     });
-  });
-  describe('.user.getUser', () => {
-    it('Should return error if address is incorrect', async () => {
-
+    it('Should throw error if address is invalid', async () => {
+      const address = '123';
+      return expect(api.address.getBalance(address)).to.be.rejected;
     });
   });
   describe('.user.getUser', () => {
-    it('', async () => {
+    it('Should throw error if username or regtx is incorrect', async () => {
+
+    });
+    it('Should throw error if user not found', async () => {
+
+    });
+    it('Should return user data if user exists', async () => {
 
     });
   });
   describe('.transaction.sendRaw', () => {
+    it('', async () => {
+
+    });
+    it('', async () => {
+
+    });
     it('', async () => {
 
     });
@@ -61,13 +106,31 @@ describe('api', () => {
     it('', async () => {
 
     });
+    it('', async () => {
+
+    });
+    it('', async () => {
+
+    });
   });
   describe('.block.getBestBlockHeight', () => {
     it('', async () => {
 
     });
+    it('', async () => {
+
+    });
+    it('', async () => {
+
+    });
   });
   describe('.block.getBlockHash', () => {
+    it('', async () => {
+
+    });
+    it('', async () => {
+
+    });
     it('', async () => {
 
     });

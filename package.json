@@ -28,6 +28,7 @@
     "base58": "^1.0.1",
     "blockchain-spv-dash": "git+https://github.com/pvrooyen/blockchain-spv-dash.git",
     "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
     "eslint": "^4.16.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",

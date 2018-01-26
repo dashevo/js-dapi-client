@@ -20,26 +20,26 @@ const mockData = {
   signature: _signature,
 };
 
-describe('Quorums', () => {
-  it('should post data to a valid quorum node', () => explorerPost('/quorum', mockData).then((res) => {
-    res.response.should.equal('Added');
-  }));
-
-  it('should fail for posting with signature from incorrect private key', () => {
-    mockData.signature = message(JSON.stringify(_data)).sign(invalidPrivKey);
-
-    return explorerPost('/quorum', mockData).then((res) => {
-      res.response.should.equal('Failed');
-    });
-  });
-
-  it('should fail for posting to invalid quorum node', () => {
-    const nonQuorumNodes = SDK.Discover.Masternode.masternodeList.nodes.filter(x => SDK.Discover.Masternode.candidateList.indexOf(x) == -1);
-
-    SDK.Discover.Masternode.candidateList = nonQuorumNodes;
-
-    return explorerPost('/quorum', mockData).then((res) => {
-      res.response.should.equal('Failed');
-    });
-  });
-});
+// describe('Quorums', () => {
+//   it('should post data to a valid quorum node', () => explorerPost('/quorum', mockData).then((res) => {
+//     res.response.should.equal('Added');
+//   }));
+//
+//   it('should fail for posting with signature from incorrect private key', () => {
+//     mockData.signature = message(JSON.stringify(_data)).sign(invalidPrivKey);
+//
+//     return explorerPost('/quorum', mockData).then((res) => {
+//       res.response.should.equal('Failed');
+//     });
+//   });
+//
+//   it('should fail for posting to invalid quorum node', () => {
+//     const nonQuorumNodes = SDK.Discover.Masternode.masternodeList.nodes.filter(x => SDK.Discover.Masternode.candidateList.indexOf(x) == -1);
+//
+//     SDK.Discover.Masternode.candidateList = nonQuorumNodes;
+//
+//     return explorerPost('/quorum', mockData).then((res) => {
+//       res.response.should.equal('Failed');
+//     });
+//   });
+// });

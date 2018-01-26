@@ -15,12 +15,13 @@ async function request(url, method, params) {
   if (typeof url !== 'string') {
     destination = `http://${url.host ? url.host : defaultHost}:${url.port ? url.port : ''}`;
   }
-  const res = await axios.post(destination, {
+  const payload = {
     jsonrpc: '2.0',
     method,
     params,
     id: 1,
-  });
+  };
+  const res = await axios.post(destination, payload);
   if (res.status !== 200) {
     throw new Error(res.statusMessage);
   }

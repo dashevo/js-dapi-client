@@ -3,7 +3,7 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const rpcClient = require('../../src/utils/rpcClient');
-const { Address } = require('bitcore-lib-dash');
+const { Address, StateTransition, RegSubTx } = require('../../src').Interfaces;
 const dashSchema = require('@dashevo/dash-schema');
 
 chai.use(chaiAsPromised);
@@ -16,14 +16,19 @@ const invalidAddress = '123';
 
 const validUsername = 'Alice';
 const notExistingUsername = 'Bob';
-const inalidUsername = '1.2';
-const validRegTxId = '';
+const invalidUsername = '1.2';
 
 const validBlockHeight = 2357;
 const validBlockHash = '6ce21c33e86c23dac892dab7be45ed791157d9463fbbb1bb45c9fe55a29d8bf8';
 
-const transitionHash = '';
-const transactionHash = '';
+const validStateTransitionHex = '00000100018096980000000000fece053ccfee6b0e96083af22882ab3a5d420eb033c6adce5f9d70cca7258d3e0000000000000000000000000000000000000000000000000000000000000000fece053ccfee6b0e96083af22882ab3a5d420eb033c6adce5f9d70cca7258d3e0000';
+const stateTransitionHash = 'f3bbe9211ac90a7079b9894b8abb49838c082c1bb5565fb87fb6001087794665';
+const invalidStateTransitionHex = 'invalidtransitionhex';
+const dataPackets = [];
+
+const validTransactionHex = 'ffffffff0000ffffffff';
+const transactionHash = 'a8502e9c08b3c851201a71d25bf29fd38a664baedb777318b12d19242f0e46ab';
+const invalidTransactionHex = 'invalidtransactionhex';
 
 describe('api', () => {
 
@@ -69,10 +74,16 @@ describe('api', () => {
         throw new Error('Not found');
       }
       if (method === 'sendRawTransaction') {
-        return transactionHash;
+        const transaction = new RegSubTx();
+        transaction.fromString(params[0]);
+        return transaction.toObject().hash;
       }
       if (method === 'sendRawTransition') {
-        return transitionHash;
+        if (!Array.isArray(params[1])) {
+          throw new Error('Data packet is missing');
+        }
+        const stateTransition = new StateTransition().fromString(params[0]);
+        return stateTransition.toObject().tsid;
       }
       if (method === 'getBestBlockHeight') {
         return 100;
@@ -128,7 +139,7 @@ describe('api', () => {
   });
   describe('.user.getUser', () => {
     it('Should throw error if username or regtx is incorrect', async () => {
-      return expect(api.user.getUser(inalidUsername)).to.be.rejected;
+      return expect(api.user.getUser(invalidUsername)).to.be.rejected;
     });
     it('Should throw error if user not found', async () => {
       return expect(api.user.getUser(notExistingUsername)).to.be.rejected;
@@ -139,25 +150,24 @@ describe('api', () => {
     });
   });
   describe('.transaction.sendRaw', () => {
-    it('', async () => {
-
+    it('Should return hash of transaction', async () => {
+      const hash = await api.transaction.sendRaw(validTransactionHex);
+      expect(hash).to.be.equal(transactionHash);
     });
-    it('', async () => {
-
-    });
-    it('', async () => {
-
+    it('Should throw error if hex is wrong', async () => {
+      return expect(api.transaction.sendRaw(invalidTransactionHex)).to.be.rejected;
     });
   });
-  describe('.transition.sendRaw', () => {
-    it('', async () => {
-
+  describe('.stateTransition.sendRaw', () => {
+    it('Should return hash of state transition', async () => {
+      const hash = await api.stateTransition.sendRaw(validStateTransitionHex, dataPackets);
+      expect(hash).to.be.equal(stateTransitionHash);
     });
-    it('', async () => {
-
+    it('Should throw error if data packet is missing', async () => {
+      return expect(api.stateTransition.sendRaw(validStateTransitionHex)).to.be.rejected;
     });
-    it('', async () => {
-
+    it('Should throw error if hex is wrong', async () => {
+      return expect(api.stateTransition.sendRaw(invalidStateTransitionHex)).to.be.rejected;
     });
   });
   describe('.block.getBestBlockHeight', () => {

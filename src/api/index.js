@@ -11,7 +11,7 @@ const api = {
   transaction: {
     sendRaw: rawTx => request('sendRawTransaction', [rawTx]),
   },
-  transition: {
+  stateTransition: {
     sendRaw(rawTransition, dataPacket) {
       return request('sendRawTransition', [rawTransition, dataPacket]);
     },

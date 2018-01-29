@@ -1,16 +1,17 @@
 /**
  * This module provides list of masternode addresses.
  * No need to use this module manually - it's part of MNDiscoveryService.
+ * It is written as class for testability purposes - there is need to be a way to
+ * reset internal state of object.
  * @module MasternodeListProvider
  */
 
-const rpcClient = require('../../utils/RPCClient');
+const RPCClient = require('../../utils/RPCClient');
 const sample = require('lodash/sample');
 const config = require('../../config/index');
 
 /**
- @typedef Masternode
- @type {Object}
+ @typedef {object} Masternode
  @property {string} vin
  @property {string} status
  @property {number} rank
@@ -21,13 +22,15 @@ const config = require('../../config/index');
  @property {number} lastseen
  */
 
-const masternodeListProvider = {
-  /**
-   * Masternode list. Initial masternode list is DNS seed from SDK config.
-   * @type Array<Masternode>
-   */
-  masternodeList: config.DAPIDNSSeeds.slice(),
-  lastUpdateDate: 0,
+class MasternodeListProvider {
+  constructor() {
+    /**
+     * Masternode list. Initial masternode list is DNS seed from SDK config.
+     * @type Array<Masternode>
+     */
+    this.masternodeList = config.DAPIDNSSeeds.slice();
+    this.lastUpdateDate = 0;
+  }
   /**
    * @private
    * Fetches masternode list from DAPI.
@@ -35,11 +38,11 @@ const masternodeListProvider = {
    */
   async fetchMNList() {
     const randomMasternode = sample(this.masternodeList);
-    return rpcClient.request({
+    return RPCClient.request({
       host: randomMasternode.ip,
       port: config.DAPI.port,
     }, 'getMNList', []);
-  },
+  }
   /**
    * @private
    * Updates masternodes list. No need to call it manually
@@ -52,7 +55,7 @@ const masternodeListProvider = {
       this.masternodeList = newMNList;
     }
     this.lastUpdateDate = Date.now();
-  },
+  }
   /**
    * @private
    * Checks whether masternode list needs update
@@ -60,7 +63,8 @@ const masternodeListProvider = {
    */
   needsUpdate() {
     return Date.now() - config.masternodeUpdateInterval > this.lastUpdateDate;
-  },
+  }
+
   /**
    * Returns masternode list
    * @returns {Promise<Array<Masternode>>}
@@ -70,7 +74,7 @@ const masternodeListProvider = {
       await this.updateMNList();
     }
     return this.masternodeList;
-  },
-};
+  }
+}
 
-module.exports = masternodeListProvider;
+module.exports = MasternodeListProvider;

@@ -8,19 +8,21 @@
 const sample = require('lodash/sample');
 const MasternodeListProvider = require('./MasternodeListProvider');
 
+const masternodeListProvider = new MasternodeListProvider();
+
 const MNDiscoveryService = {
   /**
    * @returns {Promise<Masternode>}
    */
   async getRandomMasternode() {
-    const MNList = await MasternodeListProvider.getMNList();
+    const MNList = await masternodeListProvider.getMNList();
     return sample(MNList);
   },
   /**
    * @returns {Promise<Array<Masternode>>}
    */
   getMNList() {
-    return MasternodeListProvider.getMNList();
+    return masternodeListProvider.getMNList();
   },
 };
 

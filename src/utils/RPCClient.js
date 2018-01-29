@@ -8,7 +8,7 @@ const defaultHost = '127.0.0.1';
  * @param {string|number} [url.port]
  * @param method
  * @param params
- * @returns {Promise<void>}
+ * @returns {Promise<*>}
  */
 async function request(url, method, params) {
   let destination = url;

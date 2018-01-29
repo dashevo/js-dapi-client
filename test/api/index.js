@@ -2,7 +2,7 @@ const { DAPI: api } = require('../../src');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const rpcClient = require('../../src/utils/rpcClient');
+const rpcClient = require('../../src/utils/RPCClient');
 const { Address, StateTransition, RegSubTx } = require('../../src').Interfaces;
 const dashSchema = require('@dashevo/dash-schema');
 

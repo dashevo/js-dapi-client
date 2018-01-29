@@ -4,7 +4,7 @@
  * @module MasternodeListProvider
  */
 
-const rpcClient = require('../../utils/rpcClient');
+const rpcClient = require('../../utils/RPCClient');
 const sample = require('lodash/sample');
 const config = require('../../config/index');
 

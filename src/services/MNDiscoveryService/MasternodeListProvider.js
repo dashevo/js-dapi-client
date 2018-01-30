@@ -40,7 +40,7 @@ class MasternodeListProvider {
     const randomMasternode = sample(this.masternodeList);
     const MNList = await RPCClient.request({
       host: randomMasternode.ip,
-      port: config.DAPI.port,
+      port: config.Api.port,
     }, 'getMNList', []);
     if (!MNList) {
       throw new Error('Failed to fetch masternodes list');

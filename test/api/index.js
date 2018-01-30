@@ -1,9 +1,9 @@
-const { DAPI: api } = require('../../src');
+const { Api } = require('../../src');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const rpcClient = require('../../src/utils/RPCClient');
-const { Address, StateTransition, RegSubTx } = require('../../src').Interfaces;
+const { Address, StateTransition, RegSubTx } = require('../../src').Core;
 const dashSchema = require('@dashevo/dash-schema');
 
 chai.use(chaiAsPromised);
@@ -107,83 +107,83 @@ describe('api', () => {
 
   describe('.address.getUTXO', () => {
     it('Should return list with unspent outputs for correct address, if there are any', async () => {
-      const utxo = await api.address.getUTXO(validAddressWithOutputs);
+      const utxo = await Api.address.getUTXO(validAddressWithOutputs);
       expect(utxo).to.be.an('array');
       const output = utxo[0];
       expect(output).to.be.an('object');
     });
     it('Should return empty list if there is no unspent output', async () => {
-      const utxo = await api.address.getUTXO(validAddressWithoutOutputs);
+      const utxo = await Api.address.getUTXO(validAddressWithoutOutputs);
       expect(utxo).to.be.an('array');
       expect(utxo.length).to.be.equal(0);
     });
     it('Should throw error if address is invalid', async () => {
-      return expect(api.address.getUTXO(invalidAddress)).to.be.rejected;
+      return expect(Api.address.getUTXO(invalidAddress)).to.be.rejected;
     });
     it('Should throw error if address not existing', async () => {
-      return expect(api.address.getUTXO(invalidAddress)).to.be.rejected;
+      return expect(Api.address.getUTXO(invalidAddress)).to.be.rejected;
     });
   });
   describe('.address.getBalance', () => {
     it('Should return sum of unspent outputs for address', async () => {
-      const balance = await api.address.getBalance(validAddressWithOutputs);
+      const balance = await Api.address.getBalance(validAddressWithOutputs);
       expect(balance).to.be.equal(validAddressBalance);
     });
     it('Should return 0 if there is no unspent outputs', async () => {
-      const balance = await api.address.getBalance(validAddressWithoutOutputs);
+      const balance = await Api.address.getBalance(validAddressWithoutOutputs);
       expect(balance).to.be.equal(0);
     });
     it('Should throw error if address is invalid', async () => {
-      return expect(api.address.getBalance(invalidAddress)).to.be.rejected;
+      return expect(Api.address.getBalance(invalidAddress)).to.be.rejected;
     });
   });
   describe('.user.getUser', () => {
     it('Should throw error if username or regtx is incorrect', async () => {
-      return expect(api.user.getUser(invalidUsername)).to.be.rejected;
+      return expect(Api.user.getUser(invalidUsername)).to.be.rejected;
     });
     it('Should throw error if user not found', async () => {
-      return expect(api.user.getUser(notExistingUsername)).to.be.rejected;
+      return expect(Api.user.getUser(notExistingUsername)).to.be.rejected;
     });
     it('Should return user data if user exists', async () => {
-      const user = await api.user.getUser(validUsername);
+      const user = await Api.user.getUser(validUsername);
       expect(user).to.be.an('object');
     });
   });
   describe('.transaction.sendRaw', () => {
     it('Should return hash of transaction', async () => {
-      const hash = await api.transaction.sendRaw(validTransactionHex);
+      const hash = await Api.transaction.sendRaw(validTransactionHex);
       expect(hash).to.be.equal(transactionHash);
     });
     it('Should throw error if hex is wrong', async () => {
-      return expect(api.transaction.sendRaw(invalidTransactionHex)).to.be.rejected;
+      return expect(Api.transaction.sendRaw(invalidTransactionHex)).to.be.rejected;
     });
   });
   describe('.stateTransition.sendRaw', () => {
     it('Should return hash of state transition', async () => {
-      const hash = await api.stateTransition.sendRaw(validStateTransitionHex, dataPackets);
+      const hash = await Api.stateTransition.sendRaw(validStateTransitionHex, dataPackets);
       expect(hash).to.be.equal(stateTransitionHash);
     });
     it('Should throw error if data packet is missing', async () => {
-      return expect(api.stateTransition.sendRaw(validStateTransitionHex)).to.be.rejected;
+      return expect(Api.stateTransition.sendRaw(validStateTransitionHex)).to.be.rejected;
     });
     it('Should throw error if hex is wrong', async () => {
-      return expect(api.stateTransition.sendRaw(invalidStateTransitionHex)).to.be.rejected;
+      return expect(Api.stateTransition.sendRaw(invalidStateTransitionHex)).to.be.rejected;
     });
   });
   describe('.block.getBestBlockHeight', () => {
     it('Should return block height', async () => {
-      const bestBlockHeight = await api.block.getBestBlockHeight();
+      const bestBlockHeight = await Api.block.getBestBlockHeight();
       expect(bestBlockHeight).to.be.a('number');
     });
   });
   describe('.block.getBlockHash', () => {
     it('Should return hash for a given block height', async () => {
-      const blockHash = await api.block.getBlockHash(2357);
+      const blockHash = await Api.block.getBlockHash(2357);
       expect(blockHash).to.be.a('string');
     });
     it('Should be rejected if height is invalid', async () => {
-      await expect(api.block.getBlockHash(1000000)).to.be.rejected;
-      await expect(api.block.getBlockHash('some string')).to.be.rejected;
+      await expect(Api.block.getBlockHash(1000000)).to.be.rejected;
+      await expect(Api.block.getBlockHash('some string')).to.be.rejected;
     });
   });
 });

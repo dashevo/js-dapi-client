@@ -4,7 +4,7 @@ const config = require('../config');
 
 async function makeRequestToRandomDAPINode(method, params) {
   const randomMasternode = await MNDiscoveryService.getRandomMasternode();
-  return rpcClient.request({ host: randomMasternode.ip, port: config.DAPI.port }, method, params);
+  return rpcClient.request({ host: randomMasternode.ip, port: config.Api.port }, method, params);
 }
 
 /**

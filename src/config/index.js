@@ -1,5 +1,5 @@
 const config = {
-  DAPI: {
+  Api: {
     port: 6001,
   },
   MNListUpdateInterval: 60000,

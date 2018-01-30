@@ -78,7 +78,7 @@ describe('MNListProvider', async () => {
       // Stub for request to seed, which is 127.0.0.1
       const RPCClientStub = sinon.stub(RPCClient, 'request');
       RPCClientStub
-        .withArgs({ host: '127.0.0.1', port: config.DAPI.port }, 'getMNList', [])
+        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMNList', [])
         .returns(new Promise((resolve) => {
           resolve(MockedMNList);
         }));
@@ -86,7 +86,7 @@ describe('MNListProvider', async () => {
       // Stubs for request to any MN from MNList, returned by seed. This call should return updated list
       for (let masternode of MockedMNList) {
         RPCClientStub
-          .withArgs({ host: masternode.ip, port: config.DAPI.port }, 'getMNList', [])
+          .withArgs({ host: masternode.ip, port: config.Api.port }, 'getMNList', [])
           .returns(new Promise((resolve) => {
             resolve(updatedMNList);
           }));
@@ -95,7 +95,7 @@ describe('MNListProvider', async () => {
       // Stubs for request to masternodes that should return empty list
       for (let masternode of masternodesThatReturnEmptyList) {
         RPCClientStub
-          .withArgs({ host: masternode.ip, port: config.DAPI.port }, 'getMNList', [])
+          .withArgs({ host: masternode.ip, port: config.Api.port }, 'getMNList', [])
           .returns(new Promise((resolve) => {
             resolve([]);
           }));
@@ -104,7 +104,7 @@ describe('MNListProvider', async () => {
       // Stubs for request to masternodes that should return null
       for (let masternode of masternodesThatReturnNull) {
         RPCClientStub
-          .withArgs({ host: masternode.ip, port: config.DAPI.port }, 'getMNList', [])
+          .withArgs({ host: masternode.ip, port: config.Api.port }, 'getMNList', [])
           .returns(new Promise((resolve) => {
             resolve(null);
           }));
@@ -178,7 +178,7 @@ describe('MNListProvider', async () => {
       // Override stub behaviour for next call
       RPCClient.request.resetHistory();
       RPCClient.request
-        .withArgs({ host: '127.0.0.1', port: config.DAPI.port }, 'getMNList', [])
+        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMNList', [])
         .onFirstCall()
         .returns(new Promise(resolve => resolve(null)));
 
@@ -189,7 +189,7 @@ describe('MNListProvider', async () => {
       // Override stub behaviour for next call
       RPCClient.request.resetHistory();
       RPCClient.request
-        .withArgs({ host: '127.0.0.1', port: config.DAPI.port }, 'getMNList', [])
+        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMNList', [])
         .onFirstCall()
         .returns(new Promise(resolve => resolve(masternodesThatReturnNull)));
 
@@ -207,7 +207,7 @@ describe('MNListProvider', async () => {
       // Override stub behaviour for next call
       RPCClient.request.resetHistory();
       RPCClient.request
-        .withArgs({ host: '127.0.0.1', port: config.DAPI.port }, 'getMNList', [])
+        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMNList', [])
         .onFirstCall()
         .returns(new Promise(resolve => resolve(masternodesThatReturnEmptyList)));
 

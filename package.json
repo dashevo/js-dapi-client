@@ -21,7 +21,6 @@
     "memdown": "^1.2.4",
     "quorums-dash": "^1.0.1",
     "socket.io-client": "^2.0.3",
-    "webpack": "^3.10.0",
     "ws": "^3.3.3"
   },
   "devDependencies": {
@@ -33,12 +32,13 @@
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^6.0.3",
-    "eslint-plugin-react": "^7.5.1",
+    "eslint-plugin-react": "^7.6.1",
     "mocha": "^3.3.0",
     "nyc": "^11.4.1",
     "should": "^11.2.1",
-    "sinon": "^4.2.1",
-    "webcoin-dash-testnet": "git+https://github.com/pvrooyen/webcoin-dash-testnet.git"
+    "sinon": "^4.2.2",
+    "webcoin-dash-testnet": "git+https://github.com/pvrooyen/webcoin-dash-testnet.git",
+    "webpack": "^3.10.0"
   },
   "scripts": {
     "build": "webpack --display-error-details",

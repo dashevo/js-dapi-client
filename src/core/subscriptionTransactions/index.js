@@ -1,6 +1,3 @@
-const subscriptionTransactions = {
-  RegSubTx: require('./RegSubTx'),
-  TopUpSubTx: require('./TopUpSubTx'),
-};
-
-module.exports = subscriptionTransactions;
+module.exports = {};
+module.exports.RegSubTx = require('./RegSubTx');
+module.exports.TopUpSubTx = require('./TopUpSubTx');

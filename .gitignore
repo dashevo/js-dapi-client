@@ -3,4 +3,4 @@ node_modules/
 launch.json
 _temp/
 dist/
-/.nyc_output/
+.nyc_output/

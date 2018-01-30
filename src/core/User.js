@@ -4,8 +4,6 @@ const EventEmitter = require('eventemitter2');
 const Address = require('./Address');
 const api = require('../api');
 const { RegSubTx, TopUpSubTx } = require('./subscriptionTransactions');
-const { userEvents, servicesEvents } = require('../constants');
-const { blockchainNotificationsService } = require('../services');
 
 class User extends EventEmitter {
   constructor(username, privateKeyString) {
@@ -14,8 +12,6 @@ class User extends EventEmitter {
     this.privateKey = new PrivateKey(privateKeyString);
     this.publicKey = this.privateKey.toPublicKey();
     this.address = new Address(this.publicKey);
-
-    blockchainNotificationsService.on(servicesEvents.NEW_BLOCK, this._fetchState);
   }
 
   /**
@@ -51,52 +47,6 @@ class User extends EventEmitter {
     await topUpSubTx.fund(funding, inputs, changeAddress);
     topUpSubTx.sign(privateKey);
     return topUpSubTx.send();
-  }
-
-  static async findUsers() {}
-
-  async authenticate() {}
-  async closeSubscription() {}
-  async changeKey(newKey) {}
-
-  /**
-   * It is crucial for EventEmitters to remove listeners, since if object method still listening to
-   * some events on EventEmitter it will prevent object from being garbage collected
-   */
-  destroySession() {
-    blockchainNotificationsService.off(servicesEvents.NEW_BLOCK, this._fetchState);
-  }
-
-  /**
-   * Internal method that needs to be called if user state was updated
-   * @returns {Promise.<void>}
-   * @private
-   */
-  async _fetchState() {
-    // ...
-    this.emit(userEvents.STATE_UPDATED);
-  }
-
-  fromString() {
-
-  }
-
-  fromBuffer() {
-
-  }
-
-  // todo
-  toJson() {
-
-  }
-  // todo
-  toHex() {
-
-  }
-
-  // todo
-  toString() {
-
   }
 }
 

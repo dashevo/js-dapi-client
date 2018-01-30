@@ -1,3 +1,6 @@
+/* disable this eslint rule since there is method in bitcore with dangle that
+ * can not be changed */
+/* eslint no-underscore-dangle: "off" */
 const { Script, PrivateKey, Message } = require('bitcore-lib-dash');
 const { BufferWriter } = require('bitcore-lib-dash').encoding;
 

@@ -1,4 +1,4 @@
-/* eslint-disable no-underscore-dangle */
+/* eslint no-underscore-dangle: 0, no-console: 0 */
 // TODO: Remove dangling underscores in this module's implementation
 // TODO: Performance wise we might want to make Bluebird default for promise everywhere
 const Promise = require('bluebird');

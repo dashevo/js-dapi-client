@@ -1,3 +1,4 @@
+/* eslint no-underscore-dangle: 0, no-console: 0 */
 const DGW = require('dark-gravity-wave-js');
 
 

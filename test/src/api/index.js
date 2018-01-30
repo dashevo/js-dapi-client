@@ -1,9 +1,9 @@
-const { Api } = require('../../src');
+const { Api } = require('../../../src/index');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
-const rpcClient = require('../../src/utils/RPCClient');
-const { Address, StateTransition, RegSubTx } = require('../../src').Core;
+const rpcClient = require('../../../src/utils/RPCClient');
+const { Address, StateTransition, RegSubTx } = require('../../../src/index').Core;
 const dashSchema = require('@dashevo/dash-schema');
 
 chai.use(chaiAsPromised);

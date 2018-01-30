@@ -1,9 +1,9 @@
-const MNListProvider = require('../../../src/services/MNDiscoveryService/MasternodeListProvider');
+const MNListProvider = require('../../../../src/services/MNDiscoveryService/MasternodeListProvider');
 const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const RPCClient = require('../../../src/utils/RPCClient');
-const config = require('../../../src/config');
+const RPCClient = require('../../../../src/utils/RPCClient');
+const config = require('../../../../src/config/index');
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

@@ -2,7 +2,7 @@ const { Message, PrivateKey } = require('bitcore-lib-dash');
 const Mnemonic = require('bitcore-mnemonic-dash');
 const should = require('should');
 
-const mockUser = JSON.parse(require('../../../poc/mocks/registeredUser'));
+const mockUser = JSON.parse(require('../../../../poc/mocks/registeredUser'));
 
 const _data = {
   owner: 'Alice', receiver: 'Bob', type: 'contactReq', txId: mockUser.txid,

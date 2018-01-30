@@ -1,5 +1,5 @@
 const should = require('should');
-const mnemonic = require('../../src/utils/mnemonic');
+const mnemonic = require('../../../src/utils/mnemonic');
 
 describe('Util - mnemonic', () => {
   it('should generate a valid seed from a mnemonic', async () => {

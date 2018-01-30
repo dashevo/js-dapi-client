@@ -2,7 +2,7 @@ const config = {
   DAPI: {
     port: 6001,
   },
-  masternodeUpdateInterval: 60000,
+  MNListUpdateInterval: 60000,
   quorumUpdateInterval: 60000,
   DAPIDNSSeeds: [
     {

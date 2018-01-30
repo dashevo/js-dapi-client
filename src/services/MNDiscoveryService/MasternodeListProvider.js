@@ -38,10 +38,14 @@ class MasternodeListProvider {
    */
   async fetchMNList() {
     const randomMasternode = sample(this.masternodeList);
-    return RPCClient.request({
+    const MNList = await RPCClient.request({
       host: randomMasternode.ip,
       port: config.DAPI.port,
     }, 'getMNList', []);
+    if (!MNList) {
+      throw new Error('Failed to fetch masternodes list');
+    }
+    return MNList;
   }
   /**
    * @private
@@ -62,7 +66,7 @@ class MasternodeListProvider {
    * @returns {boolean}
    */
   needsUpdate() {
-    return Date.now() - config.masternodeUpdateInterval > this.lastUpdateDate;
+    return Date.now() - config.MNListUpdateInterval > this.lastUpdateDate;
   }
 
   /**

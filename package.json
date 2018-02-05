@@ -7,7 +7,7 @@
     "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",
-    "bitcore-lib-dash": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#feature-state-transition",
+    "bitcore-lib-dash": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#develop",
     "bitcore-message-dash": "^1.0.9",
     "bitcore-mnemonic-dash": "^1.2.3",
     "bluebird": "^3.5.1",

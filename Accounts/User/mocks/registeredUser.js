@@ -1,6 +1,6 @@
-// created with /tests/User/create which uses the depricated way of OP_RETURN user registration
+// created with /tests/User/create which uses the deprecated way of OP_RETURN user registration
 
-mockUser = `{
+const mockUser = `{
     "txid": "89e3b3b4f62957ea94234293de9e01b3d509d5db67663c97d8369d018488bd12",
         "size": 325,
             "version": 1,

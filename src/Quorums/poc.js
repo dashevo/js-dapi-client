@@ -33,6 +33,9 @@ const options = { // no effect for dapi - using defaults
   },
 };
 
+// TODO: Fix REFSDK
+const REFSDK = () => new Promise();
+
 REFSDK(options)
   .then((ready) => {
     if (ready) {

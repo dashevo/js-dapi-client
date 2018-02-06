@@ -1,5 +1,4 @@
-require('../_before.js');
-const explorerPost = require('../../Common/ExplorerHelper').explorerPost;
+const { explorerPost } = require('../../Common/ExplorerHelper');
 const message = require('bitcore-message-dash');
 const Mnemonic = require('bitcore-mnemonic-dash');
 const should = require('should');

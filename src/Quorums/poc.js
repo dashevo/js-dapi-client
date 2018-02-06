@@ -1,9 +1,14 @@
-const _config = require('../config');
-const explorerPost = require('../Common/ExplorerHelper').explorerPost;
 const message = require('bitcore-message-dash');
 const Mnemonic = require('bitcore-mnemonic-dash');
+const axios = require('axios');
+const MNDiscoveryService = require('../services/MNDiscoveryService');
+const mockUser = require('../../Accounts/User/mocks/registeredUser');
 
-const REFSDK = _config.useTrustedServer ? require('../Connector/trustedFactory.js') : require('../Connector/dapiFactory.js');
+const explorerPost = async (apiMethod, data) => {
+  const MN = await MNDiscoveryService.getRandomMasternode();
+  const uri = `http://${MN.host}:${MN.port}/${apiMethod}`;
+  return axios.post(uri, data);
+};
 
 const options = { // no effect for dapi - using defaults
   verbose: false,
@@ -31,20 +36,19 @@ const options = { // no effect for dapi - using defaults
 REFSDK(options)
   .then((ready) => {
     if (ready) {
-      const mockUser = JSON.parse(require('../Accounts/User/mocks/registeredUser'));
-      const _data = {
+      const data = {
         owner: 'Alice', receiver: 'Bob', type: 'contactReq', txId: mockUser.txid,
       };
 
       const mnemonic = new Mnemonic('jaguar paddle monitor scrub stage believe odor frown honey ahead harsh talk');
       const privKey = mnemonic.toHDPrivateKey().derive('m/1').privateKey;
-      const _signature = message(JSON.stringify(_data)).sign(privKey);
+      const signature = message(JSON.stringify(data)).sign(privKey);
 
       explorerPost('/quorum', {
         verb: 'add',
         qid: 0,
-        data: _data,
-        signature: _signature,
+        data,
+        signature,
       });
     } else {
       console.log('SDK not initialised');
@@ -53,7 +57,3 @@ REFSDK(options)
 
 // Override node promises (workaround debug issues)
 global.Promise = require('bluebird');
-
-// new Promise((resolve, reject) => {
-//     breaksomething() //won't pause
-// })

@@ -1,4 +1,4 @@
-//created with /tests/User/create which uses the depricated way of OP_RETURN user registration
+// created with /tests/User/create which uses the depricated way of OP_RETURN user registration
 
 mockUser = `{
     "txid": "89e3b3b4f62957ea94234293de9e01b3d509d5db67663c97d8369d018488bd12",
@@ -85,6 +85,6 @@ mockUser = `{
                                                 "valueOut": 999.991,
                                                     "valueIn": 999.993,
                                                         "fees": 0.002
-}`
+}`;
 
 module.exports = mockUser;

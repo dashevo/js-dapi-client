@@ -3,7 +3,8 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const rpcClient = require('../../../src/utils/RPCClient');
-const { Address, StateTransition, RegSubTx } = require('../../../src/index').Core;
+const { TransitionHeader } = require('../../../src').Bitcore.StateTransition;
+const { Address, RegSubTx } = require('../../../src').Core;
 const dashSchema = require('@dashevo/dash-schema');
 
 chai.use(chaiAsPromised);
@@ -24,7 +25,7 @@ const validBlockHash = '6ce21c33e86c23dac892dab7be45ed791157d9463fbbb1bb45c9fe55
 const validStateTransitionHex = '00000100018096980000000000fece053ccfee6b0e96083af22882ab3a5d420eb033c6adce5f9d70cca7258d3e0000000000000000000000000000000000000000000000000000000000000000fece053ccfee6b0e96083af22882ab3a5d420eb033c6adce5f9d70cca7258d3e0000';
 const stateTransitionHash = 'f3bbe9211ac90a7079b9894b8abb49838c082c1bb5565fb87fb6001087794665';
 const invalidStateTransitionHex = 'invalidtransitionhex';
-const dataPackets = [];
+const dataPacket = {};
 
 const validTransactionHex = 'ffffffff0000ffffffff';
 const transactionHash = 'a8502e9c08b3c851201a71d25bf29fd38a664baedb777318b12d19242f0e46ab';
@@ -79,11 +80,11 @@ describe('api', () => {
         return transaction.toObject().hash;
       }
       if (method === 'sendRawTransition') {
-        if (!Array.isArray(params[1])) {
+        if (!params[1] || typeof params[1] !== 'object') {
           throw new Error('Data packet is missing');
         }
-        const stateTransition = new StateTransition().fromString(params[0]);
-        return stateTransition.toObject().tsid;
+        const transitionHeader = new TransitionHeader().fromString(params[0]);
+        return transitionHeader.toObject().tsid;
       }
       if (method === 'getBestBlockHeight') {
         return 100;
@@ -160,7 +161,7 @@ describe('api', () => {
   });
   describe('.stateTransition.sendRaw', () => {
     it('Should return hash of state transition', async () => {
-      const hash = await Api.stateTransition.sendRaw(validStateTransitionHex, dataPackets);
+      const hash = await Api.stateTransition.sendRaw(validStateTransitionHex, dataPacket);
       expect(hash).to.be.equal(stateTransitionHash);
     });
     it('Should throw error if data packet is missing', async () => {

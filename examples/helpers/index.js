@@ -6,4 +6,4 @@ function confirmationPrompt() {
   });
 }
 
-module.exports = confirmationPrompt;
+module.exports = { confirmationPrompt };

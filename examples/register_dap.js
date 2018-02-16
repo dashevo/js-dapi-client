@@ -2,14 +2,10 @@ const { TransitionPacket, TransitionHeader } = require('../src').Core;
 const { PrivateKey } = require('../src').Bitcore;
 const { Api } = require('../src');
 
-async function updateUserState(dapId, objects, privateKeyString) {
+async function registerDap(schema, privateKeyString) {
   const privateKey = new PrivateKey(privateKeyString);
-  const packet = new TransitionPacket();
-
-  objects.forEach((object) => {
-    packet.addObject(object);
-  });
-
+  const packet = new TransitionPacket()
+    .addObject(schema);
   const header = new TransitionHeader()
     .setMerkleRoot(packet.getMerkleRoot().toString('hex'))
     .sign(privateKey);
@@ -20,4 +16,4 @@ async function updateUserState(dapId, objects, privateKeyString) {
   );
 }
 
-module.exports = updateUserState;
+module.exports = registerDap;

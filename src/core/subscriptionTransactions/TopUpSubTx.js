@@ -6,7 +6,7 @@ const { subTxTypes, evoVersion } = require('../../constants');
 
 const { Output } = Transaction;
 
-class RegSubscriptionTransaction extends Transaction {
+class TopUpSubTx extends Transaction {
   constructor(registrationSubTxId) {
     super();
     this.registrationSubTxId = registrationSubTxId;
@@ -19,9 +19,9 @@ class RegSubscriptionTransaction extends Transaction {
    * @param {array|object} inputs that will be used for TOP_UP.
    * Inputs can be obtained by calling address.getUTXO
    * @param {string|Address} changeAddress address to which not spent amount of dash should return
-   * @returns {Promise<RegSubscriptionTransaction>}
+   * @returns {TopUpSubTx}
    */
-  async fund(funding, inputs, changeAddress) {
+  fund(funding, inputs, changeAddress) {
     // We should reverse tx id binary data, as in the core all binary representations
     // of hashes are reversed because of a mistake on early bitcoin development stage
     const regTxId = Buffer.from(this.registrationSubTxId, 'hex').reverse();
@@ -45,4 +45,4 @@ class RegSubscriptionTransaction extends Transaction {
   }
 }
 
-module.exports = RegSubscriptionTransaction;
+module.exports = TopUpSubTx;

@@ -24,9 +24,9 @@ class RegSubscriptionTransaction extends Transaction {
    * After funding transaction you need to sign it and send it.
    * @param {number} funding in duffs
    * @param inputs
-   * @returns {Promise<RegSubscriptionTransaction>}
+   * @returns {RegSubscriptionTransaction}
    */
-  async fund(funding, inputs) {
+  fund(funding, inputs) {
     const reversedPubKey = this.publicKey._getID().reverse();
     const pubKeyId = this.publicKey._getID();
     const message = new Message(`register|${this.username}|${reversedPubKey.toString('hex')}`);

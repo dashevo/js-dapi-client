@@ -3,9 +3,12 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const rpcClient = require('../../../src/utils/RPCClient');
-const { TransitionHeader } = require('../../../src').Bitcore.StateTransition;
-const { Address, RegSubTx } = require('../../../src').Core;
+const { Bitcore } = require('../../../src');
 const dashSchema = require('@dashevo/dash-schema');
+
+const { TransitionHeader } = Bitcore.StateTransition;
+const { Address } = Bitcore;
+const { Registration: RegSubTx } = Bitcore.Transaction.SubscriptionTransactions;
 
 chai.use(chaiAsPromised);
 const { expect } = chai;

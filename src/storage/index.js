@@ -59,7 +59,7 @@ class Storage {
    * Puts object to collection
    * @param {string} collectionName
    * @param {object} data
-   * @return {Promise<void>}
+   * @return {Promise<*>}
    */
   async insert(collectionName, data) {
     const collection = await this.getCollection(collectionName);
@@ -86,6 +86,47 @@ class Storage {
   async findOne(collectionName, predicate) {
     const collection = await this.getCollection(collectionName);
     return collection.find(predicate).value();
+  }
+
+  /**
+   * Updates every document in collection that matches specified criteria
+   * @param {string} collectionName
+   * @param {Object|Function} predicate - object to match or iterator function
+   * @param {Object} data - data to update
+   * @return {Promise<*>}
+   */
+  async update(collectionName, predicate, data) {
+    const collection = await this.getCollection(collectionName);
+    return collection
+      .filter(predicate)
+      .forEach(object => this.db._.assign(object, data))
+      .write();
+  }
+
+  /**
+   * Updates one document that matches specified criteria
+   * @param {string} collectionName
+   * @param {Object|Function} predicate - object to match or iterator function
+   * @param {Object} data - data to update
+   * @return {Promise<*>}
+   */
+  async updateOne(collectionName, predicate, data) {
+    const collection = await this.getCollection(collectionName);
+    return collection
+      .find(predicate)
+      .assign(data)
+      .write();
+  }
+
+  /**
+   * Removes all matched documents
+   * @param collectionName
+   * @param predicate
+   * @return {Promise<*>}
+   */
+  async remove(collectionName, predicate) {
+    const collection = await this.getCollection(collectionName);
+    return collection.remove(predicate).write();
   }
 }
 

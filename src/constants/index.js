@@ -15,4 +15,8 @@ module.exports = {
     CLOSE_ACCOUNT: 3,
   },
   evoVersion: 0x00010000,
+  storage: {
+    NODE: { DEFAULT_STORAGE_PATH: './.storage' },
+    BROWSER: { DEFAULT_DB_NAME: 'dashSdkStorage' },
+  },
 };

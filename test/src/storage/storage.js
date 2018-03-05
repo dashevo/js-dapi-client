@@ -23,6 +23,11 @@ describe('Storage', async () => {
     });
   });
 
+  beforeEach(() => {
+    // Flush simulated fs data before each test
+    fsData = {};
+  });
+
   after(() => {
     fs.writeFile.restore();
     fs.readFile.restore();
@@ -30,7 +35,7 @@ describe('Storage', async () => {
 
   describe('.getCollection', () => {
     it('Should create collection if it does\'nt exists', async () => {
-
+      const storage = new Storage();
     });
     it('', async () => {
 
@@ -40,11 +45,33 @@ describe('Storage', async () => {
     });
   });
 
-  it('Should be able to save data and then retrieve it', async() => {
+  it('Should be able to save and retrieve data', async() => {
     const storage = new Storage();
-    await storage.put('blocks', { 'height': 1 });
-    await storage.put('blocks', { 'height': 2 });
-    const block = storage.find('blocks', {height: 1});
+
+    await storage.insert('blocks', { 'height': 1, 'foo': 'bar' });
+    await storage.insert('blocks', { 'height': 2 });
+    await storage.insert('blocks', { 'height': 3, 'foo': 'bar' });
+    await storage.insert('blocks', { 'height': 4, 'foo': 'bar' });
+    await storage.insert('blocks', { 'height': 5 });
+    await storage.insert('blocks', { 'height': 6, 'foo': 'bar' });
+
+    const blocks = await storage.findAll('blocks', {foo: 'bar'});
+    expect(blocks).to.be.an('array');
+    expect(blocks.length).to.be.equal(4);
+    expect(blocks[0].height).to.be.equal(1);
+    expect(blocks[0].foo).to.be.equal('bar');
+    expect(blocks[1].height).to.be.equal(3);
+    expect(blocks[1].foo).to.be.equal('bar');
+    expect(blocks[2].height).to.be.equal(4);
+    expect(blocks[2].foo).to.be.equal('bar');
+    expect(blocks[3].height).to.be.equal(6);
+    expect(blocks[3].foo).to.be.equal('bar');
+
+    const block = await storage.findOne('blocks', {foo: 'bar'});
+    expect(block.height).to.be.equal(1);
+    expect(block.foo).to.be.equal('bar');
+
+
   });
 
 });

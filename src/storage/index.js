@@ -61,7 +61,7 @@ class Storage {
    * @param {object} data
    * @return {Promise<void>}
    */
-  async put(collectionName, data) {
+  async insert(collectionName, data) {
     const collection = await this.getCollection(collectionName);
     return collection.push(data).write();
   }
@@ -72,7 +72,18 @@ class Storage {
    * @param {Object|Function} predicate - object to match or iterator function
    * @return {Promise<*>}
    */
-  async find(collectionName, predicate) {
+  async findAll(collectionName, predicate) {
+    const collection = await this.getCollection(collectionName);
+    return collection.filter(predicate).value();
+  }
+
+  /**
+   * Finds one object in collection
+   * @param {string} collectionName
+   * @param {Object|Function} predicate - object to match or iterator function
+   * @return {Promise<*>}
+   */
+  async findOne(collectionName, predicate) {
     const collection = await this.getCollection(collectionName);
     return collection.find(predicate).value();
   }

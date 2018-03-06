@@ -9,12 +9,12 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 let fsData = {};
 const testDataSet = [
+  { 'height': 1, 'foo': 'bar' },
+  { 'height': 2 },
+  { 'height': 3, 'foo': 'bar' },
   { 'height': 4, 'foo': 'bar' },
   { 'height': 5 },
   { 'height': 6, 'foo': 'bar' },
-  { 'height': 1, 'foo': 'bar' },
-  { 'height': 2 },
-  { 'height': 3, 'foo': 'bar' }
 ];
 
 function createFsStub() {
@@ -37,6 +37,10 @@ function restoreFs() {
 createFsStub();
 
 describe('Storage', async () => {
+
+  beforeEach(() => {
+    fsData = {};
+  });
 
   after(() => {
     restoreFs();
@@ -141,15 +145,67 @@ describe('Storage', async () => {
   });
 
   describe('.findOne', () => {
-    it('', async () => {
+    it('Should return one document when comparator object passed', async () => {
       const storage = new Storage();
+
+      await storage.insertMany('blocks', testDataSet, { unique: true });
+      let block = await storage.findOne('blocks', {foo: 'bar'});
+      expect(block).to.be.deep.equal(testDataSet[0]);
+    });
+    it('Should return one document when iterator function passed', async () => {
+      const storage = new Storage();
+
+      await storage.insertMany('blocks', testDataSet, { unique: true });
+      let block = await storage.findOne('blocks', (block) => {
+        return block.foo === 'bar'
+      });
+      expect(block).to.be.deep.equal(testDataSet[0]);
+    });
+    it('Should return undefined if nothing found', async () => {
+      const storage = new Storage();
+
+      await storage.insertMany('blocks', testDataSet, { unique: true });
+      let block = await storage.findOne('blocks', {foobar: 'baz'});
+      expect(block).to.be.undefined;
     });
   });
 
   describe('.findAll', () => {
-    it('', async () => {
+    it('Should return array of documents when comparator object passed', async () => {
       const storage = new Storage();
+      const foobarTestDataSet = testDataSet.filter(block => {
+        return block.foo === 'bar';
+      });
+
+      await storage.insertMany('blocks', testDataSet, { unique: true });
+      let blocks = await storage.findAll('blocks', {foo: 'bar'});
+      expect(blocks.length).to.be.equal(foobarTestDataSet.length);
+      blocks.forEach((block, index) => {
+        expect(block).to.be.deep.equal(foobarTestDataSet[index]);
+      });
     });
+    it('Should return array of documents when iterator function passed', async () => {
+      const storage = new Storage();
+      const foobarTestDataSet = testDataSet.filter(block => {
+        return block.foo === 'bar';
+      });
+
+      await storage.insertMany('blocks', testDataSet, { unique: true });
+      let blocks = await storage.findAll('blocks', (block) => {
+        return block.foo === 'bar';
+      });
+      expect(blocks.length).to.be.equal(foobarTestDataSet.length);
+      blocks.forEach((block, index) => {
+        expect(block).to.be.deep.equal(foobarTestDataSet[index]);
+      });
+    });
+    it('Should return empty array if nothing found', async () => {
+      const storage = new Storage();
+
+      await storage.insertMany('blocks', testDataSet, { unique: true });
+      let blocks = await storage.findAll('blocks', {foobar: 'baz'});
+      expect(blocks.length).to.be.equal(0);
+    })
   });
 
   describe('.updateOne', () => {

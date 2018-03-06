@@ -20,7 +20,7 @@ const testDataSet = [
 function createFsStub() {
   const writeStub = sinon.stub(fs, 'writeFile');
   writeStub.callsFake((path, data, callback) => {
-    fsData[path] = data;
+    fsData[path] = JSON.parse(JSON.stringify(data));
     callback(null);
   });
   const readStub = sinon.stub(fs, 'readFile');
@@ -209,81 +209,167 @@ describe('Storage', async () => {
   });
 
   describe('.updateOne', () => {
-    it('', async () => {
-      const storage = new Storage();
-    });
+    it(
+      'Should update first document that match search criteria when comparator object passed',
+      async () => {
+        const storage = new Storage();
+
+        await storage.insertMany('blocks', testDataSet, { unique: true });
+        await storage.updateOne('blocks', { foo: 'bar' }, { foo: 'barbaz' });
+        let blocks = await storage.findAll('blocks', { foo: 'barbaz' });
+        expect(blocks.length).to.be.equal(1);
+        expect(blocks[0].height).to.be.equal(testDataSet[0].height);
+        expect(blocks[0].foo).to.be.equal('barbaz');
+      }
+    );
+    it(
+      'Should update first document that match search criteria when iterator function passed',
+      async () => {
+        const storage = new Storage();
+
+        await storage.insertMany('blocks', testDataSet, { unique: true });
+        await storage.updateOne('blocks', block => block.foo === 'bar', { foo: 'barbaz' });
+        let blocks = await storage.findAll('blocks', { foo: 'barbaz' });
+        expect(blocks.length).to.be.equal(1);
+        expect(blocks[0].height).to.be.equal(testDataSet[0].height);
+        expect(blocks[0].foo).to.be.equal('barbaz');
+      }
+    );
+    it(
+      'Should not update anything if no matches found',
+      async () => {
+        const storage = new Storage();
+
+        await storage.insertMany('blocks', testDataSet, { unique: true });
+        await storage.updateOne('blocks', { foo: 'barbaz' }, { foo: 'barbazbar' });
+        let blocks = await storage.findAll('blocks', { foo: 'barbazbar' });
+        expect(blocks.length).to.be.equal(0);
+      }
+    );
   });
 
   describe('.updateMany', () => {
-    it('', async () => {
-      const storage = new Storage();
-    });
+    it(
+      'Should update all documents that match search criteria when comparator object passed',
+      async () => {
+        const storage = new Storage();
+        const foobarTestDataSet = testDataSet.filter(block => {
+          return block.foo === 'bar';
+        });
+
+        await storage.insertMany('blocks', testDataSet, { unique: true });
+        await storage.updateMany('blocks', { foo: 'bar' }, { foo: 'barbaz' });
+        let blocks = await storage.findAll('blocks', { foo: 'barbaz' });
+        expect(blocks.length).to.be.equal(4);
+        blocks.forEach((block, index) => {
+          expect(block.height).to.be.equal(foobarTestDataSet[index].height);
+          expect(block.foo).to.be.equal('barbaz');
+        });
+      }
+    );
+    it(
+      'Should update all documents that match search criteria when iterator function passed',
+      async () => {
+        const storage = new Storage();
+        const foobarTestDataSet = testDataSet.filter(block => {
+          return block.foo === 'bar';
+        });
+
+        await storage.insertMany('blocks', testDataSet, { unique: true });
+        await storage.updateMany('blocks', block => block.foo === 'bar', { foo: 'barbaz' });
+        let blocks = await storage.findAll('blocks', { foo: 'barbaz' });
+        expect(blocks.length).to.be.equal(4);
+        blocks.forEach((block, index) => {
+          expect(block.height).to.be.equal(foobarTestDataSet[index].height);
+          expect(block.foo).to.be.equal('barbaz');
+        });
+      }
+    );
+    it(
+      'Should not update anything if no matches found',
+      async () => {
+        const storage = new Storage();
+
+        await storage.insertMany('blocks', testDataSet, { unique: true });
+        await storage.updateMany('blocks', { foo: 'barbaz' }, { foo: 'barbazbar' });
+        let blocks = await storage.findAll('blocks', { foo: 'barbazbar' });
+        expect(blocks.length).to.be.equal(0);
+      }
+    );
   });
 
   describe('.remove()', () => {
-    const storage = new Storage();
-  });
+    it(
+      'Should remove documents that match search criteria when comparator object passed',
+      async () => {
+        const storage = new Storage();
+        const testSet1 = testDataSet.filter(block => block.height !== 3);
+        const testSet2 = testDataSet.filter(block => block.foo !== 'bar');
 
-  it('Should be able to save and retrieve data', async() => {
-    const storage = new Storage();
+        await storage.insertMany('blocks', testDataSet, { unique: true });
 
-    await storage.insertOne('blocks', { 'height': 1, 'foo': 'bar' });
-    await storage.insertOne('blocks', { 'height': 2 });
-    await storage.insertOne('blocks', { 'height': 3, 'foo': 'bar' });
+        await storage.remove('blocks', { height: 3 });
+        let blocks = await storage.findAll('blocks', {});
+        expect(blocks.length).to.be.equal(5);
+        blocks.forEach((block, index) => {
+          expect(block).to.be.deep.equal(testSet1[index]);
+        });
+        let deletedBlocks = await storage.findAll('blocks', { height: 3 });
+        expect(deletedBlocks.length).to.be.equal(0);
 
-    let blocks = await storage.findAll('blocks', {});
-    expect(blocks.length).to.be.equal(3);
+        await storage.remove('blocks', { foo: 'bar' });
+        blocks = await storage.findAll('blocks', {});
+        expect(blocks.length).to.be.equal(2);
+        blocks.forEach((block, index) => {
+          expect(block).to.be.deep.equal(testSet2[index]);
+        });
+        deletedBlocks = await storage.findAll('blocks', { foo: 'bar' });
+        expect(deletedBlocks.length).to.be.equal(0);
+      }
+    );
+    it(
+      'Should remove documents that match search criteria when iterator function passed',
+      async () => {
+        const storage = new Storage();
+        const testSet1 = testDataSet.filter(block => block.height !== 3);
+        const testSet2 = testDataSet.filter(block => block.foo !== 'bar');
 
-    await storage.insertMany('blocks', [
-      { 'height': 4, 'foo': 'bar' },
-      { 'height': 5 },
-      { 'height': 6, 'foo': 'bar' }
-    ]);
+        await storage.insertMany('blocks', testDataSet, { unique: true });
 
-    blocks = await storage.findAll('blocks', {});
-    expect(blocks.length).to.be.equal(6);
+        await storage.remove('blocks', block => block.height === 3);
+        let blocks = await storage.findAll('blocks', {});
+        expect(blocks.length).to.be.equal(5);
+        blocks.forEach((block, index) => {
+          expect(block).to.be.deep.equal(testSet1[index]);
+        });
+        let deletedBlocks = await storage.findAll('blocks', { height: 3 });
+        expect(deletedBlocks.length).to.be.equal(0);
 
-    blocks = await storage.findAll('blocks', {foo: 'bar'});
-    expect(blocks).to.be.an('array');
-    expect(blocks.length).to.be.equal(4);
-    expect(blocks[0].height).to.be.equal(1);
-    expect(blocks[0].foo).to.be.equal('bar');
-    expect(blocks[1].height).to.be.equal(3);
-    expect(blocks[1].foo).to.be.equal('bar');
-    expect(blocks[2].height).to.be.equal(4);
-    expect(blocks[2].foo).to.be.equal('bar');
-    expect(blocks[3].height).to.be.equal(6);
-    expect(blocks[3].foo).to.be.equal('bar');
+        await storage.remove('blocks', block => block.foo === 'bar');
+        blocks = await storage.findAll('blocks', {});
+        expect(blocks.length).to.be.equal(2);
+        blocks.forEach((block, index) => {
+          expect(block).to.be.deep.equal(testSet2[index]);
+        });
+        deletedBlocks = await storage.findAll('blocks', { foo: 'bar' });
+        expect(deletedBlocks.length).to.be.equal(0);
+      }
+    );
+    it(
+      'Should not remove documents if no matches found',
+      async () => {
+        const storage = new Storage();
 
-    let block = await storage.findOne('blocks', {foo: 'bar'});
-    expect(block.height).to.be.equal(1);
-    expect(block.foo).to.be.equal('bar');
+        await storage.insertMany('blocks', testDataSet, { unique: true });
 
-    await storage.updateMany('blocks', {foo: 'bar'}, {foo: 'baz'});
-
-    blocks = await storage.findAll('blocks', {foo: 'baz'});
-    expect(blocks).to.be.an('array');
-    expect(blocks.length).to.be.equal(4);
-    expect(blocks[0].height).to.be.equal(1);
-    expect(blocks[0].foo).to.be.equal('baz');
-    expect(blocks[1].height).to.be.equal(3);
-    expect(blocks[1].foo).to.be.equal('baz');
-    expect(blocks[2].height).to.be.equal(4);
-    expect(blocks[2].foo).to.be.equal('baz');
-    expect(blocks[3].height).to.be.equal(6);
-    expect(blocks[3].foo).to.be.equal('baz');
-
-    await storage.updateOne('blocks', {height: 4}, {foo: 'barbaz'});
-    blocks = await storage.findAll('blocks', {foo: 'barbaz'});
-    expect(blocks.length).to.be.equal(1);
-    expect(blocks[0].height).to.be.equal(4);
-    expect(blocks[0].foo).to.be.equal('barbaz');
-    blocks = await storage.findAll('blocks', {foo: 'baz'});
-    expect(blocks.length).to.be.equal(3);
-
-    await storage.remove('blocks', {height: 3});
-    blocks = await storage.findAll('blocks', {});
-    expect(blocks.length).to.be.equal(5);
+        await storage.remove('blocks', { foo: 'barbaz' });
+        let blocks = await storage.findAll('blocks', {});
+        expect(blocks.length).to.be.equal(testDataSet.length);
+        blocks.forEach((block, index) => {
+          expect(block).to.be.deep.equal(testDataSet[index]);
+        });
+      }
+    );
   });
 
 });

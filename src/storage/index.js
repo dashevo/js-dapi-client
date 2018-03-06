@@ -65,13 +65,14 @@ class Storage {
    */
   async insertOne(collectionName, document, options) {
     const collection = await this.getCollection(collectionName);
+    const documentToInsert = this.db._.clone(document);
     if (options && options.unique) {
-      const isNotUnique = collection.includes(document).value();
+      const isNotUnique = !!collection.find(documentToInsert).value();
       if (isNotUnique) {
         return collection.value();
       }
     }
-    return collection.push(document).write();
+    return collection.push(documentToInsert).write();
   }
 
   /**
@@ -84,12 +85,12 @@ class Storage {
    */
   async insertMany(collectionName, documents, options) {
     const collection = await this.getCollection(collectionName);
+    let documentsToInsert = documents.map(document => this.db._.clone(document));
     if (options && options.unique) {
-      return this.db
-        .set(collectionName, this.db._.union(collection.value(), documents))
-        .write();
+      documentsToInsert = this.db._
+        .differenceWith(documentsToInsert, collection.value(), this.db._.isEqual);
     }
-    return collection.push(...documents).write();
+    return collection.push(...documentsToInsert).write();
   }
 
   /**

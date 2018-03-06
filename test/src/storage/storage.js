@@ -17,39 +17,37 @@ const testDataSet = [
   { 'height': 3, 'foo': 'bar' }
 ];
 
+function createFsStub() {
+  const writeStub = sinon.stub(fs, 'writeFile');
+  writeStub.callsFake((path, data, callback) => {
+    fsData[path] = data;
+    callback(null);
+  });
+  const readStub = sinon.stub(fs, 'readFile');
+  readStub.callsFake((path, callback) => {
+    callback(null, fsData[path]);
+  });
+}
+
+function restoreFs() {
+  fs.writeFile.restore();
+  fs.readFile.restore();
+}
+
+createFsStub();
+
 describe('Storage', async () => {
 
-  before(() => {
-    writeStub = sinon.stub(fs, 'writeFile');
-    writeStub.callsFake((path, data, callback) => {
-      fsData[path] = data;
-      callback(null);
-    });
-    readStub = sinon.stub(fs, 'readFile');
-    readStub.callsFake((path, callback) => {
-      callback(null, fsData[path]);
-    });
-  });
-
-  beforeEach(() => {
-    // Flush simulated fs data before each test
-    fsData = {};
-  });
-
   after(() => {
-    fs.writeFile.restore();
-    fs.readFile.restore();
+    restoreFs();
   });
 
   describe('.getCollection', () => {
     it('Should create collection if it does\'nt exists', async () => {
       const storage = new Storage();
-    });
-    it('', async () => {
-      const storage = new Storage();
-    });
-    it('', async () => {
-      const storage = new Storage();
+
+      const collection = await storage.getCollection('blocks');
+      expect(Array.isArray(collection.value())).to.be.equal(true);
     });
   });
 

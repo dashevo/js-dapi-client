@@ -58,12 +58,38 @@ class Storage {
   /**
    * Puts object to collection
    * @param {string} collectionName
-   * @param {object} data
+   * @param {object} document
+   * @param {object} [options]
+   * @param {boolean} [options.unique] - insert document only if its contents are unique
    * @return {Promise<*>}
    */
-  async insert(collectionName, data) {
+  async insertOne(collectionName, document, options) {
     const collection = await this.getCollection(collectionName);
-    return collection.push(data).write();
+    if (options && options.unique) {
+      const isNotUnique = collection.includes(document).value();
+      if (isNotUnique) {
+        return collection.value();
+      }
+    }
+    return collection.push(document).write();
+  }
+
+  /**
+   * Adds many objects to collection. Adds objects that not presented in collection already
+   * @param collectionName
+   * @param documents
+   * @param {object} [options]
+   * @param {boolean} [options.unique] - insert documents only if theirs contents are unique
+   * @return {Promise<*>}
+   */
+  async insertMany(collectionName, documents, options) {
+    const collection = await this.getCollection(collectionName);
+    if (options && options.unique) {
+      return this.db
+        .set(collectionName, this.db._.union(collection.value(), documents))
+        .write();
+    }
+    return collection.push(...documents).write();
   }
 
   /**
@@ -95,7 +121,7 @@ class Storage {
    * @param {Object} data - data to update
    * @return {Promise<*>}
    */
-  async update(collectionName, predicate, data) {
+  async updateMany(collectionName, predicate, data) {
     const collection = await this.getCollection(collectionName);
     return collection
       .filter(predicate)

@@ -8,6 +8,14 @@ const fs = require('graceful-fs');
 chai.use(chaiAsPromised);
 const { expect } = chai;
 let fsData = {};
+const testDataSet = [
+  { 'height': 4, 'foo': 'bar' },
+  { 'height': 5 },
+  { 'height': 6, 'foo': 'bar' },
+  { 'height': 1, 'foo': 'bar' },
+  { 'height': 2 },
+  { 'height': 3, 'foo': 'bar' }
+];
 
 describe('Storage', async () => {
 
@@ -38,24 +46,147 @@ describe('Storage', async () => {
       const storage = new Storage();
     });
     it('', async () => {
-
+      const storage = new Storage();
     });
     it('', async () => {
-
+      const storage = new Storage();
     });
+  });
+
+  describe('.insertOne', () => {
+    it('Should add one document to collection', async () => {
+      const storage = new Storage();
+
+      let blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(0);
+
+      await storage.insertOne('blocks', testDataSet[0]);
+      blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(1);
+      expect(blocks[0]).to.be.deep.equal(testDataSet[0]);
+    });
+    it('Should not add document to collection if document already in collection' +
+      'and unique option is specified', async () => {
+      const storage = new Storage();
+
+      let blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(0);
+
+      await storage.insertOne('blocks', testDataSet[0], { unique: true });
+      blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(1);
+      expect(blocks[0]).to.be.deep.equal(testDataSet[0]);
+
+      await storage.insertOne('blocks', testDataSet[0], { unique: true });
+      blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(1);
+    });
+  });
+
+  describe('.insertMany', () => {
+    it('Should add many documents to collection', async () => {
+      const storage = new Storage();
+
+      let blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(0);
+
+      await storage.insertMany('blocks', testDataSet);
+      blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(testDataSet.length);
+      blocks.forEach((block, index) => {
+        expect(block).to.be.deep.equal(testDataSet[index]);
+      });
+    });
+    it('Should append documents to collection even if they are already included' +
+      ' if unique option is not specified', async () => {
+      const storage = new Storage();
+
+      let blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(0);
+
+      await storage.insertMany('blocks', testDataSet, { unique: false });
+      blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(testDataSet.length);
+      blocks.forEach((block, index) => {
+        expect(block).to.be.deep.equal(testDataSet[index]);
+      });
+
+      await storage.insertMany('blocks', testDataSet.slice(0, 2), { unique: false });
+      blocks = await storage.findAll('blocks', {});
+      expect(blocks.length).to.be.equal(testDataSet.length + 2);
+      blocks.forEach((block, index) => {
+        expect(block).to.be.deep.equal(testDataSet[index % testDataSet.length]);
+      });
+    });
+    it(
+      'Should not add documents that already in collection if unique option is specified',
+      async () => {
+        const storage = new Storage();
+
+        let blocks = await storage.findAll('blocks', {});
+        expect(blocks.length).to.be.equal(0);
+
+        await storage.insertMany('blocks', testDataSet, { unique: true });
+        blocks = await storage.findAll('blocks', {});
+        expect(blocks.length).to.be.equal(testDataSet.length);
+        blocks.forEach((block, index) => {
+          expect(block).to.be.deep.equal(testDataSet[index]);
+        });
+
+        await storage.insertMany('blocks', testDataSet.slice(0, 2), { unique: true });
+        blocks = await storage.findAll('blocks', {});
+        expect(blocks.length).to.be.equal(testDataSet.length);
+        blocks.forEach((block, index) => {
+          expect(block).to.be.deep.equal(testDataSet[index]);
+        });
+    });
+  });
+
+  describe('.findOne', () => {
+    it('', async () => {
+      const storage = new Storage();
+    });
+  });
+
+  describe('.findAll', () => {
+    it('', async () => {
+      const storage = new Storage();
+    });
+  });
+
+  describe('.updateOne', () => {
+    it('', async () => {
+      const storage = new Storage();
+    });
+  });
+
+  describe('.updateMany', () => {
+    it('', async () => {
+      const storage = new Storage();
+    });
+  });
+
+  describe('.remove()', () => {
+    const storage = new Storage();
   });
 
   it('Should be able to save and retrieve data', async() => {
     const storage = new Storage();
 
-    await storage.insert('blocks', { 'height': 1, 'foo': 'bar' });
-    await storage.insert('blocks', { 'height': 2 });
-    await storage.insert('blocks', { 'height': 3, 'foo': 'bar' });
-    await storage.insert('blocks', { 'height': 4, 'foo': 'bar' });
-    await storage.insert('blocks', { 'height': 5 });
-    await storage.insert('blocks', { 'height': 6, 'foo': 'bar' });
+    await storage.insertOne('blocks', { 'height': 1, 'foo': 'bar' });
+    await storage.insertOne('blocks', { 'height': 2 });
+    await storage.insertOne('blocks', { 'height': 3, 'foo': 'bar' });
 
     let blocks = await storage.findAll('blocks', {});
+    expect(blocks.length).to.be.equal(3);
+
+    await storage.insertMany('blocks', [
+      { 'height': 4, 'foo': 'bar' },
+      { 'height': 5 },
+      { 'height': 6, 'foo': 'bar' }
+    ]);
+
+    blocks = await storage.findAll('blocks', {});
     expect(blocks.length).to.be.equal(6);
 
     blocks = await storage.findAll('blocks', {foo: 'bar'});
@@ -74,7 +205,7 @@ describe('Storage', async () => {
     expect(block.height).to.be.equal(1);
     expect(block.foo).to.be.equal('bar');
 
-    await storage.update('blocks', {foo: 'bar'}, {foo: 'baz'});
+    await storage.updateMany('blocks', {foo: 'bar'}, {foo: 'baz'});
 
     blocks = await storage.findAll('blocks', {foo: 'baz'});
     expect(blocks).to.be.an('array');

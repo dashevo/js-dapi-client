@@ -27,10 +27,6 @@ module.exports = (config) => {
           },
         ],
       },
-      output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'test.js',
-      },
     },
     reporters: ['progress'],
     port: 9876,

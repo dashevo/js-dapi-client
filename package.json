@@ -53,9 +53,10 @@
   "scripts": {
     "build": "webpack --display-error-details",
     "lint": "eslint . --fix",
-    "test": "mocha --no-timeouts --recursive",
+    "test": "npm run test:node && npm run test:firefox",
+    "test:node": "mocha --no-timeouts --recursive",
     "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run",
-    "test:chrome": "karma start ./karma.conf.js --browsers Chrome",
+    "test:chrome": "karma start ./karma.conf.js --browsers Chrome ----single-run",
     "coverage": "nyc mocha --recursive"
   },
   "author": "",

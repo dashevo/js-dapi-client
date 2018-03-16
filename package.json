@@ -26,6 +26,7 @@
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
+    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "base58": "^1.0.1",
     "blockchain-spv-dash": "git+https://github.com/pvrooyen/blockchain-spv-dash.git",

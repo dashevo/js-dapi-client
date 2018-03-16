@@ -4,7 +4,6 @@ const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
 const rpcClient = require('../../../src/utils/RPCClient');
 const { Bitcore } = require('../../../src');
-const dashSchema = require('@dashevo/dash-schema');
 
 const { TransitionHeader } = Bitcore.StateTransition;
 const { Address } = Bitcore;
@@ -33,6 +32,10 @@ const dataPacket = {};
 const validTransactionHex = 'ffffffff0000ffffffff';
 const transactionHash = 'a8502e9c08b3c851201a71d25bf29fd38a664baedb777318b12d19242f0e46ab';
 const invalidTransactionHex = 'invalidtransactionhex';
+
+function validateUsername(uname) {
+  return uname.length >= 3 && uname.length <= 12 && /^[\x00-\x7F]+$/.test('uname');
+}
 
 describe('api', () => {
 
@@ -64,7 +67,11 @@ describe('api', () => {
         throw new Error('Address not found');
       }
       if (method === 'getUser') {
-        const isValidUsername = dashSchema.Consensus.User.validateUsername(params[0]);
+        /*
+        Since dash schema uses fs, it would be impossible to run tests in browser
+        with current version of validation from dash-schema
+        */
+        const isValidUsername = validateUsername(params[0]);
         const validRegTxId = false;
         if (isValidUsername) {
           if (params[0] === validUsername) {

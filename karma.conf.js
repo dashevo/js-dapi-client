@@ -29,7 +29,7 @@ module.exports = (config) => {
         ],
       },
     },
-    reporters: ['progress'],
+    reporters: ['mocha'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
@@ -39,6 +39,7 @@ module.exports = (config) => {
     concurrency: Infinity,
     plugins: [
       'karma-mocha',
+      'karma-mocha-reporter',
       'karma-chai',
       'karma-chrome-launcher',
       'karma-firefox-launcher',

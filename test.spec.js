@@ -1,7 +1,5 @@
-// This file is used for compiling tests with webpack into one file for
-// using with karma
-require('babel-polyfill');
+// This file is used for compiling tests with webpack into one file for using with karma
 
-const testsContext = require.context('./test', true, /\.js$/);
+const testsContext = require.context('./test/src', true, /\.js$/);
 
 testsContext.keys().forEach(testsContext);

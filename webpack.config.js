@@ -1,6 +1,6 @@
 const path = require('path');
 
-const config = {
+const commonJSConfig = {
   entry: ['babel-polyfill', './src/index.js'],
   module: {
     rules: [
@@ -19,7 +19,9 @@ const config = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
+    library: 'dash-sdk',
+    libraryTarget: 'umd',
   },
 };
 
-module.exports = config;
+module.exports = [commonJSConfig];

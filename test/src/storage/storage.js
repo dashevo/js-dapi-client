@@ -3,11 +3,14 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const Storage = require('../../../src/storage');
 
-const fs = require('graceful-fs');
-
 chai.use(chaiAsPromised);
 const { expect } = chai;
+const isNode = typeof window === 'undefined';
+
+const fs = isNode ? require('graceful-fs') : {};
+
 let fsData = {};
+let localStorageData = {};
 const testDataSet = [
   { 'height': 1, 'foo': 'bar' },
   { 'height': 2 },
@@ -16,6 +19,30 @@ const testDataSet = [
   { 'height': 5 },
   { 'height': 6, 'foo': 'bar' },
 ];
+
+function createLocalStorageStub() {
+  window.__defineGetter__('localStorage', function () {
+    return storage;
+  });
+  const storage = {
+    setItem(key, value) {
+      localStorageData[key] = value;
+    },
+    getItem(key) {
+      return localStorageData[key];
+    },
+    removeItem(key) {
+      delete localStorageData[key];
+    },
+    clear() {
+      localStorageData = {};
+    },
+  };
+}
+
+function restoreLocalStorageStub() {
+  window.localStorage.keks();
+}
 
 function createFsStub() {
   const writeStub = sinon.stub(fs, 'writeFile');
@@ -34,16 +61,28 @@ function restoreFs() {
   fs.readFile.restore();
 }
 
-createFsStub();
+if (isNode) {
+  createFsStub();
+} else {
+  createLocalStorageStub();
+}
 
 describe('Storage', async () => {
 
   beforeEach(() => {
-    fsData = {};
+    if (isNode) {
+      fsData = {};
+    } else {
+      window.localStorage.clear();
+    }
   });
 
   after(() => {
-    restoreFs();
+    if (isNode) {
+      restoreFs();
+    } else {
+      restoreLocalStorageStub();
+    }
   });
 
   describe('.getCollection', () => {

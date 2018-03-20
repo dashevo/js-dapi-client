@@ -3,11 +3,13 @@ module.exports = (config) => {
     basePath: '',
     frameworks: ['mocha', 'chai'],
     files: [
+      './test/dist/bundle.js',
       './test.spec.js',
     ],
     exclude: [
     ],
     preprocessors: {
+      './test/dist/bundle.js': ['webpack'],
       './test.spec.js': ['webpack'],
     },
     webpack: {
@@ -17,7 +19,11 @@ module.exports = (config) => {
       module: {
         rules: [
           {
-            test: /\.js$/,
+            test: /dist\/.*\.js$/,
+            exclude: /(node_modules)/,
+          },
+          {
+            test: /src\/.*\.js$/,
             exclude: /(node_modules)/,
             use: {
               loader: 'babel-loader',

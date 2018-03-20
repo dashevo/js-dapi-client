@@ -20,7 +20,10 @@ const testDataSet = [
   { 'height': 6, 'foo': 'bar' },
 ];
 
+let oldStorage;
+
 function createLocalStorageStub() {
+  oldStorage = window.localStorage;
   window.__defineGetter__('localStorage', function () {
     return storage;
   });
@@ -41,7 +44,9 @@ function createLocalStorageStub() {
 }
 
 function restoreLocalStorageStub() {
-  window.localStorage.keks();
+  window.__defineGetter__('localStorage', function () {
+    return oldStorage;
+  });
 }
 
 function createFsStub() {

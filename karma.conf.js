@@ -11,6 +11,9 @@ module.exports = (config) => {
       './test.spec.js': ['webpack'],
     },
     webpack: {
+      node: {
+        fs: 'empty',
+      },
       module: {
         rules: [
           {

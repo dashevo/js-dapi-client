@@ -24,7 +24,11 @@ const config = require('../../config/index');
 
 class MasternodeListProvider {
   constructor(seeds) {
-    const seedsIsArray = seeds && Array.isArray(seeds);
+    const seedsIsArray = Array.isArray(seeds);
+
+    if (seeds && !seedsIsArray) {
+      throw new Error('seed is not an array');
+    }
     /**
      * Masternode list. Initial masternode list is DNS seed from SDK config.
      * @type Array<Masternode>

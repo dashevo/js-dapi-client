@@ -8,27 +8,40 @@
 const sample = require('lodash/sample');
 const MasternodeListProvider = require('./MasternodeListProvider');
 
-const MNDiscoveryService = {
+class MNDiscovery {
+  /**
+   * @class
+   * @param {Array} [seeds] - optional. Seeds to use. If nothing passed, default seeds will be used.
+   * Default will be fine in most of situations.
+   */
+  constructor(seeds) {
+    /**
+     * @private
+     * @protected
+     * For test purposes only: tests wraps .getMNList() method of that object to ensure
+     * it was called.
+     */
+    this.masternodeListProvider = new MasternodeListProvider(seeds);
+    /**
+     * @private
+     * @protected
+     * @type {Array}
+     */
+    this.seeds = seeds;
+  }
   /**
    * @returns {Promise<Masternode>}
    */
   async getRandomMasternode() {
     const MNList = await this.masternodeListProvider.getMNList();
     return sample(MNList);
-  },
+  }
   /**
    * @returns {Promise<Array<Masternode>>}
    */
   getMNList() {
     return this.masternodeListProvider.getMNList();
-  },
-  /**
-   * @private
-   * @protected
-   * For test purposes only: tests wraps .getMNList() method of that object to ensure
-   * it was called.
-   */
-  masternodeListProvider: new MasternodeListProvider(),
+  }
   /**
    * @private
    * Deletes cached MNList and resets it back to initial seed.
@@ -36,8 +49,8 @@ const MNDiscoveryService = {
    * @return void
    */
   reset() {
-    this.masternodeListProvider = new MasternodeListProvider();
-  },
-};
+    this.masternodeListProvider = new MasternodeListProvider(this.seeds);
+  }
+}
 
-module.exports = MNDiscoveryService;
+module.exports = MNDiscovery;

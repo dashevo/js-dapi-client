@@ -23,12 +23,17 @@ const config = require('../../config/index');
  */
 
 class MasternodeListProvider {
-  constructor() {
+  constructor(seeds) {
+    const seedsIsArray = Array.isArray(seeds);
+
+    if (seeds && !seedsIsArray) {
+      throw new Error('seed is not an array');
+    }
     /**
      * Masternode list. Initial masternode list is DNS seed from SDK config.
      * @type Array<Masternode>
      */
-    this.masternodeList = config.DAPIDNSSeeds.slice();
+    this.masternodeList = seedsIsArray ? seeds.slice() : config.DAPIDNSSeeds.slice();
     this.lastUpdateDate = 0;
   }
   /**

@@ -1,4 +1,4 @@
-const MNDiscoveryService = require('../../../../src/services/MNDiscoveryService/index');
+const MNDiscovery = require('../../../../src/services/MNDiscoveryService/index');
 const MNListProvider = require('../../../../src/services/MNDiscoveryService/MasternodeListProvider');
 const sinon = require('sinon');
 const chai = require('chai');
@@ -40,7 +40,7 @@ const MockedMNList = [{
 
 const masternodeIps = MockedMNList.map(masternode => masternode.ip);
 
-describe('MNDiscoveryService', async () => {
+describe('MNDiscovery', async () => {
 
   describe('.getMNList()', async () => {
 
@@ -54,23 +54,15 @@ describe('MNDiscoveryService', async () => {
         }));
     });
 
-    beforeEach(() => {
-      // Reset cached MNList
-      MNDiscoveryService.reset();
-      sinon.spy(MNDiscoveryService.masternodeListProvider, 'getMNList');
-    });
-
-    afterEach(()=> {
-      MNDiscoveryService.masternodeListProvider.getMNList.restore();
-    });
-
     after(() => {
-      MNDiscoveryService.reset();
       RPCClient.request.restore();
     });
 
     it('Should return MN list', async() => {
-      const MNList = await MNDiscoveryService.getMNList();
+      const discovery = new MNDiscovery();
+      sinon.spy(discovery.masternodeListProvider, 'getMNList');
+
+      const MNList = await discovery.getMNList();
       const MNListItem = MNList[0];
 
       expect(MNListItem);
@@ -79,12 +71,16 @@ describe('MNDiscoveryService', async () => {
       expect(MNListItem.rank).to.be.a('number');
       expect(MNListItem.lastseen).to.be.a('number');
       expect(MNListItem.activeseconds).to.be.a('number');
-      expect(MNDiscoveryService.masternodeListProvider.getMNList.callCount).to.equal(1);
+      expect(discovery.masternodeListProvider.getMNList.callCount).to.equal(1);
 
+      discovery.masternodeListProvider.getMNList.restore();
     });
 
     it('Should return random node from MN list', async() => {
-      const randomMasternode = await MNDiscoveryService.getRandomMasternode();
+      const discovery = new MNDiscovery();
+      sinon.spy(discovery.masternodeListProvider, 'getMNList');
+
+      const randomMasternode = await discovery.getRandomMasternode();
 
       expect(masternodeIps).to.contain(randomMasternode.ip);
       expect(randomMasternode.ip).to.be.a('string');
@@ -92,7 +88,9 @@ describe('MNDiscoveryService', async () => {
       expect(randomMasternode.rank).to.be.a('number');
       expect(randomMasternode.lastseen).to.be.a('number');
       expect(randomMasternode.activeseconds).to.be.a('number');
-      expect(MNDiscoveryService.masternodeListProvider.getMNList.callCount).to.equal(1);
+      expect(discovery.masternodeListProvider.getMNList.callCount).to.equal(1);
+
+      discovery.masternodeListProvider.getMNList.restore();
     });
   });
 

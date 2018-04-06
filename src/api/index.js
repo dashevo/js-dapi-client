@@ -71,6 +71,13 @@ class DAPI {
    * @returns {Promise<string>} - block hash
    */
   getBlockHash(blockHeight) { return this.makeRequestToRandomDAPINode('getBlockHash', [blockHeight]); }
+
+  /**
+   * ONLY FOR TESTING PURPOSES WITH REGTEST. WILL NOT WORK ON TESTNET/LIVENET.
+   * @param {number} amount - Number of blocks to generate
+   * @returns {Promise<string[]>} - block hashes
+   */
+  generate(amount) { return this.makeRequestToRandomDAPINode('generate', [amount]); }
 }
 
 module.exports = DAPI;

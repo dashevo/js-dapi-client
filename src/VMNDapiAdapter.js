@@ -44,8 +44,8 @@ class VMNDAPIAdapter {
     // this.log('Signup blockchainuser', obj.subtx.uname);
     const regTx = new Registration(obj);
     const regTxId = await this.DAPI.sendRawTransaction(regTx.serialize());
-    // TODO: here should be command for mining blocks in regtest
-    // this.DashCore.mineBlock();
+    // Mine 1 block to confirm regtx. Command available only in regtest mode.
+    await this.DAPI.generate(1);
     return regTxId;
   }
 
@@ -137,8 +137,8 @@ class VMNDAPIAdapter {
       packet.toHexString(),
     );
 
-    // TODO: implement mining blocks for regtest
-    // this.DashCore.mineBlock();
+    // Mine 1 block. This command available only in regtest mode.
+    await this.DAPI.generate(1);
 
     return tsid;
   }

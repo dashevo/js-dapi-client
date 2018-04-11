@@ -78,6 +78,13 @@ class DAPI {
    * @returns {Promise<string[]>} - block hashes
    */
   generate(amount) { return this.makeRequestToRandomDAPINode('generate', [amount]); }
+
+  // Here go methods that used in VMN. Most of this methods will work only in regtest mode
+  searchUsers(pattern) { return this.makeRequestToRandomDAPINode('searchUsers', [pattern]); }
+  getDapContract(dapId) { return this.makeRequestToRandomDAPINode('getDapContract', [dapId]); }
+  searchDapContracts(pattern) { return this.makeRequestToRandomDAPINode('searchDapContracts', [pattern]); }
+  getUserDapSpace(dapId, userId) { return this.makeRequestToRandomDAPINode('getUserDapSpace', [userId, dapId]); }
+  getUserDapContext(dapId, userId) { return this.makeRequestToRandomDAPINode('getUserDapContext', [userId, dapId]); }
 }
 
 module.exports = DAPI;

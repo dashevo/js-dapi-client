@@ -5,7 +5,6 @@
  * COPYING file in the root directory of this source tree.
  */
 const BitcoreLib = require('bitcore-lib-dash');
-const VMN = require('@dashevo/dash-schema/vmn');
 const Schema = require('@dashevo/dash-schema/lib');
 const DAPI = require('./api');
 const EventEmitter = require('eventemitter2');
@@ -25,7 +24,6 @@ class VMNDAPIAdapter {
 
   /**
    * Handles NewBlock ZMQ message from DashCore
-   * @memberof DAPI
    * @param {object} blockInfo info object
    */
   _onNewBlock(blockInfo) {
@@ -38,7 +36,6 @@ class VMNDAPIAdapter {
   /**
    * Create a Blockchain blockchainuser via a SubTX
    * @param {json} obj Raw subtx
-   * @memberof DAPI
    */
   async CreateUser(obj) {
     // this.log('Signup blockchainuser', obj.subtx.uname);
@@ -63,8 +60,7 @@ class VMNDAPIAdapter {
 
   /**
    * Returns a single BlockchainUser Schema object for the specified uid
-   * @param uid
-   * @constructor
+   * @param {string} uid
    */
   async GetUserById(uid) {
     return this.DAPI.getUser(uid);
@@ -72,25 +68,19 @@ class VMNDAPIAdapter {
 
   /**
    * Search for blockchain users who match a given search pattern
-   * @memberof DAPI
    * @param {string} pattern - search string
    * @returns {array} Array of matching blockchain blockchainuser accounts
    */
   async SearchUsers(pattern) {
-    // No such method at the moment in DAPI RPC
-    // let results = this.DashCore.searchusers(pattern);
-    throw new Error('SearchUsers not implemented');
-    // return results;
+    return this.DAPI.searchUsers(pattern);
   }
 
   async GetDap(dapid) {
-    // return this.DashDrive.getDapContract(dapid);
-    throw new Error('GetDap not implemented');
+    return this.DAPI.getDapContract(dapid);
   }
 
   async SearchDaps(pattern) {
-    // return this.DashDrive.searchDapContracts(pattern);
-    throw new Error('SearchDaps not implemented');
+    return this.DAPI.searchDapContracts(pattern);
   }
 
   /**
@@ -100,16 +90,11 @@ class VMNDAPIAdapter {
    * @memberof DAPI
    */
   async GetDapSpace(dapid, uid) {
-    // let state = this.DashDrive.getDapSpace(dapid, uid);
-    //
-    // return state;
-    throw new Error('GetDapSpace not implemented');
+    return this.DAPI.getUserDapSpace(dapid, uid);
   }
 
   async GetDapContext(dapid, uid) {
-    // let state = this.DashDrive.getDapContext(dapid, uid);
-    // return state;
-    throw new Error('GetDapContext not implemented');
+    return this.DAPI.getUserDapContext(dapid, uid);
   }
 
   /**
@@ -129,7 +114,7 @@ class VMNDAPIAdapter {
     }
 
     // TODO
-    // Here we need to send data to dashdrive
+    // Here we need to send data to dashdrive - it is DAPI responsibility.
     const header = new TransitionHeader(ts);
     const packet = new TransitionPacket(tsp);
     const tsid = await this.DAPI.sendRawTransition(
@@ -137,7 +122,7 @@ class VMNDAPIAdapter {
       packet.toHexString(),
     );
 
-    // Mine 1 block. This command available only in regtest mode.
+    // Mine 1 block to confirm state transition. This command available only in regtest mode.
     await this.DAPI.generate(1);
 
     return tsid;

@@ -1,6 +1,9 @@
-const { Address, RegSubTx } = require('../src').Core;
-const { PrivateKey, PublicKey } = require('../src').Bitcore;
-const { Api } = require('../src');
+const BitcoreLib = require('bitcore-lib-dash');
+const Api = require('../src/api');
+
+const { PrivateKey, PublicKey, Address } = BitcoreLib;
+const { Registration } = BitcoreLib.Transaction.SubscriptionTransactions;
+const api = new Api();
 
 async function registerUser(username, privateKeyString) {
   const privateKey = new PrivateKey(privateKeyString);
@@ -12,15 +15,18 @@ async function registerUser(username, privateKeyString) {
     .toString();
 
   // Getting available inputs
-  const inputs = await Api.address.getUTXO(address);
+  console.log(address);
+  const inputs = await api.getUTXO(address);
 
-  const subTx = new RegSubTx(username, privateKey);
+  const subTx = Registration.createRegistration(username, privateKey);
   // Must be bigger than dust amount
   const fundingInDuffs = 1000 * 1000; // 0.01 Dash
 
-  const balance = await Api.address.getBalance(address);
-  console.log(address);
-  console.log(balance);
+  const balance = await api.getBalance(address);
+
+  if (!inputs.length) {
+    throw new Error('No inputs!');
+  }
 
   if (balance < fundingInDuffs) {
     console.log('Your balance is too small to perform user registration.');
@@ -30,12 +36,11 @@ async function registerUser(username, privateKeyString) {
     throw new Error('Insufficient funds');
   }
 
-  subTx
-    .fund(fundingInDuffs, inputs)
-    .sign(privateKey);
+  subTx.fund(inputs, address, fundingInDuffs);
+  subTx.sign(privateKey);
 
   // Send registration transaction to the network
-  return Api.transaction.sendRaw(subTx.serialize());
+  return api.sendRawTransaction(subTx.serialize());
 }
 
 module.exports = registerUser;

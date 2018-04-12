@@ -4,7 +4,7 @@ const config = require('../config');
 
 class DAPI {
   /**
-   * @param {Array<Object>} seeds
+   * @param {Array<Object>} [seeds] - seeds. If no seeds provided, default seed will be used.
    */
   constructor(seeds) {
     this.MNDiscovery = new MNDiscovery(seeds);

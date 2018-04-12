@@ -3,4 +3,5 @@ node_modules/
 launch.json
 _temp/
 dist/
+!test/dist
 .nyc_output/

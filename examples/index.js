@@ -13,7 +13,7 @@ async function main() {
   // Sending registration to network
   await registerUser(username, privateKeyString);
   // Caution: this will work only in regtest mode.
-  console.log('Minig block to confirm transaction.');
+  console.log('Mining block to confirm transaction.');
   await api.generate(1);
   // Checking user data
   let blockchainUser = await api.getUser(username);
@@ -21,7 +21,7 @@ async function main() {
   // To up user credits
   await topupUserCredit(blockchainUser.regtxid, privateKeyString);
   // Caution: this will work only in regtest mode.
-  console.log('Minig block to confirm transaction.');
+  console.log('Mining block to confirm transaction.');
   await api.generate(1);
   // Check user data
   blockchainUser = await api.getUser(username);

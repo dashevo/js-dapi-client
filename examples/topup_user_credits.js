@@ -5,6 +5,12 @@ const { Address, PrivateKey, PublicKey } = BitcoreLib;
 const { TopUp } = BitcoreLib.Transaction.SubscriptionTransactions;
 const api = new Api();
 
+/**
+ * Tops up user credits. Note that anyone can top up user credits.
+ * @param {string} regTxId
+ * @param {string} privateKeyString
+ * @returns {Promise<string>}
+ */
 async function topUpUserCredits(regTxId, privateKeyString) {
   const privateKey = new PrivateKey(privateKeyString);
   const publicKey = PublicKey.fromPrivateKey(privateKey);

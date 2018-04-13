@@ -5,6 +5,12 @@ const { PrivateKey, PublicKey, Address } = BitcoreLib;
 const { Registration } = BitcoreLib.Transaction.SubscriptionTransactions;
 const api = new Api();
 
+/**
+ * Register user
+ * @param {string} username
+ * @param {string} privateKeyString
+ * @returns {Promise<string>}
+ */
 async function registerUser(username, privateKeyString) {
   const privateKey = new PrivateKey(privateKeyString);
   const publicKey = PublicKey.fromPrivateKey(privateKey);
@@ -15,7 +21,6 @@ async function registerUser(username, privateKeyString) {
     .toString();
 
   // Getting available inputs
-  console.log(address);
   const inputs = await api.getUTXO(address);
 
   const subTx = Registration.createRegistration(username, privateKey);

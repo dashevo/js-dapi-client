@@ -1,6 +1,9 @@
-const { Address, TopUpSubTx } = require('../src').Core;
-const { PrivateKey, PublicKey } = require('../src').Bitcore;
-const { Api } = require('../src');
+const Api = require('../src/api');
+const BitcoreLib = require('bitcore-lib-dash');
+
+const { Address, PrivateKey, PublicKey } = BitcoreLib;
+const { TopUp } = BitcoreLib.Transaction.SubscriptionTransactions;
+const api = new Api();
 
 async function topUpUserCredits(regTxId, privateKeyString) {
   const privateKey = new PrivateKey(privateKeyString);
@@ -11,12 +14,12 @@ async function topUpUserCredits(regTxId, privateKeyString) {
     .fromPublicKey(publicKey, 'testnet')
     .toString();
 
-  const inputs = await Api.address.getUTXO(address);
-  const subTx = new TopUpSubTx(regTxId);
+  const inputs = await api.getUTXO(address);
   const fundingInDuffs = 1000 * 1000; // 0.01 Dash
-  subTx.fund(fundingInDuffs, inputs, address).sign(privateKey);
+  const subTx = new TopUp();
+  subTx.fund(regTxId, fundingInDuffs, inputs, address).sign(privateKey);
 
-  return Api.transaction.sendRaw(subTx.serialize());
+  return api.sendRawTransaction(subTx.serialize());
 }
 
 module.exports = topUpUserCredits;

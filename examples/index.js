@@ -11,6 +11,11 @@ async function main() {
   console.log('Your random username for this run is:');
   console.log(username);
   // Sending registration to network
+  // Note: in this example we assume that account owner is the same
+  // person who funds registration, so only one private key is used.
+  // Otherwise, owner should create registration transaction and
+  // sign it with his own private key, and then pass it to the
+  // funder, which will also sign this transaction with his key.
   await registerUser(username, privateKeyString);
   // Caution: this will work only in regtest mode.
   console.log('Mining block to confirm transaction.');

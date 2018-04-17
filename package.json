@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git#v2",
+    "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",
     "bitcore-lib-dash": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#develop",
@@ -12,7 +13,6 @@
     "bitcore-mnemonic-dash": "^1.2.3",
     "bluebird": "^3.5.1",
     "dark-gravity-wave-js": "github:alex-werner/dark-gravity-wave-js",
-    "dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git",
     "dash-util": "^2.0.3",
     "eventemitter2": "^4.1.2",
     "khal": "^2.0.0",
@@ -55,7 +55,7 @@
   },
   "scripts": {
     "build": "webpack --display-error-details",
-    "lint": "eslint . --fix",
+    "lint": "eslint .",
     "test": "npm run build && npm run test:node && npm run test:firefox",
     "test:node": "mocha --no-timeouts --recursive",
     "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run",

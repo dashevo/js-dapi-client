@@ -4,7 +4,7 @@
   "description": "Client SDK for DASH DAPI.",
   "main": "index.js",
   "dependencies": {
-    "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git",
+    "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git#v2",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",
     "bitcore-lib-dash": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#develop",

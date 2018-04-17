@@ -1,6 +1,7 @@
 const BitcoreLib = require('bitcore-lib-dash');
 const Api = require('../src/api');
 
+const log = console;
 const { PrivateKey, PublicKey, Address } = BitcoreLib;
 const { Registration } = BitcoreLib.Transaction.SubscriptionTransactions;
 const api = new Api();
@@ -34,10 +35,10 @@ async function registerUser(username, privateKeyString) {
   }
 
   if (balance < fundingInDuffs) {
-    console.log('Your balance is too small to perform user registration.');
-    console.log(`Expected balance: ${fundingInDuffs / 100000000} DASH.`);
-    console.log(`Address ${address} balance is ${balance}.`);
-    console.log(`Please top up ${address}`);
+    log.info('Your balance is too small to perform user registration.');
+    log.info(`Expected balance: ${fundingInDuffs / 100000000} DASH.`);
+    log.info(`Address ${address} balance is ${balance}.`);
+    log.info(`Please top up ${address}`);
     throw new Error('Insufficient funds');
   }
 

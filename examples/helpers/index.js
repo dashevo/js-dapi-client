@@ -1,5 +1,7 @@
+const log = console;
+
 function confirmationPrompt() {
-  console.log(`
+  log.info(`
     **********************************************************************************
     * Now you need your transaction to be confirmed. If you running this code on     *
     * testnet, you need to wait until block will be mined, 2.5 minutes average.      *

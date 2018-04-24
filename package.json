@@ -11,6 +11,7 @@
     "bitcore-lib-dash": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#develop",
     "bitcore-message-dash": "^1.0.9",
     "bitcore-mnemonic-dash": "^1.2.3",
+    "bloom-filter": "^0.2.0",
     "bluebird": "^3.5.1",
     "dark-gravity-wave-js": "github:alex-werner/dark-gravity-wave-js",
     "dash-util": "^2.0.3",

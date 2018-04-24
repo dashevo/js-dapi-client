@@ -1,6 +1,8 @@
 const Api = require('../src/api');
-const { privateKeyString } = require('./data');
+const data = require('./data');
 const config = require('../src/config');
+const bloomFilter = require('bloom-filter');
+const dashcore = require('bitcore-lib-dash');
 
 const log = console;
 
@@ -9,11 +11,25 @@ const log = console;
 // mn-bootstrap
 config.Api.port = 3000;
 
+dashcore.Networks.defaultNetwork = dashcore.Networks.testnet;
+
 const api = new Api();
 
-async function main() {
+function createFilter(ref) {
+  const client = data[ref];
 
+  const filter =
+    bloomFilter.create(client.noElements, client.fpRate, 0, bloomFilter.BLOOM_UPDATE_ALL);
+  const pubKey = new dashcore.PrivateKey(client.privateKeySeed).toPublicKey();
+  filter.insert(dashcore.crypto.Hash.sha256ripemd160(pubKey.toBuffer()));
+
+  return filter;
 }
+
+async function main() {
+  await api.loadBloomFilter(createFilter(data.constants.CLIENT_1).toObject());
+}
+
 
 main().catch((e) => {
   log.error(e.stack);

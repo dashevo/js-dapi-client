@@ -73,6 +73,14 @@ class DAPI {
   getBlockHash(blockHeight) { return this.makeRequestToRandomDAPINode('getBlockHash', [blockHeight]); }
 
   /**
+   * Returns block headers from [offset] with length [limit], where limit is <= 250
+   * @param {number} offset
+   * @param {number} limit
+   * @returns {Promise<[objects]>} - array of header objects
+   */
+  getBlockHeaders(offset, limit) { return this.makeRequestToRandomDAPINode('getBlockHeaders', [offset, limit]); }
+
+  /**
    * ONLY FOR TESTING PURPOSES WITH REGTEST. WILL NOT WORK ON TESTNET/LIVENET.
    * @param {number} amount - Number of blocks to generate
    * @returns {Promise<string[]>} - block hashes

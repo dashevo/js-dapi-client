@@ -4,9 +4,11 @@ const config = require('../src/config');
 const bloomFilter = require('bloom-filter');
 const dashcore = require('bitcore-lib-dash');
 const { SpvChain } = require('dash-spv');
+const ui = require('log-update');
 // const Merkleproof = require('@dashevo/dash-spv/lib/merkleproof');
 
 const log = console;
+
 let chain = null;
 let startHeight = 0;
 
@@ -43,15 +45,31 @@ function headerCollector() {
     });
 }
 
+function outputGenerator() {
+  ui(`
+      Checkpoint block    : ${startHeight}
+
+      Current block       : ${chain.getChainHeight() + startHeight} (+${chain.getChainHeight()})
+
+      Last block hash     : ${chain.getTipHash()}
+
+      Longest Chain POW   : ${chain.getBestFork().getPOW()}
+
+      Orphan Chains       : ${chain.getAllForks().length - 1}
+`);
+}
+
 function start() {
+  process.stdout.write('\033c');
   api.getBestBlockHeight()
     .then((currHeight) => {
-      startHeight = currHeight;
-      return api.getBlockHeaders(currHeight, 1);
+      startHeight = currHeight - 20;
+      return api.getBlockHeaders(startHeight, 1);
     })
     .then((headerObj) => {
       chain = new SpvChain('custom_genesis', headerObj.headers[0]);
-      setInterval(headerCollector, 1000);
+      setInterval(headerCollector, 10000);
+      setInterval(outputGenerator, 5000);
     });
 }
 

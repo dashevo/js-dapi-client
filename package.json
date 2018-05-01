@@ -6,9 +6,9 @@
   "dependencies": {
     "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git#v2",
     "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git",
+    "@dashevo/dashcore-lib": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#develop",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",
-    "bitcore-lib-dash": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#develop",
     "bitcore-message-dash": "^1.0.9",
     "bitcore-mnemonic-dash": "^1.2.3",
     "bloom-filter": "^0.2.0",
@@ -19,12 +19,12 @@
     "khal": "^2.0.0",
     "levelup": "^1.3.8",
     "lodash": "^4.17.4",
+    "log-update": "^2.3.0",
     "lowdb": "^1.0.0",
     "memdown": "^1.2.4",
     "quorums-dash": "^1.0.1",
     "socket.io-client": "^2.0.3",
-    "ws": "^3.3.3",
-    "log-update": "^2.3.0"
+    "ws": "^3.3.3"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

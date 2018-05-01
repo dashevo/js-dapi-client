@@ -1,4 +1,4 @@
-const { Message, PrivateKey } = require('bitcore-lib-dash');
+const { Message, PrivateKey } = require('@dashevo/dashcore-lib');
 const Mnemonic = require('bitcore-mnemonic-dash');
 const should = require('should');
 

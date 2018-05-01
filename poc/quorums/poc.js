@@ -1,4 +1,4 @@
-const { Message } = require('bitcore-lib-dash');
+const { Message } = require('@dashevo/dashcore-lib');
 const Mnemonic = require('bitcore-mnemonic-dash');
 const registeredUser = require('../mocks/registeredUser');
 const axios = require('axios');

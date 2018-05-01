@@ -2,7 +2,7 @@
 // TODO: Make this file pass linting!
 const { clone } = require('khal');
 const DashUtil = require('dash-util');
-const Bitcore = require('bitcore-lib-dash');
+const Bitcore = require('@dashevo/dashcore-lib');
 
 module.exports = function (_b) {
   const _el = clone(_b);

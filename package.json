@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git#v2",
-    "dash-spv": "file:../dash-spv",
+    "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",
     "bitcore-lib-dash": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#develop",

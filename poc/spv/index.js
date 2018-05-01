@@ -3,9 +3,9 @@ const clientData = require('./data');
 const config = require('../../src/config');
 const bloomFilter = require('bloom-filter');
 const dashcore = require('bitcore-lib-dash');
-const { SpvChain } = require('dash-spv');
+const { SpvChain } = require('@dashevo/dash-spv');
 const ui = require('log-update');
-const { MerkleProof } = require('dash-spv');
+const { MerkleProof } = require('@dashevo/dash-spv');
 
 const log = console;
 

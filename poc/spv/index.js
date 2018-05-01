@@ -54,7 +54,7 @@ function getSpvTransactions(filter) {
           .map(txHash =>
             ({
               txHash,
-              merkleBlock: data.merkleblocks.filter(mb => mb.hashes.includes(Buffer.from(txHash, 'hex').reverse().toString('hex'))),
+              merkleBlock: data.merkleblocks.filter(mb => mb.hashes.includes(Buffer.from(txHash, 'hex').reverse().toString('hex')))[0],
               // Todo: confirm & improve reversal logic ^^
             }));
       }
@@ -66,7 +66,7 @@ function writeOutput(filter) {
   getSpvTransactions(filter)
     .then((transactions) => {
       Promise.all(transactions.map(tx => new Promise((resolve) => {
-        if (tx.merkleBlock && tx.merkleBlock.header) {
+        if (tx.merkleBlock) {
           chain.getBlock(tx.merkleBlock.header.hash)
             .then((localBlock) => {
               resolve(`${tx.txHash}: ${tx.merkleBlock && localBlock && MerkleProof(tx.merkleBlock, localBlock, tx.txHash) ?

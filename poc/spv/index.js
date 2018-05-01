@@ -1,6 +1,6 @@
-const Api = require('../src/api');
+const Api = require('../../src/api');
 const data = require('./data');
-const config = require('../src/config');
+const config = require('../../src/config');
 const bloomFilter = require('bloom-filter');
 const dashcore = require('bitcore-lib-dash');
 const { SpvChain } = require('dash-spv');

@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license found in the
  * COPYING file in the root directory of this source tree.
  */
-const BitcoreLib = require('bitcore-lib-dash');
+const BitcoreLib = require('@dashevo/dashcore-lib');
 const Schema = require('@dashevo/dash-schema/lib');
 const DAPI = require('./api');
 const EventEmitter = require('eventemitter2');

@@ -1,4 +1,4 @@
-const BitcoreLib = require('bitcore-lib-dash');
+const BitcoreLib = require('@dashevo/dashcore-lib');
 const Api = require('../src/api');
 
 const log = console;

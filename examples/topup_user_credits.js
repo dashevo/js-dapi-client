@@ -1,5 +1,5 @@
 const Api = require('../src/api');
-const BitcoreLib = require('bitcore-lib-dash');
+const BitcoreLib = require('@dashevo/dashcore-lib');
 
 const { Address, PrivateKey, PublicKey } = BitcoreLib;
 const { TopUp } = BitcoreLib.Transaction.SubscriptionTransactions;

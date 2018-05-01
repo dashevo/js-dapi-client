@@ -83,14 +83,12 @@ function writeOutput(transactions) {
       if (tx.merkleBlock) {
         chain.getBlock(tx.merkleBlock.header.hash)
           .then(localBlock => {
-            resolve(`
-            ${tx.txHash} ${
-              tx.merkleBlock && localBlock && MerkleProof(tx.merkleBlock, localBlock, tx.txHash) ?
-                "(Confirmed on chain)" : "(UNCONFIRMED)"}`)
+            resolve(`${tx.txHash}: ${tx.merkleBlock && localBlock && MerkleProof(tx.merkleBlock, localBlock, tx.txHash) ? 
+              "(Confirmed on chain)" : "(UNCONFIRMED)"}`)
           })
       }
       else {
-        resolve(`${tx.txHash} "(UNCONFIRMED!)"}`)
+        resolve(`${tx.txHash}: (UNCONFIRMED)`)
       }
 
     })
@@ -105,13 +103,22 @@ function writeOutput(transactions) {
   
       Longest Chain POW   : ${chain.getBestFork().getPOW()}
   
+
       ==============================================================================================
-  
       Orphan Chains       : ${chain.getAllForks().length - 1}
   
+
       ==============================================================================================
-  
-      Transactions        : ${txData}`);
+      Transactions        : 
+      (yj62dAADEBbryoSMG6TcosmH9Gu2asXwat)
+      ${txData.map(tx => `\n\t ${tx}`)}
+
+      ==============================================================================================
+      Transitions        :
+
+      *** Coming Soon (TM) ***
+
+      `);
     })
 }
 

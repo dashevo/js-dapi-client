@@ -81,7 +81,7 @@ describe('async.registerUser', async () => {
         const result = await execCommand(
             'sh',
             ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
-            {cwd: process.cwd() + '/mn-bootstrap/'},
+            {cwd: process.cwd() + '/../mn-bootstrap/'},
         );
         console.log(result);
         await api.generate(7);
@@ -219,10 +219,6 @@ describe('async.registerUser', async () => {
         return expect(registerUser(123, privateKeyString)).to.be.eventually.rejectedWith('The "value" argument must not be of type number. Received type number');
     });
 
-    it('Should throw Error when username is regexp', async () => {
-        return expect(registerUser('*', privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-dupusername. Code:-26"');
-    });
-
     it('Should throw Error when username is with big datalen', async () => {
         return expect(registerUser('a'.repeat(1000), privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-datalen. Code:-26"');
     });
@@ -273,7 +269,7 @@ describe('async.registerUser', async () => {
 describe('sync.registerUser', () => {
     it('Should re-register user when sign was skipped in the first time', async () => {
         let username = Math.random().toString(36).substring(7);
-        expect(registerUser(username, privateKeyString, 10000, true)).to.be.eventually.rejectedWith('Some inputs have not been fully signed');
+        await expect(registerUser(username, privateKeyString, 10000, true)).to.be.eventually.rejectedWith('Some inputs have not been fully signed');
         await api.generate(7);
         await registerUser(username, privateKeyString, 10001);
 
@@ -283,19 +279,18 @@ describe('sync.registerUser', () => {
         expect(blockChainUser.uname).to.be.a('string');
         expect(blockChainUser.uname).to.equal(username);
         expect(blockChainUser.credits).to.be.a('number');
-        expect(blockChainUser.credits).to.equal(10001);
+        await expect(blockChainUser.credits).to.equal(10001);
     });
 
     it('Should throw Error when recreate user with confirmation', async () => {
         let username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(7);
-        expect(registerUser(username, privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-dupusername. Code:-26');
+        await expect(registerUser(username, privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-dupusername. Code:-26');
     });
-
     it('Should throw Error when create user with existing name and new requestedFunding with confirmation', async () => {
         let username = Math.random().toString(36).substring(7);
-        await registerUser(username, privateKeyString, 99999);
+        const a = await registerUser(username, privateKeyString, 99999);
         await api.generate(7)
         let blockChainUser = await api.getUser(username);
 
@@ -304,7 +299,7 @@ describe('sync.registerUser', () => {
         expect(blockChainUser.uname).to.equal(username);
         expect(blockChainUser.credits).to.be.a('number');
         expect(blockChainUser.credits).to.equal(99999);
-        return expect(registerUser(username, privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-dupusername. Code:-26');
+        await expect(registerUser(username, privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-dupusername. Code:-26');
     });
 
     it('Should create users with case sensitive names', async () => { // TODO is it True?
@@ -317,11 +312,12 @@ describe('sync.registerUser', () => {
         let blockChainUserLower = await api.getUser(username.toLowerCase());
         expect(blockChainUserLower).to.be.an('object');
         expect(blockChainUserLower.uname).to.be.a('string');
-        expect(blockChainUserLower.uname).to.equal(username.toLowerCase());
+        await expect(blockChainUserLower.uname).to.equal(username.toLowerCase());
 
         let blockChainUserUpper = await api.getUser(username.toUpperCase());
         expect(blockChainUserUpper).to.be.an('object');
         expect(blockChainUserUpper.uname).to.be.a('string');
-        expect(blockChainUserUpper.uname).to.equal(username.toUpperCase());
+        await expect(blockChainUserUpper.uname).to.equal(username.toUpperCase());
     });
+
 });

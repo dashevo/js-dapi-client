@@ -47,27 +47,29 @@ async function registerUser(username, prKeyString, requestedFunding, skipSign, s
     return api.sendRawTransaction(subTx.serialize());
 }
 
-function execCommandWrapper() {
-    this.execCommand = function (command, params, options, callback) {
-        let result = '';
-        const sp = spawn(command, params, options);
 
-        sp.stdout.on('data', data => {
-            console.log(`stdout: ${data}`);
-            result += data;
-        });
+function execCommand (command, params, options) {
+  return new Promise(resolve => {
+    let result = '';
+    const sp = spawn(command, params, options);
 
-        sp.stderr.on('data', data => {
-            console.log(`stderr: ${data}`);
-            result += data;
-        });
+    sp.stdout.on('data', data => {
+      console.log(`stdout: ${data}`);
+      result += data;
+    });
 
-        sp.on('close', code => {
-            console.log(`child process exited with code ${code}`);
-            callback(result)
-        });
-    }
+    sp.stderr.on('data', data => {
+      console.log(`stderr: ${data}`);
+      result += data;
+    });
+
+    sp.on('close', code => {
+      console.log(`child process exited with code ${code}`);
+      resolve(result)
+    });
+  });
 }
+
 
 describe('async.registerUser', async () => {
     before(async () => {
@@ -75,11 +77,14 @@ describe('async.registerUser', async () => {
         api = new Api();
 
         // Initial chain
-        await api.generate(101).then(new execCommandWrapper().execCommand('sh', ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
-            {cwd: process.cwd() + '/mn-bootstrap/'}, function (result) {
-                console.log(result)
-                api.generate(7);
-            }));
+        await api.generate(101);
+        const result = await execCommand(
+            'sh',
+            ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
+            {cwd: process.cwd() + '/mn-bootstrap/'},
+        );
+        console.log(result);
+        await api.generate(7);
     });
 
     beforeEach(async () => {

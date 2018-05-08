@@ -8,16 +8,16 @@ const Bitcore = require('@dashevo/dashcore-lib');
 const { privateKeyString } = require('./data');
 
 const HDKey = '';
-// const config = require('../src/config');
+const config = require('../src/config');
 
 const log = console;
 
 // Setting port to local instance of DAPI.
 // Comment this line if you want to use default port that points to
 // mn-bootstrap
-// config.Api.port = 3001;
+config.Api.port = 3010;
 
-const dashPayId = '';
+let dashPayId = '359285f3aa8b42b418158788a90e493e23c7b1fe000de2dbf576bac9b834732e';
 
 const api = new Api();
 
@@ -53,12 +53,18 @@ async function main() {
 
   if (!dashPayDataContract) {
     log.info('DashPay data contract not found. Creating one');
-    const contract = Schema.create.dapcontract(Schema.Daps.DashPay);
-    await createDapContract(contract);
+    dashPayId = await createDapContract(
+      Schema.Daps.DashPay,
+      privateKeyString,
+      blockchainUser.regtxid,
+    );
+    console.log(dashPayId);
     // Confirming dap contract creation on-chain
     await api.generate(1);
     // Checking if it's really created
     dashPayDataContract = await api.getDapContract(dashPayId);
+  } else {
+    log.info('DashPay contract is already created. No need to create one');
   }
 
   log.info('DashPay data contract:');

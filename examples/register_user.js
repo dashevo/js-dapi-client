@@ -24,15 +24,15 @@ async function registerUser(username, privateKeyString) {
   // Getting available inputs
   const inputs = await api.getUTXO(address);
 
+  if (!inputs.length) {
+    throw new Error('No inputs!');
+  }
+
   const subTx = Registration.createRegistration(username, privateKey);
   // Must be bigger than dust amount
   const fundingInDuffs = 1000 * 1000; // 0.01 Dash
 
   const balance = await api.getBalance(address);
-
-  if (!inputs.length) {
-    throw new Error('No inputs!');
-  }
 
   if (balance < fundingInDuffs) {
     log.info('Your balance is too small to perform user registration.');

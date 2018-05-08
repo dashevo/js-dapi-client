@@ -1,6 +1,6 @@
 const { TransitionPacket, TransitionHeader } = require('@dashevo/dashcore-lib').StateTransition;
 const Schema = require('@dashevo/dash-schema');
-const { PrivateKey } = require('../src').Bitcore;
+const { PrivateKey } = require('@dashevo/dashcore-lib');
 const { Api } = require('../src');
 
 const api = new Api();
@@ -20,13 +20,6 @@ async function registerDap(dapSchema, privateKeyString, userId) {
   if (!validTsp.valid) {
     throw new Error('Packet is not valid.');
   }
-
-  // create a transition
-  // const ts = Schema.create.tsheader(tsp.tspacket.meta.id, this._currentUser.blockchainuser.uid);
-  // Schema.object.setID(ts);
-  // if (!Schema.object.validate(ts).valid) {
-  //   throw new Error('Transition header is not valid');
-  // }
 
   const transitionPacket = new TransitionPacket()
     .addObject(tsp);

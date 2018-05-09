@@ -7,7 +7,9 @@ const Api = require('../src/api');
 const Bitcore = require('@dashevo/dashcore-lib');
 const { privateKeyString } = require('./data');
 
-const HDKey = '';
+const user1HDKey = new Bitcore.HDPrivateKey();
+const user2HDKey = new Bitcore.HDPrivateKey();
+const derivingPath = 'm/1';
 const config = require('../src/config');
 
 const log = console;
@@ -95,21 +97,18 @@ async function main() {
   // Creating "contact" object
   const contactRequest = Schema.create.dapobject('contact');
   // Generate an HD public key for the user
-  contactRequest.contact.hdextpubkey = new Bitcore
-    .HDPrivateKey(HDKey)
-    .derive('m/1').hdPublicKey.toString();
+  contactRequest.contact.hdextpubkey = user1HDKey
+    .derive(derivingPath).hdPublicKey.toString();
   // Setting a relation to that user in object. Later this user can retrieve this object
   // from DAPI with getDapContext
   contactRequest.contact.relation = otherUserId.txid;
   log.info('Contact request object:');
   log.info(contactRequest);
 
-  const objects = [contactRequest];
-
   // End of DashPay-specific code.
 
   log.info('Sending contact request to the network');
-  await updateUserState(dashPayId, blockchainUser.regtxid, objects, privateKeyString);
+  await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
 
   log.info('Mining block to confirm changes');
   // Generate 1 block to confirm transition
@@ -117,7 +116,7 @@ async function main() {
 
   // Check first user dap space - contact request should appear there:
 
-  const user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+  let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
   log.info(`${username}'s DashPay dap space:`);
   log.info(user1Space);
   log.info('Contact request in the first user\'s space:');
@@ -139,6 +138,39 @@ async function main() {
 
   // Now we need to accept first user contact request, i.e. create contact object
   // on second user side, referencing first user's id:
+
+  log.info(`Accepting contact request from ${otherUserUsername} by ${username}`);
+  // Creating "contact" object
+  const contactAcceptance = Schema.create.dapobject('contact');
+  // Generate an HD public key for the user
+  contactAcceptance.contact.hdextpubkey = user2HDKey
+    .derive(derivingPath).hdPublicKey.toString();
+  // Setting a relation to that user in object. Later this user can retrieve this object
+  // from DAPI with getDapContext
+  contactAcceptance.contact.relation = blockchainUser.regtxid;
+  log.info('Contact request object:');
+  log.info(contactAcceptance);
+
+  // End of DashPay-specific code.
+
+  log.info('Sending contact request to the network');
+  await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance], privateKeyString);
+
+  log.info('Mining block to confirm changes');
+  // Generate 1 block to confirm transition
+  await api.generate(1);
+
+  user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+  log.info(`${username}'s DashPay dap space:`);
+  log.info(user1Space);
+  log.info('Contact in the first user\'s space:');
+  log.info(user1Space.objects[0]);
+
+  const user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+  log.info(`${otherUserUsername}'s DashPay dap space:`);
+  log.info(user2Space);
+  log.info('Contact in the second user\'s space:');
+  log.info(user2Space.objects[0]);
 
   process.exit(0);
 }

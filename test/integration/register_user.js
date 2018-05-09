@@ -37,11 +37,11 @@ async function registerUser(username, prKeyString, requestedFunding, skipSign, s
     // Must be bigger than dust amount
     const fundingInDuffs = requestedFunding || 1000 * 1000; // 0.01 Dash
 
-    const balance = await api.getBalance(address);
+    api.getBalance(address);
 
     subTx.fund(inputs, address, fundingInDuffs);
     if (skipSign === undefined || !skipSign) {
-        subTx.sign(privateKey, signature == undefined ? undefined : signature);
+        await subTx.sign(privateKey, signature == undefined ? undefined : signature);
     }
     // Send registration transaction to the network
     return api.sendRawTransaction(subTx.serialize());
@@ -70,9 +70,9 @@ function execCommand (command, params, options) {
   });
 }
 
-
 describe('async.registerUser', async () => {
     before(async () => {
+
         // Need to start mn-bootstrap
         api = new Api();
 
@@ -94,7 +94,7 @@ describe('async.registerUser', async () => {
     });
 
     var signatures = [undefined, Signature.SIGHASH_ALL, Signature.SIGHASH_NONE, Signature.SIGHASH_SINGLE, Signature.SIGHASH_ANYONECANPAY];
-    // for SIGHASH_ANYONECANPAY:  Error: DAPI RPC error: sendRawTransaction: 400 - "64: non-mandatory-script-verify-flag (Signature hash type missing or not understood). Code:-26"
+    // TODO for SIGHASH_ANYONECANPAY:  Error: DAPI RPC error: sendRawTransaction: 400 - "64: non-mandatory-script-verify-flag (Signature hash type missing or not understood). Code:-26"
     signatures.forEach(function (signature) {
         it('Should register user with diff signature', async () => {
             let username = Math.random().toString(36).substring(7);
@@ -163,7 +163,7 @@ describe('async.registerUser', async () => {
         return expect(registerUser(username, privateKeyString, 900000000000)).to.be.eventually.rejectedWith('undefined - For more information please see');
     });
 
-    var requestedFundings = [10000, '10000', 10000000]
+    var requestedFundings = [10000, '10000', 10000000];
     requestedFundings.forEach(function (requestedFunding) {
         it('Should register user with correct requestedFunding', async () => {
             let username = Math.random().toString(36).substring(7);
@@ -267,6 +267,10 @@ describe('async.registerUser', async () => {
 });
 
 describe('sync.registerUser', () => {
+    before(() => {
+       api = new Api();
+    });
+
     it('Should re-register user when sign was skipped in the first time', async () => {
         let username = Math.random().toString(36).substring(7);
         await expect(registerUser(username, privateKeyString, 10000, true)).to.be.eventually.rejectedWith('Some inputs have not been fully signed');
@@ -279,7 +283,7 @@ describe('sync.registerUser', () => {
         expect(blockChainUser.uname).to.be.a('string');
         expect(blockChainUser.uname).to.equal(username);
         expect(blockChainUser.credits).to.be.a('number');
-        await expect(blockChainUser.credits).to.equal(10001);
+        expect(blockChainUser.credits).to.equal(10001);
     });
 
     it('Should throw Error when recreate user with confirmation', async () => {
@@ -288,10 +292,11 @@ describe('sync.registerUser', () => {
         await api.generate(7);
         await expect(registerUser(username, privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-dupusername. Code:-26');
     });
+
     it('Should throw Error when create user with existing name and new requestedFunding with confirmation', async () => {
         let username = Math.random().toString(36).substring(7);
-        const a = await registerUser(username, privateKeyString, 99999);
-        await api.generate(7)
+        await registerUser(username, privateKeyString, 99999);
+        await api.generate(7);
         let blockChainUser = await api.getUser(username);
 
         expect(blockChainUser).to.be.an('object');
@@ -304,20 +309,19 @@ describe('sync.registerUser', () => {
 
     it('Should create users with case sensitive names', async () => { // TODO is it True?
         let username = Math.random().toString(36).substring(7);
-        await registerUser(username.toLowerCase(), privateKeyString);
-        await api.generate(7);
-        await registerUser(username.toUpperCase(), privateKeyString);
-        await api.generate(7);
 
-        let blockChainUserLower = await api.getUser(username.toLowerCase());
-        expect(blockChainUserLower).to.be.an('object');
-        expect(blockChainUserLower.uname).to.be.a('string');
-        await expect(blockChainUserLower.uname).to.equal(username.toLowerCase());
+        for (let un of [username.toLowerCase(), username.toUpperCase()]) {
+            await registerUser(un, privateKeyString);
+            await api.generate(7);
+        }
 
-        let blockChainUserUpper = await api.getUser(username.toUpperCase());
-        expect(blockChainUserUpper).to.be.an('object');
-        expect(blockChainUserUpper.uname).to.be.a('string');
-        await expect(blockChainUserUpper.uname).to.equal(username.toUpperCase());
+        for (let un of [username.toLowerCase(), username.toUpperCase()]) {
+            let blockChainUserLower = await api.getUser(un);
+            expect(blockChainUserLower).to.be.an('object');
+            expect(blockChainUserLower.uname).to.be.a('string');
+            expect(blockChainUserLower.uname).to.equal(un);
+        }
+
     });
 
 });

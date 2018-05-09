@@ -72,7 +72,7 @@ async function main() {
       privateKeyString,
       blockchainUser.regtxid,
     );
-    console.log(dashPayId);
+    log.info(dashPayId);
     // Confirming dap contract creation on-chain
     await api.generate(1);
     // Checking if it's really created

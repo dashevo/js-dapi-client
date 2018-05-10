@@ -40,7 +40,7 @@ class DAPI {
    * @param {string} usernameOrRegTxId
    * @returns {Promise<Object>} - blockchain user
    */
-  getUser(usernameOrRegTxId) { return this.makeRequestToRandomDAPINode('getUser', [usernameOrRegTxId]); }
+  getUser(usernameOrRegTxId) { return this.makeRequestToRandomDAPINode('getUser', { usernameOrRegTxId }); }
 
   /**
    * Sends serialized transaction to the network

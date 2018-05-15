@@ -22,6 +22,7 @@ config.Api.port = 3000;
 let api;
 
 const privateKey = new PrivateKey(privateKeyString);
+const timeout = ms => new Promise(res => setTimeout(res, ms))
 
 async function registerUser(username, prKeyString, requestedFunding, skipSign, signature) {
     const privateKey = new PrivateKey(prKeyString);
@@ -47,33 +48,32 @@ async function registerUser(username, prKeyString, requestedFunding, skipSign, s
     return api.sendRawTransaction(subTx.serialize());
 }
 
+function execCommand(command, params, options) {
+    return new Promise(resolve => {
+        let result = '';
+        const sp = spawn(command, params, options);
 
-function execCommand (command, params, options) {
-  return new Promise(resolve => {
-    let result = '';
-    const sp = spawn(command, params, options);
+        sp.stdout.on('data', data => {
+            console.log(`stdout: ${data}`);
+            result += data;
+        });
 
-    sp.stdout.on('data', data => {
-      console.log(`stdout: ${data}`);
-      result += data;
+        sp.stderr.on('data', data => {
+            console.log(`stderr: ${data}`);
+            result += data;
+        });
+
+        sp.on('close', code => {
+            console.log(`child process exited with code ${code}`);
+            resolve(result)
+        });
     });
-
-    sp.stderr.on('data', data => {
-      console.log(`stderr: ${data}`);
-      result += data;
-    });
-
-    sp.on('close', code => {
-      console.log(`child process exited with code ${code}`);
-      resolve(result)
-    });
-  });
 }
 
 describe('async.registerUser', async () => {
     before(async () => {
 
-        // Need to start mn-bootstrap
+        // Need to start mn-bootstrap & wait wallet loading complete
         api = new Api();
 
         // Initial chain
@@ -147,17 +147,6 @@ describe('async.registerUser', async () => {
         return expect(registerUser(username, privateKeyString, 9999)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-lowtopup. Code:-26"');
     });
 
-
-    it('Should throw Error when requestedFunding is a string', async () => {
-        let username = Math.random().toString(36).substring(7);
-        return expect(registerUser(username, privateKeyString, 'blabla')).to.be.eventually.rejectedWith('Invalid state: Output satoshis is not a natural number');
-    });
-
-    it('Should throw Error when requestedFunding is a boolean', async () => {
-        let username = Math.random().toString(36).substring(7);
-        return expect(registerUser(username, privateKeyString, true)).to.be.eventually.rejectedWith('Invalid Argument: Output satoshis is not a natural number');
-    });
-
     it('Should throw Error when requestedFunding is too big', async () => {
         let username = Math.random().toString(36).substring(7);
         return expect(registerUser(username, privateKeyString, 900000000000)).to.be.eventually.rejectedWith('undefined - For more information please see');
@@ -211,14 +200,6 @@ describe('async.registerUser', async () => {
         });
     });
 
-    it('Should throw Error when username is empty', async () => {
-        return expect(registerUser('', privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-dupusername. Code:-26"');
-    });
-
-    it('Should throw Error when username is number', async () => {
-        return expect(registerUser(123, privateKeyString)).to.be.eventually.rejectedWith('The "value" argument must not be of type number. Received type number');
-    });
-
     it('Should throw Error when username is with big datalen', async () => {
         return expect(registerUser('a'.repeat(1000), privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-datalen. Code:-26"');
     });
@@ -235,27 +216,27 @@ describe('async.registerUser', async () => {
         return expect(registerUser(username, privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "18: subtx-dup-username. Code:-26');
     });
 
-    it('Should throw Error when privateKey is wrong( with bigger size)', async () => {
+    it('Should throw Error when prKeyString is wrong( with bigger size)', async () => {
         let username = Math.random().toString(36).substring(7);
         expect(registerUser(username, privateKeyString + 'a')).to.be.eventually.rejectedWith('Checksum mismatch');
     });
 
-    it('Should throw Error when privateKey is wrong( with smaller size)', async () => {
+    it('Should throw Error when prKeyString is wrong( with smaller size)', async () => {
         let username = Math.random().toString(36).substring(7);
         return expect(registerUser(username, privateKeyString.substring(0, privateKeyString.length - 1))).to.be.eventually.rejectedWith('Checksum mismatch');
     });
 
-    it('Should throw Error when privateKey is null', async () => {
+    it('Should throw Error when prKeyString is null', async () => {
         let username = Math.random().toString(36).substring(7);
         return expect(registerUser(username)).to.be.eventually.rejectedWith('Invalid state: undefined');
     });
 
-    it('Should throw Error when privateKey is empty string', async () => {
+    it('Should throw Error when prKeyString is empty string', async () => {
         let username = Math.random().toString(36).substring(7);
         return expect(registerUser(username, '')).to.be.eventually.rejectedWith('Input string too short');
     });
 
-    it('Should throw Error when privateKey is number', async () => {
+    it('Should throw Error when prKeyString is number', async () => {
         const username = Math.random().toString(36).substring(7);
         return expect(registerUser(username, 123)).to.be.eventually.rejectedWith('First argument is an unrecognized data type.');
     });
@@ -266,9 +247,10 @@ describe('async.registerUser', async () => {
     });
 });
 
+
 describe('sync.registerUser', () => {
     before(() => {
-       api = new Api();
+        api = new Api();
     });
 
     it('Should re-register user when sign was skipped in the first time', async () => {
@@ -295,7 +277,8 @@ describe('sync.registerUser', () => {
 
     it('Should throw Error when create user with existing name and new requestedFunding with confirmation', async () => {
         let username = Math.random().toString(36).substring(7);
-        await registerUser(username, privateKeyString, 99999);
+        await timeout(1000)
+        registerUser(username, privateKeyString, 99999);
         await api.generate(7);
         let blockChainUser = await api.getUser(username);
 
@@ -311,6 +294,7 @@ describe('sync.registerUser', () => {
         let username = Math.random().toString(36).substring(7);
 
         for (let un of [username.toLowerCase(), username.toUpperCase()]) {
+            await timeout(1000)
             await registerUser(un, privateKeyString);
             await api.generate(7);
         }

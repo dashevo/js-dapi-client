@@ -19,484 +19,396 @@ const {TopUp} = BitcoreLib.Transaction.SubscriptionTransactions;
 
 const config = require('../../src/config');
 
-const constants = {
-    StateTransition: {
-        VERSION: 1,
-        PACKET_OBJECT_TYPE: 'TransitionPacket',
-        NULL_HASH: new buffer.Buffer('0000000000000000000000000000000000000000000000000000000000000000', 'hex')
-    },
-    PUB_KEY_ID_LENGTH: 20,
-    EVO_VERSION: 0x00010000,
-    SUBSCRIPTION_TRANSACTION_TYPES: {
-        REGISTER: 1,
-        TOP_UP: 2
-    }
-};
-
 config.Api.port = 3000;
 
 const testPrivateKey = new PrivateKey();
-const txIdCommon = '74bae538b381ea952868c0c0dd87806f45492189e6aaabf68c6922c3c7efc074';
-const scriptCommon = 'OP_DUP OP_HASH160 20 0x88d9931ea73d60eaf7e5671efc0552b912911f2a OP_EQUALVERIFY OP_CHECKSIG';
-
 let api;
-let testAddress;
 let address;
-let topUpTx;
-let UTXO;
+// let topUpTx;
+let privateKey;
+let publicKey;
+let fundingInDuffs = 1000 * 1000;
+
+const timeout = ms => new Promise(res => setTimeout(res, ms))
 
 
-describe('async.registerUser', async () => {
+async function registerUser(username, prKeyString, requestedFunding, skipSign, signature) {
+    const privateKey = new PrivateKey(prKeyString);
+    const publicKey = PublicKey.fromPrivateKey(privateKey);
+    // Change to livenet, if you want to create address for livenet
+    // You need to top up this address first
+    const address = Address.fromPublicKey(publicKey, 'testnet').toString();
+
+    // Getting available inputs
+    const inputs = await api.getUTXO(address);
+
+    const subTx = Registration.createRegistration(username, privateKey, requestedFunding);
+    // Must be bigger than dust amount
+    const lFundingInDuffs = requestedFunding || 1000 * 1000; // 0.01 Dash
+
+    api.getBalance(address);
+
+    subTx.fund(inputs, address, lFundingInDuffs);
+    if (skipSign === undefined || !skipSign) {
+        await subTx.sign(privateKey, signature == undefined ? undefined : signature);
+    }
+    // Send registration transaction to the network
+    return api.sendRawTransaction(subTx.serialize());
+}
+
+
+describe('sync.topup_user_credits', () => {
     before(async () => {
         // Need to start mn-bootstrap
         api = new Api();
 
-        let privateKey = new PrivateKey(privateKeyString);
-        let publicKey = PublicKey.fromPrivateKey(privateKey);
+        privateKey = new PrivateKey(privateKeyString);
+        publicKey = PublicKey.fromPrivateKey(privateKey);
         address = Address.fromPublicKey(publicKey, 'testnet').toString();
     });
 
     beforeEach(async () => {
-        topUpTx = new TopUp();
+        await timeout(500);
+    });
 
-        UTXO = await api.getUTXO(address);
-        testAddress = testPrivateKey.toPublicKey().toAddress();
+    before(async () => {
     });
 
     after(async () => {
     });
 
-    it('Every fund should increase number of inputs/outputs', async () => {
-        let regTxId = 'a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458';
+    it('Sequential funding with signing do not increase number of inputs/outputs', async () => {
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
         let nums = [1, 2, 3, 4];
-        nums.forEach(function (num) {
-            let topUpSubtx = topUpTx
-                .fund(regTxId, 10000, UTXO, testAddress);
-            expect(topUpSubtx).to.be.an('object');
-            expect(topUpSubtx.inputs).to.have.lengthOf(num);
-            expect(topUpSubtx.nLockTime).to.equal(0);
-            expect(topUpSubtx.outputs).to.have.lengthOf(1 + num);
-            expect(topUpSubtx.version).to.equal(1);
+        for (let num of nums) {
+            let inputs = await api.getUTXO(address);
+            let subTx = new TopUp();
+            subTx
+                .fund(blockChainUser.regtxid, fundingInDuffs*num, inputs, address);
+            expect(subTx).to.be.an('object');
+            expect(subTx.inputs).to.have.lengthOf(1);
+            expect(subTx.nLockTime).to.equal(0);
+            expect(subTx.outputs).to.have.lengthOf(2);
+            expect(subTx.version).to.equal(1);
+            subTx.sign(privateKey);
+            let txId = await api.sendRawTransaction(subTx.serialize());
+            expect(txId).to.be.an('object').that.has.all.keys('txid');
+        }
+    });
+
+    it('Should throw error when try to reuse input', async () => {
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+        subTx.sign(privateKey);
+        let txId = await api.sendRawTransaction(subTx.serialize());
+        expect(txId).to.be.an('object').that.has.all.keys('txid');
+
+        // we need to reset 'inputs = await api.getUTXO(address)' but we skip it expressly
+        subTx = new TopUp();
+        blockChainUser = await api.getUser(username);
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs * 5, inputs, address);
+        subTx.sign(privateKey);
+        return expect(
+            api.sendRawTransaction(subTx.serialize())
+        ).to.be.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "258: txn-mempool-conflict. Code:-26"');
+
+    });
+
+    it('Should throw error when try to reuse input with the same TopUp instance', async () => {
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+        subTx.sign(privateKey);
+        let txId = await api.sendRawTransaction(subTx.serialize());
+        expect(txId).to.be.an('object').that.has.all.keys('txid');
+
+        // we need to reset 'inputs = await api.getUTXO(address)' but we skip it expressly
+        // subTx = new TopUp();
+        blockChainUser = await api.getUser(username);
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs * 5, inputs, address);
+        subTx.sign(privateKey);
+        return expect(
+            api.sendRawTransaction(subTx.serialize())
+        ).to.be.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-txns-inputs-duplicate. Code:-26"');
+
+    });
+
+    it('SendRawTransaction pass when re-sign with valid privateKey', async () => {
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+        // try to use wrong privateKey
+        expect(() => subTx.serialize()).to.throw('Some inputs have not been fully signed');
+    });
+
+    it('SendRawTransaction pass when re-sign with valid privateKey', async () => {
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+        // the first one is wrong privateKey
+        subTx.sign(testPrivateKey);
+        subTx.sign(privateKey);
+        await api.sendRawTransaction(subTx.serialize());
+    });
+
+//TODO add <>667 cases
+    it('Serialize should throw error when fee is too small', async () => {
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+        expect(subTx).to.be.an('object');
+        expect(subTx.inputs).to.have.lengthOf(1);
+        expect(subTx.nLockTime).to.equal(0);
+        expect(subTx.outputs).to.have.lengthOf(2);
+        expect(subTx.version).to.equal(1);
+        subTx.fee(100).sign(privateKey)
+        expect(() => subTx.serialize()).to.throw('Fee is too small: expected more than 667 but got 100 - For more information please see');
+    });
+
+        it('Should throw error when try to resue TopUp object', async () => {
+            let username = Math.random().toString(36).substring(7);
+            await registerUser(username, privateKeyString, 10000);
+            await api.generate(7);
+
+            let blockChainUser = await api.getUser(username);
+            let subTx = new TopUp();
+            let inputs = await api.getUTXO(address);
+
+            await subTx
+                .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+            expect(subTx).to.be.an('object');
+            expect(subTx.inputs).to.have.lengthOf(1);
+            expect(subTx.nLockTime).to.equal(0);
+            expect(subTx.outputs).to.have.lengthOf(2);
+            expect(subTx.version).to.equal(1);
+            subTx.fee(1000).sign(privateKey)
+            let txId = await api.sendRawTransaction(subTx.serialize());
+            expect(txId).to.be.an('object').that.has.all.keys('txid');
+
+            inputs = await api.getUTXO(address);
+
+            blockChainUser = await api.getUser(username);
+            // we need to reinitialize 'subTx = new TopUp()' but  we skip it expressly
+            await subTx
+                .fund(blockChainUser.regtxid, fundingInDuffs * 5, inputs, address);
+            expect(subTx).to.be.an('object');
+            expect(subTx.inputs).to.have.lengthOf(2);
+            expect(subTx.nLockTime).to.equal(0);
+            expect(subTx.outputs).to.have.lengthOf(3);
+            expect(subTx.version).to.equal(1);
+            subTx.fee(2000).sign(privateKey)
+            return expect(
+                api.sendRawTransaction(subTx.serialize())
+            ).to.be.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-badchange. Code:-26"');
         });
+
+    it('Should throw error when fee is too large', async () => {
+        // let testFundingAmount = 10000;
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, fundingInDuffs);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+
+        await subTx.fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+
+        subTx.fee(300000).sign();
+        expect(() => subTx.serialize()).to.throw('Fee is too large: expected less than 150000 but got 300000');
     });
 
-    it('List of inputs/outputs arrays are increased with new funding without signing', async () => {
+    it('Output satoshis are invalid when fund->fee->sing', async () => {
         let testFundingAmount = 10000;
-        let regTxId = 'a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458';
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, fundingInDuffs);
+        await api.generate(7);
 
-        let topUpSubtx = await topUpTx
-            .fund(regTxId, testFundingAmount, UTXO, testAddress);
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(1);
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(2);
-        expect(topUpSubtx.version).to.equal(1);
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
 
-        await topUpTx
-            .fund(regTxId, testFundingAmount * 5, UTXO, testAddress);
-        // check that list of inputs/outputs for topUpSubtx was increased for topUpSubtx
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(2);
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(3);
-        expect(topUpSubtx.version).to.equal(1);
-    });
+        await subTx.fund(blockChainUser.regtxid, testFundingAmount, inputs, address);
+        expect(subTx).to.be.an('object');
+        expect(subTx.inputs).to.have.lengthOf(1);
+        let in11 = subTx.inputs[0];
+        expect(subTx.nLockTime).to.equal(0);
+        expect(subTx.outputs).to.have.lengthOf(2);
+        let out12 = subTx.outputs[0];
+        let out11 = subTx.outputs[1];
+        expect(subTx.version).to.equal(1);
 
-    it('List of inputs/outputs arrays are increased with new funding with signing & fee', async () => {
-        let testFundingAmount = 10000;
-        let regTxId = 'a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458';
-
-        let topUpSubtx = await topUpTx
-            .fund(regTxId, testFundingAmount, UTXO, testAddress);
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(1);
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(2);
-        expect(topUpSubtx.version).to.equal(1);
-
-        topUpSubtx.sign(testPrivateKey).fee(1000);
-
-        await topUpTx
-            .fund(regTxId, testFundingAmount * 5, UTXO, testAddress);
-        // check that list of inputs/outputs for topUpSubtx was increased for topUpSubtx
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(2);
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(3);
-        expect(topUpSubtx.version).to.equal(1);
-    });
-
-    it('only last fee should be applied for topUpSubtx', async () => {
-        let testFundingAmount = 10000;
-
-        let regTxId = 'a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458';
-        let topUpSubtx = await topUpTx.fund(regTxId, testFundingAmount, UTXO, testAddress);
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(1);
-        let in11 = topUpSubtx.inputs[0];
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(2);
-        let out12 = topUpSubtx.outputs[0];
-        let out11 = topUpSubtx.outputs[1];
-        expect(topUpSubtx.version).to.equal(1);
-
-        let fees = [1, 200000, 3];
-        fees.forEach(function (fValue) {
-            topUpSubtx.sign().fee(fValue);
-        });
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(1);
-        let in21 = topUpSubtx.inputs[0];
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(2);
-        let out22 = topUpSubtx.outputs[0];
-        let out21 = topUpSubtx.outputs[1];
-        expect(topUpSubtx.version).to.equal(1);
+        var feeValue = 1000;
+        subTx.fee(feeValue).sign();
+        expect(subTx).to.be.an('object');
+        expect(subTx.inputs).to.have.lengthOf(1);
+        let in21 = subTx.inputs[0];
+        expect(subTx.nLockTime).to.equal(0);
+        expect(subTx.outputs).to.have.lengthOf(2);
+        let out22 = subTx.outputs[0];
+        let out21 = subTx.outputs[1];
+        expect(subTx.version).to.equal(1);
 
         // take into account fee( only last fee should be applied)
-        let feeExpected = fees.slice(-1)[0];
-        in11.output._satoshis -= feeExpected;
+        in11.output._satoshis -= feeValue;
         expect(in11).to.equal(in21);
         out11._satoshis += testFundingAmount;
-        out11._satoshis -= feeExpected;
+        out11._satoshis -= feeValue;
         out11._satoshisBN.words[0] += testFundingAmount;
-        out11._satoshisBN.words[0] -= feeExpected;
+        out11._satoshisBN.words[0] -= feeValue;
         expect(out11).to.deep.equal(out21);
-        out12._satoshis -= feeExpected;
+        out12._satoshis -= feeValue;
         expect(out12).to.equal(out22);
+
+        expect(() => subTx.serialize()).to.throw('Output satoshis are invalid');
+    });
+
+    it('Error not throwing when inputs satoshi has been changed when funding', async () => { // TODO WHY?
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+        inputs[0].satoshis += 10000;
+        subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+        subTx.sign(privateKey);
+        await api.sendRawTransaction(subTx.serialize());
     });
 
 
-    it('topUpSubtx is not changed after sign without funding', async () => {
+    it('Error throwing when inputs address has been changed when funding', async () => { // TODO WHY?
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
 
-        let testFundingAmount = 10000;
-        let testFee = 1000;
-
-        let regTxId = 'a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458';
-        let topUpSubtx = await topUpTx.fund(regTxId, testFundingAmount, UTXO, testAddress);
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(1);
-        let in11 = topUpSubtx.inputs[0];
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(2);
-        let out12 = topUpSubtx.outputs[0];
-        let out11 = topUpSubtx.outputs[1];
-        expect(topUpSubtx.version).to.equal(1);
-
-        topUpSubtx.sign(testPrivateKey);
-        // UTXO should be the same after signing
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(1);
-        let in21 = topUpSubtx.inputs[0];
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(2);
-        let out22 = topUpSubtx.outputs[0];
-        let out21 = topUpSubtx.outputs[1];
-        expect(topUpSubtx.version).to.equal(1);
-
-        expect(in11).to.equal(in21);
-        expect(out11).to.equal(out21);
-        expect(out12).to.equal(out22);
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+        inputs[0].address = 'ygPcCwVy6Fxg7ruxZzqVYdPLtvw7auHAFh';
+        expect(() => subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)).to.throw('Checksum mismatch');
     });
 
-    it('topUpSubtx is changed after fee with signing', async () => {
-        let testFundingAmount = 10000;
-        let testFee = 1000;
+    it('Error throwing when inputs amount has been changed when funding', async () => { // TODO WHY?
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
 
-        let regTxId = 'a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458';
-        let topUpSubtx = await topUpTx.fund(regTxId, testFundingAmount, UTXO, testAddress);
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(1);
-        let in11 = topUpSubtx.inputs[0];
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(2);
-        let out12 = topUpSubtx.outputs[0];
-        let out11 = topUpSubtx.outputs[1];
-        expect(topUpSubtx.version).to.equal(1);
-
-        topUpSubtx.fee(testFee);
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(1);
-        let in21 = topUpSubtx.inputs[0];
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(2);
-        let out22 = topUpSubtx.outputs[0];
-        let out21 = topUpSubtx.outputs[1];
-        expect(topUpSubtx.version).to.equal(1);
-
-        // take into account fee and funding amount and the compare UTXO
-        in11.output._satoshis -= testFee;
-        expect(in11).to.equal(in21);
-        out11._satoshis += testFundingAmount;
-        out11._satoshis -= testFee
-        out11._satoshisBN.words[0] += testFundingAmount;
-        out11._satoshisBN.words[0] -= testFee;
-        expect(out11).to.deep.equal(out21);
-        out12._satoshis -= testFee;
-        expect(out12).to.equal(out22);
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+        inputs[0].amount += 1;
+        subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+        subTx.sign(privateKey);
+        expect(() => api.sendRawTransaction(subTx.serialize()).to.throw('DAPI RPC error: sendRawTransaction: 400 - "16: bad-txns-in-belowout. Code:-26"'));
     });
 
-    it('only regTxId is changed in multiple topUpSubtxs', async () => {
+    it('Error not throwing when inputs confirmations has been changed when funding', async () => { // TODO WHY?
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
 
-        let testFundingAmount = 10000;
-        let testFee = 1000;
-
-        let regTxId = 'a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458';
-
-        let topUpSubtx = await topUpTx
-            .fund(regTxId, testFundingAmount, UTXO, testAddress);
-
-        let topUpData = topUpTx.getTopUpData();
-
-        topUpSubtx.sign(testPrivateKey).fee(testFee).fund(regTxId, testFundingAmount, UTXO, testAddress).sign().fee(testFee * 2 - 123).sign().fund(regTxId, testFundingAmount * 5 + 2, UTXO, testAddress).fund(regTxId, testFundingAmount - 99, UTXO, testAddress).fee(0).fund(regTxId, 0, UTXO, testAddress).fee(1231).sign();
-
-        let topUpData2 = topUpTx.getTopUpData();
-        expect(topUpData.regTxId).to.equal(regTxId);
-        expect(topUpData.funding).to.equal(testFundingAmount);
-        expect(topUpData.subTxType).to.equal(constants.SUBSCRIPTION_TRANSACTION_TYPES.TOP_UP);
-        expect(topUpData.version).to.equal(65536);
-        // only regTxId is changed
-        topUpData.regTxId = topUpData2.regTxId;
-        expect(topUpData).to.deep.equal(topUpData2);
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+        inputs[0].confirmations += 1;
+        subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+        subTx.sign(privateKey);
+        await api.sendRawTransaction(subTx.serialize());
     });
 
-    // TODO post tickets!!! some strings ignored/obfuscated
-    let regTxIdsForCase = ['a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458', '', 'fake', "a".repeat(100000), '3333', 'keke', 'hex', 'int', 'string'];
-    regTxIdsForCase.forEach(function (rTxId) {
-        it('Should allow regSubTxId with string values', async () => {
-            let testFundingAmount = 10000;
-            let topUpSubtx = topUpTx.fund(rTxId, testFundingAmount, UTXO, testAddress);
 
-            let topUpData = topUpSubtx.sign(testPrivateKey)
-                .fee(1000).getTopUpData();
-            expect(topUpData.regTxId).to.equal(rTxId);
-            expect(topUpData.funding).to.equal(testFundingAmount);
-            expect(topUpData.subTxType).to.equal(constants.SUBSCRIPTION_TRANSACTION_TYPES.TOP_UP);
-        });
+    it('Error not throwing when inputs height has been changed when funding', async () => { // TODO WHY?
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+        inputs[0].height += 1;
+        subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+        subTx.sign(privateKey);
+        await api.sendRawTransaction(subTx.serialize());
     });
 
-    it('Should throw error when regTxId is number', async () => {
-        let regTxId = 1000;
-        return expect(() => {
-            topUpTx.fund(regTxId, 10000, UTXO, testAddress)
-        }).to.throw(TypeError, 'The "value" argument must not be of type number. Received type number');
+    it('Error not throwing when inputs scriptPubKey has been changed when funding', async () => { // TODO WHY?
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+        inputs[0].scriptPubKey = '76a914dc2bfda564dc6217c55c842d65cc0242e095d2d788ac';
+        subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+        subTx.sign(privateKey);
+        await api.sendRawTransaction(subTx.serialize());
     });
 
-    it('Should throw error when regTxId is undefined', async () => {
-        let regTxId = undefined;
-        return expect(() => {
-            topUpTx.fund(regTxId, 10000, UTXO, testAddress)
-        }).to.throw(TypeError, 'The first argument must be one of type string, Buffer, ArrayBuffer, Array, or Array-like Object. Received type undefined');
+
+    it('Error not throwing when inputs txid has been changed when funding', async () => { // TODO WHY?
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+        inputs[0].txid = 'a3690bea9fadcba57b3138df56ccfd6e15823071d5e5f43fbbbdf947d0ccbe41';
+        subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+        subTx.sign(privateKey);
+        api.sendRawTransaction(subTx.serialize())
     });
 
-// TODO post tickets!!! some strings ignored/obfuscated ???
-    let regTxIds = [[1, 2, 3], ['abcde'], Buffer.from('abc'), new Int32Array(new ArrayBuffer(8))];
-    regTxIds.forEach(function (rTxId) {
-        it('Should allow regSubTxId to be Buffer, ArrayBuffer, Array, or Array-like Object', async () => {
-            let testFundingAmount = 10000;
-            let topUpSubtx = topUpTx.fund(rTxId, testFundingAmount, UTXO, testAddress);
-
-            let topUpData = topUpSubtx.sign(testPrivateKey)
-                .fee(1000).getTopUpData();
-            expect(topUpData.regTxId).to.equal(rTxId);
-            expect(topUpData.funding).to.equal(testFundingAmount);
-            expect(topUpData.subTxType).to.equal(constants.SUBSCRIPTION_TRANSACTION_TYPES.TOP_UP);
-        });
-    });
-
-    it('Should throw error when funding is undefined', async () => {
-        let funding = undefined;
-        return expect(() => {
-            topUpTx.fund('regTxId', funding, UTXO, testAddress)
-        }).to.throw('Invalid Argument: Output satoshis is not a natural number');
-    });
-
-    it('Should throw error when funding is string', async () => {
-        let funding = 'str';
-        return expect(() => {
-            topUpTx.fund('regTxId', funding, UTXO, testAddress)
-        }).to.throw('Invalid state: Output satoshis is not a natural number');
-    });
-
-    it('Should throw error when funding is negative', async () => {
-        let funding = -10;
-        return expect(() => {
-            topUpTx.fund('regTxId', funding, UTXO, testAddress)
-        }).to.throw('Invalid Argument: Output satoshis is not a natural number');
-    });
-
-    it('Should throw error when finfing is float', async () => {
-        let funding = 10.4;
-        return expect(() => {
-            topUpTx.fund('regTxId', funding, UTXO, testAddress)
-        }).to.throw('Invalid Argument: Output satoshis is not a natural number');
-    });
-
-    let fundings = [0, 9999999900];
-    fundings.forEach(function (funding) {
-        it('Should allow to set any natural number for funding ', async () => {
-            let topUpSubtx = topUpTx.fund('rTxId', funding, UTXO, testAddress);
-            let topUpData = topUpSubtx.sign(testPrivateKey)
-                .fee(1000).getTopUpData();
-            expect(topUpData.funding).to.equal(funding);
-        });
-    });
-
-    it('Should fund with minimum UTXO fields', async () => {
-        let regTxId = 'a477af6b2667c29670467e4e0728b685ee07b240235771862318e29ddbe58458';
-        let testFundingAmount = 10000;
-        let testUTXO = {
-            'txId': txIdCommon,
-            'outputIndex': 0,
-            'script': scriptCommon,
-            'satoshis': 123000
-        };
-        let topUpSubtx = await topUpTx
-            .fund(regTxId, testFundingAmount, testUTXO, testAddress);
-        expect(topUpSubtx).to.be.an('object');
-        expect(topUpSubtx.inputs).to.have.lengthOf(1);
-        expect(topUpSubtx.nLockTime).to.equal(0);
-        expect(topUpSubtx.outputs).to.have.lengthOf(2);
-        expect(topUpSubtx.version).to.equal(1);
-    });
-
-    it('txId is required property in UTXO/inputs parameter for funding', async () => {
-        let testUTXO = {
-            // 'txId': txIdCommon,
-            'outputIndex': 0,
-            'script': scriptCommon,
-            'satoshis': 123000
-        };
-        return expect(() => {
-            topUpTx.fund('regTxId', 10000, testUTXO, testAddress)
-        }).to.throw('Invalid TXID in object');
-    });
-
-    let txIdsInvalid = [0, '', 'ahaha', 100];
-    txIdsInvalid.forEach(function (txId) {
-        it('Should throw error when inputs.txId is invalid', async () => {
-            let testUTXO = {
-                'txId': txId,
-                'outputIndex': 0,
-                'script': scriptCommon,
-                'satoshis': 123000
-            };
-            return expect(() => {
-                topUpTx.fund('regTxId', 10000, testUTXO, testAddress)
-            }).to.throw('Invalid TXID in object');
-        });
-    });
-
-    it('outputIndex is required property in inputs parameter for funding', async () => {
-        let testUTXO = {
-            'txId': txIdCommon,
-            // 'outputIndex': 0,
-            'script': scriptCommon,
-            'satoshis': 123000
-        };
-        return expect(() => {
-            topUpTx.fund('regTxId', 10000, testUTXO, testAddress)
-        }).to.throw('Invalid outputIndex, received undefined');
-    });
-
-    let outputIndexsInvalid = [0, 1, '', 'ahaha', 100];
-    outputIndexsInvalid.forEach(function (outputIndex) {
-        it('outputIndex is sssss required property in inputs parameter for funding', async () => {
-            let testUTXO = {
-                'txId': txIdCommon,
-                'outputIndex': '',
-                'script': scriptCommon,
-                'satoshis': 123000
-            };
-            return expect(() => {
-                topUpTx.fund('regTxId', 10000, testUTXO, testAddress)
-            }).to.throw('Invalid outputIndex, received ');
-        });
-    });
-
-    it('script is required property in inputs parameter for funding', async () => {
-        let testUTXO = {
-            'txId': txIdCommon,
-            'outputIndex': 0,
-            // 'script': scriptCommon,
-            'satoshis': 123000
-        };
-        return expect(() => {
-            topUpTx.fund('regTxId', 10000, testUTXO, testAddress)
-        }).to.throw('Invalid Argument: Must provide the scriptPubKey for that output!');
-    });
-
-    let scriptsInvalid = [0, 1, '', 'ahaha', 100];
-    scriptsInvalid.forEach(function (script) {
-        it('script is required property in inputs parameter for funding', async () => {
-            let testUTXO = {
-                'txId': txIdCommon,
-                'outputIndex': 0,
-                'script': '',
-                'satoshis': 123000
-            };
-            return expect(() => {
-                topUpTx.fund('regTxId', 10000, testUTXO, testAddress)
-            }).to.throw('Abstract Method Invocation: Input#clearSignatures'); // bad error message
-        });
-    });
-
-    it('satoshis is required property in inputs parameter for funding', async () => {
-        let testUTXO = {
-            'txId': txIdCommon,
-            'outputIndex': 0,
-            'script': scriptCommon,
-            // 'satoshis': 123000
-        };
-        return expect(() => {
-            topUpTx.fund('regTxId', 10000, testUTXO, testAddress)
-        }).to.throw('Invalid Argument: Must provide an amount for the output');
-    });
-
-    it('Should throw error when satoshis is negative number', async () => {
-        let testUTXO = {
-            'txId': txIdCommon,
-            'outputIndex': 0,
-            'script': scriptCommon,
-            'satoshis': -1
-        };
-        return expect(() => {
-            topUpTx.fund('regTxId', 10000, testUTXO, testAddress)
-        }).to.throw('Invalid Argument: Output satoshis is not a natural number');
-    });
-
-    let satoshisInvalid = ['', 'ahaha'];
-    satoshisInvalid.forEach(function (satoshis) {
-        it('Should throw error when satoshis is string', async () => {
-            let testUTXO = {
-                'txId': txIdCommon,
-                'outputIndex': 0,
-                'script': scriptCommon,
-                'satoshis': satoshis
-            };
-            return expect(() => {
-                topUpTx.fund('regTxId', 10000, testUTXO, testAddress)
-            }).to.throw('Invalid Argument: Amount must be a number');
-        });
-    })
-
-    it('Address is required for funding', async () => {
-        return expect(() => {
-            topUpTx.fund('regTxId', 10000, UTXO)
-        }).to.throw('Invalid Argument: address is required');
-    });
-
-    it('Should throw error when address is invalid string', async () => {
-        return expect(() => {
-            topUpTx.fund('regTxId', 10000, UTXO, 'ss')
-        }).to.throw('Input string too short');
-    });
-
-    it('Should throw error when address is number', async () => {
-        return expect(() => {
-            topUpTx.fund('regTxId', 10000, UTXO, 12)
-        }).to.throw('First argument is an unrecognized data format.');
-    });
 });
 
 

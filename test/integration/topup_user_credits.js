@@ -1,7 +1,5 @@
 'use strict'
 
-
-var buffer = require('buffer');
 const {spawn} = require('child_process');
 
 const chai = require('chai');
@@ -24,12 +22,11 @@ config.Api.port = 3000;
 const testPrivateKey = new PrivateKey();
 let api;
 let address;
-// let topUpTx;
 let privateKey;
 let publicKey;
 let fundingInDuffs = 1000 * 1000;
 
-const timeout = ms => new Promise(res => setTimeout(res, ms))
+const timeout = ms => new Promise(res => setTimeout(res, ms));
 
 
 async function registerUser(username, prKeyString, requestedFunding, skipSign, signature) {
@@ -77,18 +74,90 @@ describe('sync.topup_user_credits', () => {
     after(async () => {
     });
 
-    it('Sequential funding with signing do not increase number of inputs/outputs', async () => {
+    it('Should go through the full Top UP process', async () => {
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+
+        await api.generate(7);
+
+        let blockChainUserAfterCreation = await api.getUser(username);
+
+        console.log(blockChainUserAfterCreation)
+
+
+        expect(blockChainUserAfterCreation.uname).to.equal(username);
+        expect(blockChainUserAfterCreation.credits).to.equal(10000);
+        expect(blockChainUserAfterCreation.state).to.equal('open');
+        expect(blockChainUserAfterCreation.subtx).to.have.lengthOf(1);
+        expect(blockChainUserAfterCreation.transitions).to.have.lengthOf(0);
+        expect(blockChainUserAfterCreation.from_mempool).to.equal(undefined)
+        var pubkeyid1 = blockChainUserAfterCreation.pubkeyid
+        var regtxid1 = blockChainUserAfterCreation.regtxid
+        var subtx1 = blockChainUserAfterCreation.subtx
+
+        let inputs = await api.getUTXO(address);
+        let subTx = new TopUp();
+        subTx
+            .fund(blockChainUserAfterCreation.regtxid, fundingInDuffs, inputs, address);
+
+        expect(subTx).to.be.an('object');
+        expect(subTx.inputs).to.have.lengthOf(1);
+        expect(subTx.nLockTime).to.equal(0);
+        expect(subTx.outputs).to.have.lengthOf(2);
+        expect(subTx.version).to.equal(1);
+        subTx.sign(privateKey);
+        let txId = await api.sendRawTransaction(subTx.serialize());
+        expect(txId).to.be.an('object').that.has.all.keys('txid');
+
+        let blockChainUserAfterTopUp = await api.getUser(username);
+
+        expect(blockChainUserAfterTopUp.uname).to.equal(username);
+        expect(blockChainUserAfterTopUp.credits).to.equal(10000 + fundingInDuffs);
+        expect(blockChainUserAfterTopUp.state).to.equal('open');
+        expect(blockChainUserAfterTopUp.subtx).to.have.lengthOf(1);
+        expect(blockChainUserAfterTopUp.transitions).to.have.lengthOf(0);
+        expect(blockChainUserAfterTopUp.from_mempool).to.equal(true)
+        var pubkeyid2 = blockChainUserAfterTopUp.pubkeyid
+        var regtxid2 = blockChainUserAfterTopUp.regtxid
+        var subtx2 = blockChainUserAfterTopUp.subtx
+
+        await api.generate(1);
+
+        let blockChainUserAfterBlockGen = await api.getUser(username);
+        console.log(blockChainUserAfterBlockGen)
+
+        expect(blockChainUserAfterBlockGen.uname).to.equal(username);
+        expect(blockChainUserAfterBlockGen.credits).to.equal(10000 + fundingInDuffs);
+        expect(blockChainUserAfterBlockGen.state).to.equal('open');
+        expect(blockChainUserAfterBlockGen.subtx).to.have.lengthOf(2);
+        expect(blockChainUserAfterBlockGen.transitions).to.have.lengthOf(0);
+        expect(blockChainUserAfterBlockGen.from_mempool).to.equal(undefined)
+        var pubkeyid3 = blockChainUserAfterBlockGen.pubkeyid
+        var regtxid3 = blockChainUserAfterBlockGen.regtxid
+        var subtx3 = blockChainUserAfterBlockGen.subtx
+
+        expect(pubkeyid1).to.equal(pubkeyid2);
+        expect(pubkeyid2).to.equal(pubkeyid3);
+        expect(regtxid1).to.equal(regtxid2);
+        expect(regtxid2).to.equal(regtxid3);
+        expect(subtx1).to.deep.equal(subtx2);
+        expect(subtx2).to.deep.equal([subtx3[0]]);
+    });
+
+    it('Should be able sequential funding with signing', async () => {
         let username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        var expectedCredits = 10000
         let nums = [1, 2, 3, 4];
         for (let num of nums) {
+            let blockChainUser = await api.getUser(username);
             let inputs = await api.getUTXO(address);
             let subTx = new TopUp();
             subTx
-                .fund(blockChainUser.regtxid, fundingInDuffs*num, inputs, address);
+                .fund(blockChainUser.regtxid, fundingInDuffs * num, inputs, address);
+            expectedCredits += fundingInDuffs * num
             expect(subTx).to.be.an('object');
             expect(subTx.inputs).to.have.lengthOf(1);
             expect(subTx.nLockTime).to.equal(0);
@@ -97,6 +166,15 @@ describe('sync.topup_user_credits', () => {
             subTx.sign(privateKey);
             let txId = await api.sendRawTransaction(subTx.serialize());
             expect(txId).to.be.an('object').that.has.all.keys('txid');
+
+            blockChainUser = await api.getUser(username);
+            console.log(blockChainUser)
+            expect(blockChainUser.uname).to.equal(username);
+            expect(blockChainUser.credits).to.equal(expectedCredits);
+            expect(blockChainUser.state).to.equal('open');
+            expect(blockChainUser.subtx).to.have.lengthOf(1);
+            expect(blockChainUser.transitions).to.have.lengthOf(0);
+            expect(blockChainUser.from_mempool).to.equal(true)
         }
     });
 
@@ -184,28 +262,9 @@ describe('sync.topup_user_credits', () => {
         await api.sendRawTransaction(subTx.serialize());
     });
 
-//TODO add <>667 cases
-    it('Serialize should throw error when fee is too small', async () => {
-        let username = Math.random().toString(36).substring(7);
-        await registerUser(username, privateKeyString, 10000);
-        await api.generate(7);
-
-        let blockChainUser = await api.getUser(username);
-        let subTx = new TopUp();
-        let inputs = await api.getUTXO(address);
-
-        await subTx
-            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
-        expect(subTx).to.be.an('object');
-        expect(subTx.inputs).to.have.lengthOf(1);
-        expect(subTx.nLockTime).to.equal(0);
-        expect(subTx.outputs).to.have.lengthOf(2);
-        expect(subTx.version).to.equal(1);
-        subTx.fee(100).sign(privateKey)
-        expect(() => subTx.serialize()).to.throw('Fee is too small: expected more than 667 but got 100 - For more information please see');
-    });
-
-        it('Should throw error when try to resue TopUp object', async () => {
+    var fees = [0, 1, 100, 666];
+    fees.forEach(function (fee) {
+        it('Serialize should throw error when fee is too small', async () => {
             let username = Math.random().toString(36).substring(7);
             await registerUser(username, privateKeyString, 10000);
             await api.generate(7);
@@ -221,41 +280,105 @@ describe('sync.topup_user_credits', () => {
             expect(subTx.nLockTime).to.equal(0);
             expect(subTx.outputs).to.have.lengthOf(2);
             expect(subTx.version).to.equal(1);
-            subTx.fee(1000).sign(privateKey)
-            let txId = await api.sendRawTransaction(subTx.serialize());
-            expect(txId).to.be.an('object').that.has.all.keys('txid');
-
-            inputs = await api.getUTXO(address);
-
-            blockChainUser = await api.getUser(username);
-            // we need to reinitialize 'subTx = new TopUp()' but  we skip it expressly
-            await subTx
-                .fund(blockChainUser.regtxid, fundingInDuffs * 5, inputs, address);
-            expect(subTx).to.be.an('object');
-            expect(subTx.inputs).to.have.lengthOf(2);
-            expect(subTx.nLockTime).to.equal(0);
-            expect(subTx.outputs).to.have.lengthOf(3);
-            expect(subTx.version).to.equal(1);
-            subTx.fee(2000).sign(privateKey)
-            return expect(
-                api.sendRawTransaction(subTx.serialize())
-            ).to.be.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-badchange. Code:-26"');
+            subTx.fee(fee).sign(privateKey);
+            expect(() => subTx.serialize()).to.throw('Fee is too small: expected more than 667 but got ' + fee + ' - For more information please see');
         });
+    });
 
-    it('Should throw error when fee is too large', async () => {
-        // let testFundingAmount = 10000;
+    it('Should topup with the minimum fee=667', async () => {
         let username = Math.random().toString(36).substring(7);
-        await registerUser(username, privateKeyString, fundingInDuffs);
+        await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
         let blockChainUser = await api.getUser(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
 
-        await subTx.fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+        expect(subTx).to.be.an('object');
+        expect(subTx.inputs).to.have.lengthOf(1);
+        expect(subTx.nLockTime).to.equal(0);
+        expect(subTx.outputs).to.have.lengthOf(2);
+        expect(subTx.version).to.equal(1);
+        subTx.fee(667).sign(privateKey);
+        await api.sendRawTransaction(subTx.serialize());
+    });
 
-        subTx.fee(300000).sign();
-        expect(() => subTx.serialize()).to.throw('Fee is too large: expected less than 150000 but got 300000');
+    it('Should throw error when try to resue TopUp object', async () => {
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+        expect(subTx).to.be.an('object');
+        expect(subTx.inputs).to.have.lengthOf(1);
+        expect(subTx.nLockTime).to.equal(0);
+        expect(subTx.outputs).to.have.lengthOf(2);
+        expect(subTx.version).to.equal(1);
+        subTx.fee(1000).sign(privateKey);
+        let txId = await api.sendRawTransaction(subTx.serialize());
+        expect(txId).to.be.an('object').that.has.all.keys('txid');
+
+        inputs = await api.getUTXO(address);
+
+        blockChainUser = await api.getUser(username);
+        // we need to reinitialize 'subTx = new TopUp()' but  we skip it expressly
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs * 5, inputs, address);
+        expect(subTx).to.be.an('object');
+        expect(subTx.inputs).to.have.lengthOf(2);
+        expect(subTx.nLockTime).to.equal(0);
+        expect(subTx.outputs).to.have.lengthOf(3);
+        expect(subTx.version).to.equal(1);
+        subTx.fee(2000).sign(privateKey);
+        return expect(
+            api.sendRawTransaction(subTx.serialize())
+        ).to.be.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-badchange. Code:-26"');
+    });
+
+    var fees = [150001, 300000];
+    fees.forEach(function (fee) {
+        it('Should throw error when fee is too larg', async () => {
+            let username = Math.random().toString(36).substring(7);
+            await registerUser(username, privateKeyString, fundingInDuffs);
+            await api.generate(7);
+
+            let blockChainUser = await api.getUser(username);
+            let subTx = new TopUp();
+            let inputs = await api.getUTXO(address);
+
+            await subTx.fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+
+            subTx.fee(fee).sign();
+            expect(() => subTx.serialize()).to.throw('Fee is too large: expected less than 150000 but got ' + fee);
+        });
+    });
+
+    it('Should topup with the maximum fee=150000', async () => {
+        let username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString, 10000);
+        await api.generate(7);
+
+        let blockChainUser = await api.getUser(username);
+        let subTx = new TopUp();
+        let inputs = await api.getUTXO(address);
+
+        await subTx
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
+        expect(subTx).to.be.an('object');
+        expect(subTx.inputs).to.have.lengthOf(1);
+        expect(subTx.nLockTime).to.equal(0);
+        expect(subTx.outputs).to.have.lengthOf(2);
+        expect(subTx.version).to.equal(1);
+        subTx.fee(150000).sign(privateKey);
+        await api.sendRawTransaction(subTx.serialize());
+
     });
 
     it('Output satoshis are invalid when fund->fee->sing', async () => {
@@ -357,7 +480,7 @@ describe('sync.topup_user_credits', () => {
         let inputs = await api.getUTXO(address);
         inputs[0].confirmations += 1;
         subTx
-            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
         subTx.sign(privateKey);
         await api.sendRawTransaction(subTx.serialize());
     });
@@ -373,7 +496,7 @@ describe('sync.topup_user_credits', () => {
         let inputs = await api.getUTXO(address);
         inputs[0].height += 1;
         subTx
-            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
         subTx.sign(privateKey);
         await api.sendRawTransaction(subTx.serialize());
     });

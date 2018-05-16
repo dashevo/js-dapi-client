@@ -44,7 +44,7 @@ async function main() {
   log.info('Block hash is', await api.generate(1));
 
   // Checking user data
-  let blockchainUser = await api.getUser(username);
+  let blockchainUser = await api.getUserByName(username);
   log.info('User profile:', blockchainUser);
 
   // Registering second user, which we will use later in this example
@@ -59,7 +59,7 @@ async function main() {
   log.info('Block hash is', await api.generate(1));
 
   // Check user data
-  blockchainUser = await api.getUser(username);
+  blockchainUser = await api.getUserByName(username);
   log.info('User credits after top up:', blockchainUser.credits);
 
   // Registering dap, if it's not registered already:

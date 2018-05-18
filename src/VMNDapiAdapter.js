@@ -55,7 +55,7 @@ class VMNDAPIAdapter {
     if (!Schema.validate.username(uname)) {
       return null;
     }
-    return this.DAPI.getUser(uname);
+    return this.DAPI.getUserByName(uname);
   }
 
   /**
@@ -63,7 +63,7 @@ class VMNDAPIAdapter {
    * @param {string} uid
    */
   async GetUserById(uid) {
-    return this.DAPI.getUser(uid);
+    return this.DAPI.getUserById(uid);
   }
 
   /**

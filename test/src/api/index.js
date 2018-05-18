@@ -42,26 +42,30 @@ describe('api', () => {
   before(() => {
     // stub requests to DAPI
     sinon.stub(rpcClient, 'request').callsFake(async function(url, method, params) {
+      const {
+        address, username, rawTransaction, rawTransitionHeader, rawTransitionPacket, height
+      } = params;
+
       if (method === 'getUTXO') {
-        if (!Address.isValid(params[0])) {
+        if (!Address.isValid(address)) {
           throw new Error('Address is not valid');
         }
-        if (params[0] === validAddressWithOutputs) {
+        if (address === validAddressWithOutputs) {
           return [{}];
         }
-        if (params[0] === validAddressWithoutOutputs) {
+        if (address === validAddressWithoutOutputs) {
           return [];
         }
         throw new Error('Address not found');
       }
       if (method === 'getBalance') {
-        if (!Address.isValid(params[0])) {
+        if (!Address.isValid(address)) {
           throw new Error('Address is not valid');
         }
-        if (params[0] === validAddressWithOutputs) {
+        if (address === validAddressWithOutputs) {
           return validAddressBalance;
         }
-        if (params[0] === validAddressWithoutOutputs) {
+        if (address === validAddressWithoutOutputs) {
           return 0;
         }
         throw new Error('Address not found');
@@ -71,10 +75,10 @@ describe('api', () => {
         Since dash schema uses fs, it would be impossible to run tests in browser
         with current version of validation from dash-schema
         */
-        const isValidUsername = validateUsername(params[0]);
+        const isValidUsername = validateUsername(username);
         const validRegTxId = false;
         if (isValidUsername) {
-          if (params[0] === validUsername) {
+          if (username === validUsername) {
             return {}; //todo
           }
           throw new Error('User with such username not found');
@@ -86,21 +90,21 @@ describe('api', () => {
       }
       if (method === 'sendRawTransaction') {
         const transaction = new RegSubTx();
-        transaction.fromString(params[0]);
+        transaction.fromString(rawTransaction);
         return transaction.toObject().hash;
       }
       if (method === 'sendRawTransition') {
-        if (!params[1] || typeof params[1] !== 'object') {
+        if (!rawTransitionHeader || typeof rawTransitionPacket !== 'object') {
           throw new Error('Data packet is missing');
         }
-        const transitionHeader = new TransitionHeader().fromString(params[0]);
+        const transitionHeader = new TransitionHeader().fromString(rawTransitionHeader);
         return transitionHeader.toObject().tsid;
       }
       if (method === 'getBestBlockHeight') {
         return 100;
       }
       if (method === 'getBlockHash') {
-        if (params[0] === validBlockHeight) {
+        if (height === validBlockHeight) {
           return validBlockHash;
         }
         throw new Error('Invalid block height');
@@ -155,18 +159,18 @@ describe('api', () => {
       return expect(dapi.getBalance(invalidAddress)).to.be.rejected;
     });
   });
-  describe('.user.getUser', () => {
+  describe('.user.getUserByName', () => {
     it('Should throw error if username or regtx is incorrect', async () => {
       const dapi = new Api();
-      return expect(dapi.getUser(invalidUsername)).to.be.rejected;
+      return expect(dapi.getUserByName(invalidUsername)).to.be.rejected;
     });
     it('Should throw error if user not found', async () => {
       const dapi = new Api();
-      return expect(dapi.getUser(notExistingUsername)).to.be.rejected;
+      return expect(dapi.getUserByName(notExistingUsername)).to.be.rejected;
     });
     it('Should return user data if user exists', async () => {
       const dapi = new Api();
-      const user = await dapi.getUser(validUsername);
+      const user = await dapi.getUserByName(validUsername);
       expect(user).to.be.an('object');
     });
   });

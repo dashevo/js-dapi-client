@@ -1,22 +1,19 @@
 'use strict'
 
-const {spawn} = require('child_process');
-
 const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 
-chai.use(chaiAsPromised);
+chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 
 const BitcoreLib = require('@dashevo/dashcore-lib');
-const {privateKeyString} = require('../../examples/data');
-const Api = require('../../src/api');
 const {PrivateKey, PublicKey, Address} = BitcoreLib;
-const {Registration} = BitcoreLib.Transaction.SubscriptionTransactions;
 const {TopUp} = BitcoreLib.Transaction.SubscriptionTransactions;
 
-const config = require('../../src/config');
+const {execCommand, timeout, registerUser} = require('./helpers');
 
+const {privateKeyString} = require('../../examples/data');
+const Api = require('../../src/api');
+const config = require('../../src/config');
 config.Api.port = 3000;
 
 const testPrivateKey = new PrivateKey();
@@ -26,55 +23,34 @@ let privateKey;
 let publicKey;
 let fundingInDuffs = 1000 * 1000;
 
-const timeout = ms => new Promise(res => setTimeout(res, ms));
-
-
-async function registerUser(username, prKeyString, requestedFunding, skipSign, signature) {
-    const privateKey = new PrivateKey(prKeyString);
-    const publicKey = PublicKey.fromPrivateKey(privateKey);
-    // Change to livenet, if you want to create address for livenet
-    // You need to top up this address first
-    const address = Address.fromPublicKey(publicKey, 'testnet').toString();
-
-    // Getting available inputs
-    const inputs = await api.getUTXO(address);
-
-    const subTx = Registration.createRegistration(username, privateKey, requestedFunding);
-    // Must be bigger than dust amount
-    const lFundingInDuffs = requestedFunding || 1000 * 1000; // 0.01 Dash
-
-    api.getBalance(address);
-
-    subTx.fund(inputs, address, lFundingInDuffs);
-    if (skipSign === undefined || !skipSign) {
-        await subTx.sign(privateKey, signature == undefined ? undefined : signature);
-    }
-    // Send registration transaction to the network
-    return api.sendRawTransaction(subTx.serialize());
-}
-
 
 describe('sync.topup_user_credits', () => {
     before(async () => {
         // Need to start mn-bootstrap
-        api = new Api();
-
         privateKey = new PrivateKey(privateKeyString);
         publicKey = PublicKey.fromPrivateKey(privateKey);
         address = Address.fromPublicKey(publicKey, 'testnet').toString();
+
+        // Need to start mn-bootstrap & wait wallet loading complete
+        api = new Api();
+
+        // Initial chain
+        await api.generate(101);
+        const result = await execCommand(
+            'sh',
+            ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
+            {cwd: process.cwd() + '/../mn-bootstrap/'},
+        );
+        console.log(result);
+        await api.generate(7);
+
     });
 
     beforeEach(async () => {
         await timeout(500);
     });
 
-    before(async () => {
-    });
-
-    after(async () => {
-    });
-
-    it('Should go through the full Top UP process', async () => {
+    it('Should go through the full Top Up process', async () => {
         let username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString, 10000);
 
@@ -82,18 +58,15 @@ describe('sync.topup_user_credits', () => {
 
         let blockChainUserAfterCreation = await api.getUser(username);
 
-        console.log(blockChainUserAfterCreation)
-
-
         expect(blockChainUserAfterCreation.uname).to.equal(username);
         expect(blockChainUserAfterCreation.credits).to.equal(10000);
         expect(blockChainUserAfterCreation.state).to.equal('open');
         expect(blockChainUserAfterCreation.subtx).to.have.lengthOf(1);
         expect(blockChainUserAfterCreation.transitions).to.have.lengthOf(0);
-        expect(blockChainUserAfterCreation.from_mempool).to.equal(undefined)
-        var pubkeyid1 = blockChainUserAfterCreation.pubkeyid
-        var regtxid1 = blockChainUserAfterCreation.regtxid
-        var subtx1 = blockChainUserAfterCreation.subtx
+        expect(blockChainUserAfterCreation.from_mempool).to.equal(undefined);
+        let pubkeyid1 = blockChainUserAfterCreation.pubkeyid;
+        let regtxid1 = blockChainUserAfterCreation.regtxid;
+        let subtx1 = blockChainUserAfterCreation.subtx;
 
         let inputs = await api.getUTXO(address);
         let subTx = new TopUp();
@@ -116,25 +89,24 @@ describe('sync.topup_user_credits', () => {
         expect(blockChainUserAfterTopUp.state).to.equal('open');
         expect(blockChainUserAfterTopUp.subtx).to.have.lengthOf(1);
         expect(blockChainUserAfterTopUp.transitions).to.have.lengthOf(0);
-        expect(blockChainUserAfterTopUp.from_mempool).to.equal(true)
-        var pubkeyid2 = blockChainUserAfterTopUp.pubkeyid
-        var regtxid2 = blockChainUserAfterTopUp.regtxid
-        var subtx2 = blockChainUserAfterTopUp.subtx
+        expect(blockChainUserAfterTopUp.from_mempool).to.equal(true);
+        let pubkeyid2 = blockChainUserAfterTopUp.pubkeyid;
+        let regtxid2 = blockChainUserAfterTopUp.regtxid;
+        let subtx2 = blockChainUserAfterTopUp.subtx;
 
         await api.generate(1);
 
         let blockChainUserAfterBlockGen = await api.getUser(username);
-        console.log(blockChainUserAfterBlockGen)
 
         expect(blockChainUserAfterBlockGen.uname).to.equal(username);
         expect(blockChainUserAfterBlockGen.credits).to.equal(10000 + fundingInDuffs);
         expect(blockChainUserAfterBlockGen.state).to.equal('open');
         expect(blockChainUserAfterBlockGen.subtx).to.have.lengthOf(2);
         expect(blockChainUserAfterBlockGen.transitions).to.have.lengthOf(0);
-        expect(blockChainUserAfterBlockGen.from_mempool).to.equal(undefined)
-        var pubkeyid3 = blockChainUserAfterBlockGen.pubkeyid
-        var regtxid3 = blockChainUserAfterBlockGen.regtxid
-        var subtx3 = blockChainUserAfterBlockGen.subtx
+        expect(blockChainUserAfterBlockGen.from_mempool).to.equal(undefined);
+        let pubkeyid3 = blockChainUserAfterBlockGen.pubkeyid;
+        let regtxid3 = blockChainUserAfterBlockGen.regtxid;
+        let subtx3 = blockChainUserAfterBlockGen.subtx;
 
         expect(pubkeyid1).to.equal(pubkeyid2);
         expect(pubkeyid2).to.equal(pubkeyid3);
@@ -146,29 +118,28 @@ describe('sync.topup_user_credits', () => {
 
     it('Should be able sequential funding with signing', async () => {
         let username = Math.random().toString(36).substring(7);
+        await timeout(1000);
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        var expectedCredits = 10000
-        let nums = [1, 2, 3, 4];
-        for (let num of nums) {
+        let expectedCredits = 10000
+        for (let num of [1, 2, 3, 4]) {
             let blockChainUser = await api.getUser(username);
             let inputs = await api.getUTXO(address);
             let subTx = new TopUp();
             subTx
                 .fund(blockChainUser.regtxid, fundingInDuffs * num, inputs, address);
-            expectedCredits += fundingInDuffs * num
+            expectedCredits += fundingInDuffs * num;
             expect(subTx).to.be.an('object');
             expect(subTx.inputs).to.have.lengthOf(1);
             expect(subTx.nLockTime).to.equal(0);
             expect(subTx.outputs).to.have.lengthOf(2);
             expect(subTx.version).to.equal(1);
             subTx.sign(privateKey);
+
             let txId = await api.sendRawTransaction(subTx.serialize());
             expect(txId).to.be.an('object').that.has.all.keys('txid');
-
             blockChainUser = await api.getUser(username);
-            console.log(blockChainUser)
             expect(blockChainUser.uname).to.equal(username);
             expect(blockChainUser.credits).to.equal(expectedCredits);
             expect(blockChainUser.state).to.equal('open');
@@ -262,8 +233,7 @@ describe('sync.topup_user_credits', () => {
         await api.sendRawTransaction(subTx.serialize());
     });
 
-    var fees = [0, 1, 100, 666];
-    fees.forEach(function (fee) {
+    [0, 1, 100, 666].forEach(function (fee) {
         it('Serialize should throw error when fee is too small', async () => {
             let username = Math.random().toString(36).substring(7);
             await registerUser(username, privateKeyString, 10000);
@@ -342,8 +312,7 @@ describe('sync.topup_user_credits', () => {
         ).to.be.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-badchange. Code:-26"');
     });
 
-    var fees = [150001, 300000];
-    fees.forEach(function (fee) {
+    [150001, 300000].forEach(function (fee) {
         it('Should throw error when fee is too larg', async () => {
             let username = Math.random().toString(36).substring(7);
             await registerUser(username, privateKeyString, fundingInDuffs);
@@ -401,7 +370,7 @@ describe('sync.topup_user_credits', () => {
         let out11 = subTx.outputs[1];
         expect(subTx.version).to.equal(1);
 
-        var feeValue = 1000;
+        let feeValue = 1000;
         subTx.fee(feeValue).sign();
         expect(subTx).to.be.an('object');
         expect(subTx.inputs).to.have.lengthOf(1);
@@ -436,11 +405,10 @@ describe('sync.topup_user_credits', () => {
         let inputs = await api.getUTXO(address);
         inputs[0].satoshis += 10000;
         subTx
-            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
         subTx.sign(privateKey);
         await api.sendRawTransaction(subTx.serialize());
     });
-
 
     it('Error throwing when inputs address has been changed when funding', async () => { // TODO WHY?
         let username = Math.random().toString(36).substring(7);
@@ -465,7 +433,7 @@ describe('sync.topup_user_credits', () => {
         let inputs = await api.getUTXO(address);
         inputs[0].amount += 1;
         subTx
-            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
         subTx.sign(privateKey);
         expect(() => api.sendRawTransaction(subTx.serialize()).to.throw('DAPI RPC error: sendRawTransaction: 400 - "16: bad-txns-in-belowout. Code:-26"'));
     });
@@ -484,7 +452,6 @@ describe('sync.topup_user_credits', () => {
         subTx.sign(privateKey);
         await api.sendRawTransaction(subTx.serialize());
     });
-
 
     it('Error not throwing when inputs height has been changed when funding', async () => { // TODO WHY?
         let username = Math.random().toString(36).substring(7);
@@ -511,11 +478,10 @@ describe('sync.topup_user_credits', () => {
         let inputs = await api.getUTXO(address);
         inputs[0].scriptPubKey = '76a914dc2bfda564dc6217c55c842d65cc0242e095d2d788ac';
         subTx
-            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
         subTx.sign(privateKey);
         await api.sendRawTransaction(subTx.serialize());
     });
-
 
     it('Error not throwing when inputs txid has been changed when funding', async () => { // TODO WHY?
         let username = Math.random().toString(36).substring(7);
@@ -527,7 +493,7 @@ describe('sync.topup_user_credits', () => {
         let inputs = await api.getUTXO(address);
         inputs[0].txid = 'a3690bea9fadcba57b3138df56ccfd6e15823071d5e5f43fbbbdf947d0ccbe41';
         subTx
-            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address)
+            .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
         subTx.sign(privateKey);
         api.sendRawTransaction(subTx.serialize())
     });

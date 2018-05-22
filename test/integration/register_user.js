@@ -1,28 +1,21 @@
-'use strict'
-
-const {spawn} = require('child_process');
-const Signature = require("@dashevo/dashcore-lib/lib/crypto/signature");
+'use strict';
 
 const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
-
-chai.use(chaiAsPromised);
+chai.use(require('chai-as-promised'));
 const expect = chai.expect;
 
 const BitcoreLib = require('@dashevo/dashcore-lib');
-const {privateKeyString} = require('../../examples/data');
-const Api = require('../../src/api');
 const {PrivateKey, PublicKey, Address} = BitcoreLib;
 const {Registration} = BitcoreLib.Transaction.SubscriptionTransactions;
+const Signature = require("@dashevo/dashcore-lib/lib/crypto/signature");
 
+const {execCommand, timeout} = require('./helpers');
+const {privateKeyString} = require('../../examples/data');
+const Api = require('../../src/api');
 const config = require('../../src/config');
-
 config.Api.port = 3000;
 
 let api;
-
-const privateKey = new PrivateKey(privateKeyString);
-const timeout = ms => new Promise(res => setTimeout(res, ms))
 
 async function registerUser(username, prKeyString, requestedFunding, skipSign, signature) {
     const privateKey = new PrivateKey(prKeyString);
@@ -48,28 +41,6 @@ async function registerUser(username, prKeyString, requestedFunding, skipSign, s
     return api.sendRawTransaction(subTx.serialize());
 }
 
-function execCommand(command, params, options) {
-    return new Promise(resolve => {
-        let result = '';
-        const sp = spawn(command, params, options);
-
-        sp.stdout.on('data', data => {
-            console.log(`stdout: ${data}`);
-            result += data;
-        });
-
-        sp.stderr.on('data', data => {
-            console.log(`stderr: ${data}`);
-            result += data;
-        });
-
-        sp.on('close', code => {
-            console.log(`child process exited with code ${code}`);
-            resolve(result)
-        });
-    });
-}
-
 describe('async.registerUser', async () => {
     before(async () => {
 
@@ -93,7 +64,7 @@ describe('async.registerUser', async () => {
     after(async () => {
     });
 
-    var signatures = [undefined, Signature.SIGHASH_ALL, Signature.SIGHASH_NONE, Signature.SIGHASH_SINGLE, Signature.SIGHASH_ANYONECANPAY];
+    const signatures = [undefined, Signature.SIGHASH_ALL, Signature.SIGHASH_NONE, Signature.SIGHASH_SINGLE, Signature.SIGHASH_ANYONECANPAY];
     // TODO for SIGHASH_ANYONECANPAY:  Error: DAPI RPC error: sendRawTransaction: 400 - "64: non-mandatory-script-verify-flag (Signature hash type missing or not understood). Code:-26"
     signatures.forEach(function (signature) {
         it('Should register user with diff signature', async () => {
@@ -152,8 +123,7 @@ describe('async.registerUser', async () => {
         return expect(registerUser(username, privateKeyString, 900000000000)).to.be.eventually.rejectedWith('undefined - For more information please see');
     });
 
-    var requestedFundings = [10000, '10000', 10000000];
-    requestedFundings.forEach(function (requestedFunding) {
+    [10000, '10000', 10000000].forEach(function (requestedFunding) {
         it('Should register user with correct requestedFunding', async () => {
             let username = Math.random().toString(36).substring(7);
 
@@ -176,8 +146,7 @@ describe('async.registerUser', async () => {
         });
     });
 
-    var names = ["1", '*', '&()@', '[+=']
-    names.forEach(function (name) {
+    ["1", '*', '&()@', '[+='].forEach(function (name) {
         it('Should register user with special symbols', async () => {
             let username = name + Math.random().toString(36).substring(7);
 
@@ -277,7 +246,7 @@ describe('sync.registerUser', () => {
 
     it('Should throw Error when create user with existing name and new requestedFunding with confirmation', async () => {
         let username = Math.random().toString(36).substring(7);
-        await timeout(1000)
+        await timeout(1000);
         registerUser(username, privateKeyString, 99999);
         await api.generate(7);
         let blockChainUser = await api.getUser(username);
@@ -294,7 +263,7 @@ describe('sync.registerUser', () => {
         let username = Math.random().toString(36).substring(7);
 
         for (let un of [username.toLowerCase(), username.toUpperCase()]) {
-            await timeout(1000)
+            await timeout(1000);
             await registerUser(un, privateKeyString);
             await api.generate(7);
         }
@@ -305,7 +274,6 @@ describe('sync.registerUser', () => {
             expect(blockChainUserLower.uname).to.be.a('string');
             expect(blockChainUserLower.uname).to.equal(un);
         }
-
     });
 
 });

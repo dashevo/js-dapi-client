@@ -3,7 +3,7 @@ const BitcoreLib = require('@dashevo/dashcore-lib');
 
 const { Address, PrivateKey, PublicKey } = BitcoreLib;
 const { TopUp } = BitcoreLib.Transaction.SubscriptionTransactions;
-const api = new Api();
+const api = new Api({ port: 3010 });
 
 /**
  * Tops up user credits. Note that anyone can top up user credits.

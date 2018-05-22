@@ -3,7 +3,7 @@ const Schema = require('@dashevo/dash-schema');
 const { PrivateKey } = require('@dashevo/dashcore-lib');
 const { Api } = require('../src');
 
-const api = new Api();
+const api = new Api({ port: 3010 });
 
 async function registerDap(dapSchema, privateKeyString, userId) {
   const privateKey = new PrivateKey(privateKeyString);

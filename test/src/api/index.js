@@ -120,6 +120,19 @@ describe('api', () => {
     rpcClient.request.restore();
   });
 
+  describe('constructor', () => {
+    it('Should set seeds and port, if passed', async () => {
+      const dapi = new Api({seeds: [{ip:'127.1.2.3'}], port: 1234});
+      expect(dapi.DAPIPort).to.be.equal(1234);
+      expect(dapi.MNDiscovery.masternodeListProvider.DAPIPort).to.be.equal(1234);
+      expect(dapi.MNDiscovery.masternodeListProvider.masternodeList).to.be.deep.equal([{ip:'127.1.2.3'}]);
+
+      await dapi.getBestBlockHeight();
+      expect(rpcClient.request.calledWith({ host: '127.1.2.3', port: 1234 }, 'getMNList', {})).to.be.true;
+      expect(rpcClient.request.calledWith({ host: '127.1.2.3', port: 1234 }, 'getBestBlockHeight', {})).to.be.true;
+    });
+  });
+
   describe('.address.getUTXO', () => {
     it('Should return list with unspent outputs for correct address, if there are any', async () => {
       const dapi = new Api();

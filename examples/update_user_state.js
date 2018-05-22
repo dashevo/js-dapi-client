@@ -3,7 +3,7 @@ const { PrivateKey } = require('@dashevo/dashcore-lib');
 const { Api } = require('../src');
 const Schema = require('@dashevo/dash-schema');
 
-const api = new Api();
+const api = new Api({ port: 3010 });
 
 async function updateUserState(dapId, userId, objects, privateKeyString) {
   const privateKey = new PrivateKey(privateKeyString);

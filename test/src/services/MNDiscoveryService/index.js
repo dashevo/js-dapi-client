@@ -48,7 +48,7 @@ describe('MNDiscovery', async () => {
       // Stub for request to seed, which is 127.0.0.1
       const RPCClientStub = sinon.stub(RPCClient, 'request');
       RPCClientStub
-        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMNList', [])
+        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMNList', {})
         .returns(new Promise((resolve) => {
           resolve(MockedMNList);
         }));

@@ -4,10 +4,14 @@ const config = require('../config');
 
 class DAPI {
   /**
-   * @param {Array<Object>} [seeds] - seeds. If no seeds provided, default seed will be used.
+   * @param options
+   * @param {Array<Object>} [options.seeds] - seeds. If no seeds provided
+   * default seed will be used.
+   * @param {number} [options.port] - default port for connection to the DAPI
    */
-  constructor(seeds) {
-    this.MNDiscovery = new MNDiscovery(seeds);
+  constructor(options = {}) {
+    this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
+    this.DAPIPort = options.port || config.Api.port;
   }
 
   /**
@@ -18,7 +22,7 @@ class DAPI {
    */
   async makeRequestToRandomDAPINode(method, params) {
     const randomMasternode = await this.MNDiscovery.getRandomMasternode();
-    return rpcClient.request({ host: randomMasternode.ip, port: config.Api.port }, method, params);
+    return rpcClient.request({ host: randomMasternode.ip, port: this.DAPIPort }, method, params);
   }
 
   /**

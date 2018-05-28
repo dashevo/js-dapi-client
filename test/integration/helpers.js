@@ -12,23 +12,28 @@ const api = new Api();
 
 const timeout = ms => new Promise(res => setTimeout(res, ms))
 
-async function execCommand(command, params, options) {
+async function execCommand(command, params, options, waitString) {
     return new Promise(resolve => {
         let result = '';
         const sp = spawn(command, params, options);
 
         sp.stdout.on('data', data => {
-            console.log(`stdout: ${data}`);
+            // console.log(`stdout: ${data}`);
             result += data;
+            if (waitString != undefined && data.indexOf(waitString)>1){
+                sp.stdin.end();
+                sp.stdout.destroy();
+                sp.stderr.destroy();
+            }
         });
 
         sp.stderr.on('data', data => {
-            console.log(`stderr: ${data}`);
+            // console.log(`stderr: ${data}`);
             result += data;
         });
 
         sp.on('close', code => {
-            console.log(`child process exited with code ${code}`);
+            // console.log(`child process exited with code ${code}`);
             resolve(result)
         });
     });

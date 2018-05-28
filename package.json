@@ -61,6 +61,7 @@
     "test": "npm run build && npm run test:node && npm run test:firefox",
     "test:node": "mocha --no-timeouts --recursive",
     "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run",
+    "test:integration": "mocha --no-timeouts --ui bdd  test/integration/*",
     "coverage": "nyc mocha --recursive"
   },
   "author": "",

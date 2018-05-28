@@ -43,18 +43,32 @@ async function registerUser(username, prKeyString, requestedFunding, skipSign, s
 
 describe('async.registerUser', async () => {
     before(async () => {
-
-        // Need to start mn-bootstrap & wait wallet loading complete
         api = new Api();
 
-        // Initial chain
-        await api.generate(101);
-        const result = await execCommand(
-            'sh',
-            ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
+        await execCommand(
+            './mn-bootstrap.sh',
+            ['regtest', 'up', '-d'],
             {cwd: process.cwd() + '/../mn-bootstrap/'},
         );
-        console.log(result);
+
+        await execCommand(
+            './mn-bootstrap.sh',
+            ['regtest', 'logs', '-f'],
+            {cwd: process.cwd() + '/../mn-bootstrap/'}, 'Dash Daemon Ready');
+        await api.generate(101);
+
+        await execCommand(
+            './mn-bootstrap.sh',
+            ['regtest', 'logs', '-f'],
+            {cwd: process.cwd() + '/../mn-bootstrap/'}, 'join new Quorum');
+        await api.generate(10);
+
+        await
+            execCommand(
+                'sh',
+                ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
+                {cwd: process.cwd() + '/../mn-bootstrap/'},
+            );
         await api.generate(7);
     });
 

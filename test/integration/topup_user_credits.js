@@ -26,24 +26,37 @@ let fundingInDuffs = 1000 * 1000;
 
 describe('sync.topup_user_credits', () => {
     before(async () => {
-        // Need to start mn-bootstrap
         privateKey = new PrivateKey(privateKeyString);
         publicKey = PublicKey.fromPrivateKey(privateKey);
         address = Address.fromPublicKey(publicKey, 'testnet').toString();
 
-        // Need to start mn-bootstrap & wait wallet loading complete
         api = new Api();
 
-        // Initial chain
-        await api.generate(101);
-        const result = await execCommand(
-            'sh',
-            ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
+        await execCommand(
+            './mn-bootstrap.sh',
+            ['regtest', 'up', '-d'],
             {cwd: process.cwd() + '/../mn-bootstrap/'},
         );
-        console.log(result);
-        await api.generate(7);
 
+        await execCommand(
+            './mn-bootstrap.sh',
+            ['regtest', 'logs', '-f'],
+            {cwd: process.cwd() + '/../mn-bootstrap/'}, 'Dash Daemon Ready');
+        await api.generate(101);
+
+        await execCommand(
+            './mn-bootstrap.sh',
+            ['regtest', 'logs', '-f'],
+            {cwd: process.cwd() + '/../mn-bootstrap/'}, 'join new Quorum');
+        await api.generate(10);
+
+        await
+            execCommand(
+                'sh',
+                ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
+                {cwd: process.cwd() + '/../mn-bootstrap/'},
+            );
+        await api.generate(7);
     });
 
     beforeEach(async () => {

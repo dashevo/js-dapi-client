@@ -18,7 +18,6 @@ const Api = require('../../src/api');
 
 config.Api.port = 3000;
 const derivingPath = 'm/1';
-const log = console;
 
 let api;
 let address;
@@ -26,103 +25,101 @@ let privateKey;
 let publicKey;
 let dashPayId = 'b4de10e1ddb8e225cd04a406deb98e6081f9bd26f98f46c0932d0bdfb2bd0623';
 
-
 describe('sync.register_dap', () => {
     before(async () => {
-        // Need to start mn-bootstrap
         privateKey = new PrivateKey(privateKeyString);
         publicKey = PublicKey.fromPrivateKey(privateKey);
         address = Address.fromPublicKey(publicKey, 'testnet').toString();
-
-        // // Need to start mn-bootstrap & wait wallet loading complete
         api = new Api();
 
-        // Initial chain
-        await api.generate(101);
-        const result = await execCommand(
-            'sh',
-            ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
+        await execCommand(
+            './mn-bootstrap.sh',
+            ['regtest', 'up', '-d'],
             {cwd: process.cwd() + '/../mn-bootstrap/'},
         );
-        console.log(result);
-        await api.generate(7);
 
+        await execCommand(
+            './mn-bootstrap.sh',
+            ['regtest', 'logs', '-f'],
+            {cwd: process.cwd() + '/../mn-bootstrap/'}, 'Dash Daemon Ready');
+        await api.generate(101);
+
+        await execCommand(
+            './mn-bootstrap.sh',
+            ['regtest', 'logs', '-f'],
+            {cwd: process.cwd() + '/../mn-bootstrap/'}, 'join new Quorum');
+        await api.generate(10);
+
+        await
+            execCommand(
+                'sh',
+                ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
+                {cwd: process.cwd() + '/../mn-bootstrap/'},
+            );
+        await api.generate(7);
     });
 
     beforeEach(async () => {
+        await api.generate(1);
         await timeout(1000);
     });
 
-    it('Should be able to accept 2 contact requests at the same time', async () => {
+    it('Should not be able accept contact if it has been deleted', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
-        const username2 = Math.random().toString(36).substring(7);
-        await registerUser(username2, privateKeyString);
-
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-
-        await api.generate(1);
-
-        let blockchainUser = await api.getUser(username);
-        let blockchainUser2 = await api.getUser(username2);
-
-        // To up user credits
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-        await topUpUserCredits(blockchainUser2.regtxid, privateKeyString);
-
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
-        blockchainUser2 = await api.getUser(username2);
-
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
-            log.info('DashPay data contract not found. Creating one');
+            // DashPay data contract not found. Creating one
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
                 privateKeyString,
                 blockchainUser.regtxid,
             );
             await api.generate(1);
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
-
-        let dashPayId2 = await registerDap(
-            Schema.Daps.DashPay,
-            privateKeyString,
-            blockchainUser2.regtxid,
-        );
-        await api.generate(1);
-        let dashPayDataContract2 = await api.getDapContract(dashPayId2);
-
-        // This code is DashPay-specific.
         const contactRequest = Schema.create.dapobject('contact');
         contactRequest.contact.hdextpubkey = user1HDKey
             .derive(derivingPath).hdPublicKey.toString();
         contactRequest.contact.relation = otherUserId.txid;
 
-        const contactRequest2 = Schema.create.dapobject('contact');
-        contactRequest2.contact.hdextpubkey = user1HDKey
-            .derive(derivingPath).hdPublicKey.toString();
-        contactRequest2.contact.relation = otherUserId.txid;
-
-        log.info('Sending contact request to the network');
         await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
-        await updateUserState(dashPayId, blockchainUser2.regtxid, [contactRequest2], privateKeyString);
-
         await api.generate(1);
 
-        const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
 
+        let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.regtxid);
+        expect(user2Space).to.equal(undefined);
+
+        let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
         expect(user2Context.maxidx).to.equal(-1);
         expect(user2Context.objects).to.equal(null);
-        expect(user2Context.related).to.have.lengthOf(2);
+        expect(user2Context.related).to.have.lengthOf(1);
         expect(user2Context.related[0]).to.be.deep.equal({
             "contact": {
                 "act": 1,
@@ -136,7 +133,1016 @@ describe('sync.register_dap', () => {
                 }
             }
         });
-        expect(user2Context.related[1]).to.be.deep.equal({
+
+        // delete contact
+        const contactDeleteRequest = Schema.create.dapobject('contact');
+        contactDeleteRequest.contact.hdextpubkey = "";
+        contactDeleteRequest.contact.relation = otherUserId.txid;
+        contactDeleteRequest.contact.act = 3;
+        updateUserState(dashPayId, blockchainUser.regtxid, [contactDeleteRequest], privateKeyString);
+        await api.generate(1);
+
+        //try to accept deleted contact
+        const contactAcceptance = Schema.create.dapobject('contact');
+        contactAcceptance.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactAcceptance.contact.relation = blockchainUser.regtxid;
+        await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance], privateKeyString);
+        await api.generate(1);
+
+        user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(0);
+
+        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(0);
+
+        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(1);
+        expect(user2Space.objects[0]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 1,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": contactAcceptance.contact.hdextpubkey
+                }
+        });
+
+        blockchainUser = await api.getUser(username);
+        expect(blockchainUser.subtx).to.have.lengthOf(2);
+        expect(blockchainUser.transitions).to.have.lengthOf(3);
+
+        let otherUser = await api.getUser(otherUserUsername);
+        expect(otherUser.subtx).to.have.lengthOf(1);
+        expect(otherUser.transitions).to.have.lengthOf(1);
+    });
+
+    it('Should have correct behavior with contact requests for create/delete/update based on relations state', async () => {
+        const username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString);
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
+        const otherUserUsername = Math.random().toString(36).substring(7);
+        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        // Registering dap, if it's not registered already:
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+        }
+
+        let contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = "";
+        contactRequest.contact.relation = otherUserId.txid;
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+        await api.generate(1);
+
+        // try to re-create contact request
+        contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = "";
+        contactRequest.contact.relation = otherUserId.txid;
+        return expect(updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString)).to.be.rejectedWith('DAPI RPC error: sendRawTransition: Wasn\'t able to pin packet');
+        await api.generate(1);
+
+        // update contact request
+        contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = "";
+        contactRequest.contact.relation = otherUserId.txid;
+        contactRequest.contact.act = 2;
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+        await api.generate(1);
+
+        // delete contact
+        contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = "";
+        contactRequest.contact.relation = otherUserId.txid;
+        contactRequest.contact.act = 3;
+        return expect(updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString)).to.be.rejectedWith('DAPI RPC error: sendRawTransition: Wasn\'t able to pin packet');
+        await api.generate(1);
+
+        //TODO why we can update without creation?
+        // update contact request
+        contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = "";
+        contactRequest.contact.relation = otherUserId.txid;
+        contactRequest.contact.act = 2;
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+        await api.generate(1);
+
+        // try to re-create contact request after deletion
+        contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = "";
+        contactRequest.contact.relation = otherUserId.txid;
+        updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+        await api.generate(1);
+    });
+
+    it('Should be able to resend updated request contact before accepting', async () => {
+        const username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString);
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
+        const otherUserUsername = Math.random().toString(36).substring(7);
+        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        // Registering dap, if it's not registered already:
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+        }
+        const contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest.contact.relation = otherUserId.txid;
+
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+        await api.generate(1);
+
+
+        const contactUpdateRequest = Schema.create.dapobject('contact');
+        contactUpdateRequest.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactUpdateRequest.contact.relation = otherUserId.txid;
+        contactUpdateRequest.contact.extra_param = "new_param_added";
+        contactUpdateRequest.contact.act = 2;
+
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactUpdateRequest], privateKeyString);
+        await api.generate(1);
+
+        let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 2,
+                "extra_param": "new_param_added",
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+
+        let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.regtxid);
+        expect(user2Space).to.equal(undefined);
+
+        let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.equal(null);
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 2,
+                "extra_param": "new_param_added",
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        const contactAcceptance = Schema.create.dapobject('contact');
+        contactAcceptance.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactAcceptance.contact.relation = blockchainUser.regtxid;
+        await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance], privateKeyString);
+        await api.generate(1);
+
+        user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 2,
+                "extra_param": "new_param_added",
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 2,
+                "extra_param": "new_param_added",
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+
+        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(1);
+        expect(user2Space.objects[0]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 1,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": contactAcceptance.contact.hdextpubkey
+                }
+        });
+
+        blockchainUser = await api.getUser(username);
+        expect(blockchainUser.subtx).to.have.lengthOf(2);
+        expect(blockchainUser.transitions).to.have.lengthOf(2);
+
+        let otherUser = await api.getUser(otherUserUsername);
+        expect(otherUser.subtx).to.have.lengthOf(1);
+        expect(otherUser.transitions).to.have.lengthOf(1);
+
+        await api.generate(1);
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 2,
+                "extra_param": "new_param_added",
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        // create request to delete the user from contacts
+        const contactRequestDelete = Schema.create.dapobject('contact');
+        contactRequestDelete.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequestDelete.contact.relation = otherUserId.txid;
+        contactRequestDelete.contact.act = 3;
+
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequestDelete], privateKeyString);
+        await api.generate(1);
+
+        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(0);
+
+        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(1);
+        expect(user2Space.objects[0]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 1,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": contactAcceptance.contact.hdextpubkey
+                }
+        });
+
+        user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(0);
+    });
+
+
+    it('TODO why we can set act = 3 for non created contact?', async () => {
+        const username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString);
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
+        const otherUserUsername = Math.random().toString(36).substring(7);
+        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        // Registering dap, if it's not registered already:
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+        }
+        const contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest.contact.relation = otherUserId.txid;
+        contactRequest.contact.act = 3;
+
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+        await api.generate(1);
+
+        let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 3,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+
+        let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.regtxid);
+        expect(user2Space).to.equal(undefined);
+
+        let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.equal(null);
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 3,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        const contactAcceptance = Schema.create.dapobject('contact');
+        contactAcceptance.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactAcceptance.contact.relation = blockchainUser.regtxid;
+        contactAcceptance.contact.act = 3;
+        await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance], privateKeyString);
+        await api.generate(1);
+
+        user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 3,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 3,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 3,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+
+        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(1);
+        expect(user2Space.objects[0]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 3,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": contactAcceptance.contact.hdextpubkey
+                }
+        });
+
+        blockchainUser = await api.getUser(username);
+        expect(blockchainUser.subtx).to.have.lengthOf(2);
+        expect(blockchainUser.transitions).to.have.lengthOf(1); // ????
+
+        let otherUser = await api.getUser(otherUserUsername);
+        expect(otherUser.subtx).to.have.lengthOf(1);
+        expect(otherUser.transitions).to.have.lengthOf(1);
+
+        await api.generate(1);
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 3,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 3,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        // create request to delete the user from contacts
+        const contactRequestDelete = Schema.create.dapobject('contact');
+        contactRequestDelete.contact.hdextpubkey = '';
+        contactRequestDelete.contact.relation = otherUserId.txid;
+        contactRequestDelete.contact.act = 3;
+
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequestDelete], privateKeyString);
+        await api.generate(1);
+
+        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(0);
+
+        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(1);
+        expect(user2Space.objects[0]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 3,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": contactAcceptance.contact.hdextpubkey
+                }
+        });
+
+        user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 3,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(0);
+        await api.generate(1);
+    });
+
+    it('Should be able to remove contact', async () => {
+        const username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString);
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
+        const otherUserUsername = Math.random().toString(36).substring(7);
+        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        // Registering dap, if it's not registered already:
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+        }
+        const contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest.contact.relation = otherUserId.txid;
+
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+        await api.generate(1);
+
+        let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+
+        let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.regtxid);
+        expect(user2Space).to.equal(undefined);
+
+        let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.equal(null);
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        const contactAcceptance = Schema.create.dapobject('contact');
+        contactAcceptance.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactAcceptance.contact.relation = blockchainUser.regtxid;
+        await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance], privateKeyString);
+        await api.generate(1);
+
+        user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+
+        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(1);
+        expect(user2Space.objects[0]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 1,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": contactAcceptance.contact.hdextpubkey
+                }
+        });
+
+        blockchainUser = await api.getUser(username);
+        expect(blockchainUser.subtx).to.have.lengthOf(2);
+        expect(blockchainUser.transitions).to.have.lengthOf(1);
+
+        let otherUser = await api.getUser(otherUserUsername);
+        expect(otherUser.subtx).to.have.lengthOf(1);
+        expect(otherUser.transitions).to.have.lengthOf(1);
+
+        await api.generate(1);
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        // create request to delete the user from contacts
+        const contactRequestDelete = Schema.create.dapobject('contact');
+        contactRequestDelete.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequestDelete.contact.relation = otherUserId.txid;
+        contactRequestDelete.contact.act = 3;
+
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequestDelete], privateKeyString);
+        await api.generate(1);
+
+        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(0);
+
+        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(1);
+        expect(user2Space.objects[0]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 1,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": contactAcceptance.contact.hdextpubkey
+                }
+        });
+
+        user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
+
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(0);
+    });
+
+    it('Should be able to send and accept many contact requests at the same time with many DapContracts', async () => {
+        const numAdditionalUsers = 3;
+        const username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString);
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
+        const otherUserUsername = Math.random().toString(36).substring(7);
+        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        // Registering dap, if it's not registered already:
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+        }
+        const contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest.contact.relation = otherUserId.txid;
+
+        await api.generate(1);
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+
+        var i;
+        var blockchainUsers = [];
+        let contactRequests = [];
+        for (i = 0; i < numAdditionalUsers; i++) {
+            await timeout(800);
+            const username2 = Math.random().toString(36).substring(7);
+            await registerUser(username2, privateKeyString);
+            await api.generate(1);
+            let blockchainUser2 = await api.getUser(username2);
+            await topUpUserCredits(blockchainUser2.regtxid, privateKeyString);
+            await api.generate(1);
+            blockchainUser2 = await api.getUser(username2);
+            blockchainUsers.push(blockchainUser2);
+
+            let dashPayId2 = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser2.regtxid,
+            );
+
+            let contactRequest2 = Schema.create.dapobject('contact');
+            contactRequest2.contact.hdextpubkey = user1HDKey
+                .derive(derivingPath).hdPublicKey.toString();
+            contactRequest2.contact.relation = otherUserId.txid;
+            await api.generate(1);
+            await updateUserState(dashPayId2, blockchainUser2.regtxid, [contactRequest2], privateKeyString);
+            contactRequests.push(contactRequest2);
+        }
+
+        const otherUserContext = await api.getUserDapContext(dashPayId, otherUserId.txid);
+
+        expect(otherUserContext.dapid).to.equal(dashPayId);
+        expect(otherUserContext.maxidx).to.equal(-1);
+        expect(otherUserContext.objects).to.equal(null);
+        expect(otherUserContext.related).to.have.lengthOf(numAdditionalUsers + 1);
+
+        const contactAcceptance = Schema.create.dapobject('contact');
+        contactAcceptance.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactAcceptance.contact.relation = blockchainUser.regtxid;
+
+        let contactAcceptances = [];
+        for (i = 0; i < numAdditionalUsers; i++) {
+            const contactAcceptance2 = Schema.create.dapobject('contact');
+            contactAcceptance2.contact.hdextpubkey = user2HDKey
+                .derive(derivingPath).hdPublicKey.toString();
+            contactAcceptance2.contact.relation = blockchainUsers[i].regtxid;
+            contactAcceptances.push(contactAcceptance2);
+
+        }
+        contactAcceptances.push(contactAcceptance);
+        await updateUserState(dashPayId, otherUserId.txid, contactAcceptances, privateKeyString);
+        await api.generate(1);
+
+        let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+
+        const user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(numAdditionalUsers + 1);
+
+
+        const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(numAdditionalUsers + 1);
+        expect(user2Context.related).to.have.lengthOf(numAdditionalUsers + 1);
+    });
+
+    it('Should be able to accept 2 contact requests at the same time with 1 DapContract', async () => {
+        const username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString);
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
+        const otherUserUsername = Math.random().toString(36).substring(7);
+        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        // Registering dap, if it's not registered already:
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+        }
+        const contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest.contact.relation = otherUserId.txid;
+
+        await timeout(1000);
+        const username2 = Math.random().toString(36).substring(7);
+        await registerUser(username2, privateKeyString);
+        await api.generate(1);
+        let blockchainUser2 = await api.getUser(username2);
+        await topUpUserCredits(blockchainUser2.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser2 = await api.getUser(username2);
+        await api.generate(1);
+
+        const contactRequest2 = Schema.create.dapobject('contact');
+        contactRequest2.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest2.contact.relation = otherUserId.txid;
+
+        // Sending contact requests to the network
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+        await updateUserState(dashPayId, blockchainUser2.regtxid, [contactRequest2], privateKeyString);
+        await api.generate(1);
+
+        const otherUserContext = await api.getUserDapContext(dashPayId, otherUserId.txid);
+
+        expect(otherUserContext.dapid).to.equal(dashPayId);
+        expect(otherUserContext.maxidx).to.equal(-1);
+        expect(otherUserContext.objects).to.equal(null);
+        expect(otherUserContext.related).to.have.lengthOf(2);
+        expect(otherUserContext.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+        expect(otherUserContext.related[1]).to.be.deep.equal({
             "contact": {
                 "act": 1,
                 "idx": 0,
@@ -150,8 +1156,7 @@ describe('sync.register_dap', () => {
             }
         });
 
-        // Now we need to accept first user contact request, i.e. create contact object
-        // on second user side, referencing first user's id:
+        // Now we need to accept contact requests
         const contactAcceptance = Schema.create.dapobject('contact');
         contactAcceptance.contact.hdextpubkey = user2HDKey
             .derive(derivingPath).hdPublicKey.toString();
@@ -163,10 +1168,11 @@ describe('sync.register_dap', () => {
         contactAcceptance2.contact.relation = blockchainUser2.regtxid;
 
         await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance, contactAcceptance2], privateKeyString);
-
         await api.generate(1);
 
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space.objects).to.have.lengthOf(1);
         expect(user1Space.objects[0]).to.be.deep.equal({
             "contact": {
                 "act": 1,
@@ -178,6 +1184,159 @@ describe('sync.register_dap', () => {
         });
 
         let user1Space2 = await api.getUserDapSpace(dashPayId, blockchainUser2.regtxid);
+        expect(user1Space2.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space2.objects).to.have.lengthOf(1);
+        expect(user1Space2.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest2.contact.hdextpubkey
+            }
+        });
+
+        const user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(2);
+        expect(user2Space.objects[0]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 1,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": contactAcceptance.contact.hdextpubkey
+                }
+        });
+        expect(user2Space.objects[1]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 1,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space2.uid,
+                    "hdextpubkey": contactAcceptance2.contact.hdextpubkey
+                }
+        });
+    });
+
+    it('Should be able to accept 2 contact requests at the same time with 2 DapContract', async () => {
+        const username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString);
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
+        const otherUserUsername = Math.random().toString(36).substring(7);
+        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        // Registering dap, if it's not registered already:
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+        }
+        const contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest.contact.relation = otherUserId.txid;
+
+        await timeout(1000);
+        const username2 = Math.random().toString(36).substring(7);
+        await registerUser(username2, privateKeyString);
+        await api.generate(1);
+        let blockchainUser2 = await api.getUser(username2);
+        await topUpUserCredits(blockchainUser2.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser2 = await api.getUser(username2);
+
+        let dashPayId2 = await registerDap(
+            Schema.Daps.DashPay,
+            privateKeyString,
+            blockchainUser2.regtxid,
+        );
+        await api.generate(1);
+
+        const contactRequest2 = Schema.create.dapobject('contact');
+        contactRequest2.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest2.contact.relation = otherUserId.txid;
+
+        // Sending contact requests to the network
+        await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
+        await updateUserState(dashPayId2, blockchainUser2.regtxid, [contactRequest2], privateKeyString);
+        await api.generate(1);
+
+        const otherUserContext = await api.getUserDapContext(dashPayId, otherUserId.txid);
+
+        expect(otherUserContext.dapid).to.equal(dashPayId);
+        expect(otherUserContext.maxidx).to.equal(-1);
+        expect(otherUserContext.objects).to.equal(null);
+        expect(otherUserContext.related).to.have.lengthOf(2);
+        expect(otherUserContext.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+        expect(otherUserContext.related[1]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser2.regtxid,
+                    "uname": username2
+                }
+            }
+        });
+
+        // Now we need to accept contact requests
+        const contactAcceptance = Schema.create.dapobject('contact');
+        contactAcceptance.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactAcceptance.contact.relation = blockchainUser.regtxid;
+
+        const contactAcceptance2 = Schema.create.dapobject('contact');
+        contactAcceptance2.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactAcceptance2.contact.relation = blockchainUser2.regtxid;
+
+        await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance, contactAcceptance2], privateKeyString);
+        await api.generate(1);
+
+        let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+
+        let user1Space2 = await api.getUserDapSpace(dashPayId2, blockchainUser2.regtxid);
+        expect(user1Space2.dapid).to.be.deep.equal(dashPayId2);
+        expect(user1Space2.objects).to.have.lengthOf(1);
         expect(user1Space2.objects[0]).to.be.deep.equal({
             "contact": {
                 "act": 1,
@@ -218,13 +1377,29 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-
         let blockchainUser = await api.getUser(username);
-
-        // Registering second user, which we will use later in this example
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        // Registering dap, if it's not registered already:
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+        }
+        const contactRequest = Schema.create.dapobject('contact');
+        contactRequest.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest.contact.relation = otherUserId.txid;
 
+        await timeout(1000);
         const thirdUserUsername = Math.random().toString(36).substring(7);
         const thirdUserId = await registerUser(thirdUserUsername, privateKeyString);
 
@@ -233,38 +1408,37 @@ describe('sync.register_dap', () => {
 
         await api.generate(1);
 
-        // Registering dap, if it's not registered already:
-        let dashPayDataContract = await api.getDapContract(dashPayId);
-
-        if (!dashPayDataContract) {
-            dashPayId = await registerDap(
-                Schema.Daps.DashPay,
-                privateKeyString,
-                blockchainUser.regtxid,
-            );
-            await api.generate(1);
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
-        }
-
-        const contactRequest = Schema.create.dapobject('contact');
-        contactRequest.contact.hdextpubkey = user1HDKey
-            .derive(derivingPath).hdPublicKey.toString();
-        contactRequest.contact.relation = otherUserId.txid;
-
         const contactRequest2 = Schema.create.dapobject('contact');
         contactRequest2.contact.hdextpubkey = user1HDKey
             .derive(derivingPath).hdPublicKey.toString();
         contactRequest2.contact.relation = thirdUserId.txid;
 
-        // End of DashPay-specific code.
+        // Send 2 contact requests to diff users in the same transaction
         await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest, contactRequest2], privateKeyString);
-
         await api.generate(1);
 
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(2);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+        expect(user1Space.objects[1]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": thirdUserId.txid,
+                "hdextpubkey": contactRequest2.contact.hdextpubkey
+            }
+        });
 
+        // check UserDapContext for otherUser
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
         expect(user2Context.maxidx).to.equal(-1);
@@ -292,17 +1466,6 @@ describe('sync.register_dap', () => {
         await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance], privateKeyString);
         await api.generate(1);
 
-        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
-        expect(user1Space.objects[0]).to.be.deep.equal({
-            "contact": {
-                "act": 1,
-                "idx": 0,
-                "rev": 0,
-                "relation": otherUserId.txid,
-                "hdextpubkey": contactRequest.contact.hdextpubkey
-            }
-        });
-
         const user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
         expect(user2Space.dapid).to.equal(dashPayId);
         expect(user2Space.uid).to.equal(otherUserId.txid);
@@ -317,25 +1480,71 @@ describe('sync.register_dap', () => {
                     "hdextpubkey": contactAcceptance.contact.hdextpubkey
                 }
         });
-    });
 
+        // check UserDapContext for thirdUser
+        const user2Context2 = await api.getUserDapContext(dashPayId, thirdUserId.txid);
+        expect(user2Context2.dapid).to.equal(dashPayId);
+        expect(user2Context2.maxidx).to.equal(-1);
+        expect(user2Context2.objects).to.equal(null);
+        expect(user2Context2.related).to.have.lengthOf(1);
+        expect(user2Context2.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": thirdUserId.txid,
+                "hdextpubkey": contactRequest2.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        const contactAcceptance2 = Schema.create.dapobject('contact');
+        contactAcceptance2.contact.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactAcceptance2.contact.relation = blockchainUser.regtxid;
+
+        await updateUserState(dashPayId, thirdUserId.txid, [contactAcceptance2], privateKeyString);
+        await api.generate(1);
+
+        const user3Space = await api.getUserDapSpace(dashPayId, thirdUserId.txid);
+        expect(user3Space.dapid).to.equal(dashPayId);
+        expect(user3Space.uid).to.equal(thirdUserId.txid);
+        expect(user3Space.objects).to.have.lengthOf(1);
+        expect(user3Space.objects[0]).to.be.deep.equal({
+            "contact":
+                {
+                    "act": 1,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": contactAcceptance.contact.hdextpubkey
+                }
+        });
+    });
 
     it('Should not be able to register DAP twice', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
         await api.generate(1);
-
         let blockchainUser = await api.getUser(username);
-
-        const otherUserUsername = Math.random().toString(36).substring(7);
-        await registerUser(otherUserUsername, privateKeyString);
-
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
+
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        // TODO need fix from Anton
+        if (!dashPayDataContract) {
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+            dashPayDataContract = await api.getDapContract(dashPayId);
+        }
 
         await registerDap(
             Schema.Daps.DashPay,
@@ -352,48 +1561,34 @@ describe('sync.register_dap', () => {
         )).to.be.rejectedWith('not valid. state: bad-ts-ancestor (code 81)');
     });
 
-
     it('Should not be able to accept contact request twice', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
         await api.generate(1);
         let blockchainUser = await api.getUser(username);
-
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
-
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
                 privateKeyString,
                 blockchainUser.regtxid,
             );
             await api.generate(1);
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
-
         const contactRequest = Schema.create.dapobject('contact');
         contactRequest.contact.hdextpubkey = user1HDKey
             .derive(derivingPath).hdPublicKey.toString();
         contactRequest.contact.relation = otherUserId.txid;
 
-        // End of DashPay-specific code.
         await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
-
         await api.generate(1);
-
-        let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
 
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
 
@@ -425,47 +1620,37 @@ describe('sync.register_dap', () => {
         return expect(updateUserState(dashPayId, otherUserId.txid, [contactAcceptance], privateKeyString)).to.be.rejectedWith('DAPI RPC error: sendRawTransition: Wasn\'t able to pin packet');
     });
 
-    it('Should trow error when request contact has been resend after accepting', async () => {
+    it('Should not be able to resend contact request after accepting', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
         await api.generate(1);
-
         let blockchainUser = await api.getUser(username);
-
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
-
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
                 privateKeyString,
                 blockchainUser.regtxid,
             );
             await api.generate(1);
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
-
         const contactRequest = Schema.create.dapobject('contact');
         contactRequest.contact.hdextpubkey = user1HDKey
             .derive(derivingPath).hdPublicKey.toString();
         contactRequest.contact.relation = otherUserId.txid;
 
         await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
-
         await api.generate(1);
 
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(1);
 
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
 
@@ -498,86 +1683,68 @@ describe('sync.register_dap', () => {
     });
 
 
-    it('Should not be able send request twice', async () => {
+    it('Should not be able to send request contact twice', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
         await api.generate(1);
-
         let blockchainUser = await api.getUser(username);
-
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
-
+        // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
                 privateKeyString,
                 blockchainUser.regtxid,
             );
             await api.generate(1);
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
-
         const contactRequest = Schema.create.dapobject('contact');
         contactRequest.contact.hdextpubkey = user1HDKey
             .derive(derivingPath).hdPublicKey.toString();
         contactRequest.contact.relation = otherUserId.txid;
-        contactRequest.contact.extrapropboolean = true;
-        contactRequest.contact.extrapropstr = 'stringgg';
-        contactRequest.contact.extrapropnum = -1;
 
         await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
-        await api.generate(1);
-        return expect(updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString)).to.be.rejectedWith('DAPI RPC error: sendRawTransition: Wasn\'t able to pin packet');
 
+        const contactRequest2 = Schema.create.dapobject('contact');
+        contactRequest2.contact.hdextpubkey = user1HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        contactRequest2.contact.relation = otherUserId.txid;
+        return expect(updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest2], privateKeyString)).to.be.rejectedWith('DAPI RPC error: sendRawTransition: Wasn\'t able to pin packet');
     });
 
 
     it('Should go through full accepting contact request process with extra properties', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
         await api.generate(1);
-
         let blockchainUser = await api.getUser(username);
-
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-
-        // To up user credits
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
-
+        // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
                 privateKeyString,
                 blockchainUser.regtxid,
             );
             await api.generate(1);
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
-
         const contactRequest = Schema.create.dapobject('contact');
         contactRequest.contact.hdextpubkey = user1HDKey
             .derive(derivingPath).hdPublicKey.toString();
         contactRequest.contact.relation = otherUserId.txid;
+
         contactRequest.contact.extrapropboolean = true;
         contactRequest.contact.extrapropstr = 'stringgg';
         contactRequest.contact.extrapropnum = -1;
@@ -587,9 +1754,28 @@ describe('sync.register_dap', () => {
         await api.generate(1);
 
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "extrapropboolean": true,
+                "extrapropnum": -1,
+                "extrapropstr": "stringgg",
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
+
+        const user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
 
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
-
         expect(user2Context.dapid).to.equal(dashPayId);
         expect(user2Context.maxidx).to.equal(-1);
         expect(user2Context.objects).to.equal(null);
@@ -615,13 +1801,11 @@ describe('sync.register_dap', () => {
         contactAcceptance.contact.hdextpubkey = user2HDKey
             .derive(derivingPath).hdPublicKey.toString();
         contactAcceptance.contact.relation = blockchainUser.regtxid;
-
         await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance], privateKeyString);
-
         await api.generate(1);
 
         user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
-
+        expect(user1Space.objects).to.have.lengthOf(1);
         expect(user1Space.objects[0]).to.be.deep.equal({
             "contact": {
                 "act": 1,
@@ -636,7 +1820,6 @@ describe('sync.register_dap', () => {
         });
 
         const user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
-
         expect(user2Space.dapid).to.equal(dashPayId);
         expect(user2Space.uid).to.equal(otherUserId.txid);
         expect(user2Space.objects).to.have.lengthOf(1);
@@ -652,108 +1835,58 @@ describe('sync.register_dap', () => {
         });
     });
 
-    it('Should go through full accepting contact request process', async () => {
-        // Generating random username
+    it('Should go through full accepting contact request process', async () => {//aaaaaaaaaaaa
         const username = Math.random().toString(36).substring(7);
-        log.info('Your random username for this run is:');
-        log.info(username);
-        // Sending registration to the network
-        // Note: in this example we assume that account owner is the same
-        // person who funds registration, so only one private key is used.
-        // Otherwise, owner should create registration transaction and
-        // sign it with his own private key, and then pass it to the
-        // funder, which will also sign this transaction with his key.
         await registerUser(username, privateKeyString);
-
-        // Caution: this will work only in regtest mode.
-        log.info('Mining block to confirm transaction.');
-        log.info('Block hash is', await api.generate(1));
-
-        // Checking user data
+        await api.generate(1);
         let blockchainUser = await api.getUser(username);
-        log.info('User profile:', blockchainUser);
-
-        // Registering second user, which we will use later in this example
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-        log.info('Second user is', otherUserUsername, otherUserId);
-
-        // To up user credits
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
-        // Caution: this will work only in regtest mode.
-        log.info('Mining block to confirm transaction.');
-        log.info('Block hash is', await api.generate(1));
-
-        // Check user data
+        await api.generate(1);
         blockchainUser = await api.getUser(username);
-        log.info('User credits after top up:', blockchainUser.credits);
-
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
-
         if (!dashPayDataContract) {
-            log.info('DashPay data contract not found. Creating one');
+            // DashPay data contract not found. Creating one
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
                 privateKeyString,
                 blockchainUser.regtxid,
             );
-            log.info('dashPayId:', dashPayId);
-            // Confirming dap contract creation on-chain
             await api.generate(1);
-            // Checking if it's really created
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
-
-        log.info('DashPay data contract:');
-        log.info(dashPayDataContract);
-
-        // This code is DashPay-specific.
-
-        log.info(`Creating friend request from ${username} to ${otherUserUsername}`);
-        // Creating "contact" object
         const contactRequest = Schema.create.dapobject('contact');
-        // Generate an HD public key for the user
         contactRequest.contact.hdextpubkey = user1HDKey
             .derive(derivingPath).hdPublicKey.toString();
-        // Setting a relation to that user in object. Later this user can retrieve this object
-        // from DAPI with getDapContext
         contactRequest.contact.relation = otherUserId.txid;
-        log.info('Contact request object:');
-        log.info(contactRequest);
 
-        // End of DashPay-specific code.
-
-        log.info('Sending contact request to the network');
         await updateUserState(dashPayId, blockchainUser.regtxid, [contactRequest], privateKeyString);
-
-        log.info('Mining block to confirm changes');
-        // Generate 1 block to confirm transition
         await api.generate(1);
 
-        // Check first user dap space - contact request should appear there:
-
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
-        log.info(`${username}'s DashPay dap space:`);
-        log.info(user1Space);
-        log.info('Contact request in the first user\'s space:');
-        log.info(user1Space.objects[0]);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            }
+        });
 
-        // Check second user dap context - friend request should appear there:
+        let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.regtxid);
+        expect(user2Space).to.equal(undefined);
 
-        // NOTE: If you get error around this line that says 'Cannot read property...'
-        // You probably has different users stored in virtual dashdrive and dashcore.
-        // It can happen if you flushed regtest data in dashcore, but not in virtual dashdrive.
-        // To fix this, go to DAPI folder and delete vmn/stack-db.json
-        const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
-        log.info(`${otherUserUsername}'s DahPay dap context:`);
-        log.info(user2Context);
-        log.info('Contact request in the second user\'s space:');
-        log.info(user2Context.related[0]);
+        let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
 
+        let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
         expect(user2Context.maxidx).to.equal(-1);
         expect(user2Context.objects).to.equal(null);
@@ -772,36 +1905,49 @@ describe('sync.register_dap', () => {
             }
         });
 
-        // Now we need to accept first user contact request, i.e. create contact object
-        // on second user side, referencing first user's id:
-
-        log.info(`Accepting contact request from ${otherUserUsername} by ${username}`);
-        // Creating "contact" object
         const contactAcceptance = Schema.create.dapobject('contact');
-        // Generate an HD public key for the user
         contactAcceptance.contact.hdextpubkey = user2HDKey
             .derive(derivingPath).hdPublicKey.toString();
-        // Setting a relation to that user in object. Later this user can retrieve this object
-        // from DAPI with getDapContext
         contactAcceptance.contact.relation = blockchainUser.regtxid;
-        log.info('Contact request object:');
-        log.info(contactAcceptance);
-
-        // End of DashPay-specific code.
-
-        log.info('Sending contact request to the network');
         await updateUserState(dashPayId, otherUserId.txid, [contactAcceptance], privateKeyString);
-
-        log.info('Mining block to confirm changes');
-        // Generate 1 block to confirm transition
         await api.generate(1);
 
-        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
-        log.info(`${username}'s DashPay dap space:`);
-        log.info(user1Space);
-        log.info('Contact in the first user\'s space:');
-        log.info(user1Space.objects[0]);
+        user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
+        expect(user1Context.dapid).to.equal(dashPayId);
+        expect(user1Context.maxidx).to.equal(-1);
+        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(null);
 
+        user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.have.lengthOf(1);
+        expect(user2Context.objects[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "idx": 0,
+                "relation": user1Space.uid,
+                "rev": 0
+            }
+        });
+        expect(user2Context.related).to.have.lengthOf(1);
+        expect(user2Context.related[0]).to.be.deep.equal({
+            "contact": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey,
+                "meta": {
+                    "uid": blockchainUser.regtxid,
+                    "uname": username
+                }
+            }
+        });
+
+        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
         expect(user1Space.objects[0]).to.be.deep.equal({
             "contact": {
                 "act": 1,
@@ -812,12 +1958,7 @@ describe('sync.register_dap', () => {
             }
         });
 
-        const user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
-        log.info(`${otherUserUsername}'s DashPay dap space:`);
-        log.info(user2Space);
-        log.info('Contact in the second user\'s space:');
-        log.info(user2Space.objects[0]);
-
+        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
         expect(user2Space.dapid).to.equal(dashPayId);
         expect(user2Space.uid).to.equal(otherUserId.txid);
         expect(user2Space.objects).to.have.lengthOf(1);
@@ -831,38 +1972,37 @@ describe('sync.register_dap', () => {
                     "hdextpubkey": contactAcceptance.contact.hdextpubkey
                 }
         });
+
+        blockchainUser = await api.getUser(username);
+        expect(blockchainUser.subtx).to.have.lengthOf(2);
+        expect(blockchainUser.transitions).to.have.lengthOf(1);
+
+        let otherUser = await api.getUser(otherUserUsername);
+        expect(otherUser.subtx).to.have.lengthOf(1);
+        expect(otherUser.transitions).to.have.lengthOf(1);
     });
 
     it('Should go through full accepting user request process with extra properties', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
         await api.generate(1);
-
         let blockchainUser = await api.getUser(username);
-
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
+        // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
-
         if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
                 privateKeyString,
                 blockchainUser.regtxid,
             );
             await api.generate(1);
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
-
         const userRequest = Schema.create.dapobject('user');
         userRequest.user.aboutme = 'This is story about me';
         userRequest.user.avatar = 'My avatar here';
@@ -872,16 +2012,30 @@ describe('sync.register_dap', () => {
         await api.generate(1);
 
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "user": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "avatar": "My avatar here",
+                "aboutme": "This is story about me",
+                "extra_property": "this property was not defined in schema"
+            }
+        });
 
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.equal(null);
+        expect(user2Context.related).to.have.lengthOf(0);
 
         const userAcceptance = Schema.create.dapobject('user');
         userAcceptance.user.hdextpubkey = user2HDKey
             .derive(derivingPath).hdPublicKey.toString();
         userAcceptance.user.relation = blockchainUser.regtxid;
-
         await updateUserState(dashPayId, otherUserId.txid, [userAcceptance], privateKeyString);
-
         await api.generate(1);
 
         user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
@@ -913,135 +2067,61 @@ describe('sync.register_dap', () => {
     });
 
     it('Should go through full accepting user request process with properties', async () => {
-        // Generating random username
         const username = Math.random().toString(36).substring(7);
-        log.info('Your random username for this run is:');
-        log.info(username);
-        // Sending registration to the network
-        // Note: in this example we assume that account owner is the same
-        // person who funds registration, so only one private key is used.
-        // Otherwise, owner should create registration transaction and
-        // sign it with his own private key, and then pass it to the
-        // funder, which will also sign this transaction with his key.
         await registerUser(username, privateKeyString);
-
-        // Caution: this will work only in regtest mode.
-        log.info('Mining block to confirm transaction.');
-        log.info('Block hash is', await api.generate(1));
-
-        // Checking user data
+        await api.generate(1);
         let blockchainUser = await api.getUser(username);
-        log.info('User profile:', blockchainUser);
-
-        // Registering second user, which we will use later in this example
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-        log.info('Second user is', otherUserUsername, otherUserId);
-
-        // To up user credits
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
-        // Caution: this will work only in regtest mode.
-        log.info('Mining block to confirm transaction.');
-        log.info('Block hash is', await api.generate(1));
-
-        // Check user data
+        await api.generate(1);
         blockchainUser = await api.getUser(username);
-        log.info('User credits after top up:', blockchainUser.credits);
-
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
-
         if (!dashPayDataContract) {
-            log.info('DashPay data contract not found. Creating one');
+            // DashPay data contract not found. Creating one
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
                 privateKeyString,
                 blockchainUser.regtxid,
             );
-            log.info('dashPayId:', dashPayId);
-            // Confirming dap contract creation on-chain
             await api.generate(1);
-            // Checking if it's really created
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
-
-        log.info('DashPay data contract:');
-        log.info(dashPayDataContract);
-
-        // This code is DashPay-specific.
-
-        log.info(`Creating friend request from ${username} to ${otherUserUsername}`);
-        // Creating "user" object
         const userRequest = Schema.create.dapobject('user');
-        // Set aboutme for the user
+
         userRequest.user.aboutme = 'This is story about me';
-        // Set avatar for the user
         userRequest.user.avatar = 'My avatar here';
-        log.info('Store request object:');
-        log.info(userRequest);
-
-        // End of DashPay-specific code.
-
-        log.info('Sending user request to the network');
         await updateUserState(dashPayId, blockchainUser.regtxid, [userRequest], privateKeyString);
-
-        log.info('Mining block to confirm changes');
-        // Generate 1 block to confirm transition
         await api.generate(1);
 
-        // Check first user dap space - user request should appear there:
-
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
-        log.info(`${username}'s DashPay dap space:`);
-        log.info(user1Space);
-        log.info('User request in the first user\'s space:');
-        log.info(user1Space.objects[0]);
+        expect(user1Space.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "user": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "avatar": "My avatar here",
+                "aboutme": "This is story about me"
+            }
+        });
 
-        // Check second user dap context - friend request should appear there:
-
-        // NOTE: If you get error around this line that says 'Cannot read property...'
-        // You probably has different users stored in virtual dashdrive and dashcore.
-        // It can happen if you flushed regtest data in dashcore, but not in virtual dashdrive.
-        // To fix this, go to DAPI folder and delete vmn/stack-db.json
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
-        log.info(`${otherUserUsername}'s DahPay dap context:`);
-        log.info(user2Context);
-        log.info('User request in the second user\'s space:');
-        log.info(user2Context.related[0]);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.equal(null);
+        expect(user2Context.related).to.have.lengthOf(0);
 
-        // Now we need to accept first user user request, i.e. create user object
-        // on second user side, referencing first user's id:
-
-        log.info(`Accepting user request from ${otherUserUsername} by ${username}`);
-        // Creating "user" object
         const userAcceptance = Schema.create.dapobject('user');
-        // Generate an HD public key for the user
         userAcceptance.user.hdextpubkey = user2HDKey
             .derive(derivingPath).hdPublicKey.toString();
-        // Setting a relation to that user in object. Later this user can retrieve this object
-        // from DAPI with getDapContext
         userAcceptance.user.relation = blockchainUser.regtxid;
-        log.info('User request object:');
-        log.info(userAcceptance);
 
-        // End of DashPay-specific code.
-
-        log.info('Sending user request to the network');
         await updateUserState(dashPayId, otherUserId.txid, [userAcceptance], privateKeyString);
-
-        log.info('Mining block to confirm changes');
-        // Generate 1 block to confirm transition
         await api.generate(1);
 
         user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
-        log.info(`${username}'s DashPay dap space:`);
-        log.info(user1Space);
-        log.info('User in the first user\'s space:');
-        log.info(user1Space.objects[0]);
-
         expect(user1Space.objects[0]).to.be.deep.equal({
             "user": {
                 "act": 1,
@@ -1053,11 +2133,6 @@ describe('sync.register_dap', () => {
         });
 
         const user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
-        log.info(`${otherUserUsername}'s DashPay dap space:`);
-        log.info(user2Space);
-        log.info('User in the second user\'s space:');
-        log.info(user2Space.objects[0]);
-
         expect(user2Space.dapid).to.equal(dashPayId);
         expect(user2Space.uid).to.equal(otherUserId.txid);
         expect(user2Space.objects).to.have.lengthOf(1);
@@ -1077,43 +2152,45 @@ describe('sync.register_dap', () => {
     it('Should go through full accepting user request process without properties', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
         await api.generate(1);
-
         let blockchainUser = await api.getUser(username);
-
-        // Registering second user, which we will use later in this example
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
-
+        // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
-
         if (!dashPayDataContract) {
+            // DashPay data contract not found. Creating one
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
                 privateKeyString,
                 blockchainUser.regtxid,
             );
-            log.info('dashPayId:', dashPayId);
             await api.generate(1);
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
-
         const userRequest = Schema.create.dapobject('user');
 
         await updateUserState(dashPayId, blockchainUser.regtxid, [userRequest], privateKeyString);
         await api.generate(1);
 
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "user": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0
+            }
+        });
 
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.equal(null);
+        expect(user2Context.related).to.have.lengthOf(0);
 
         const userAcceptance = Schema.create.dapobject('user');
         userAcceptance.user.hdextpubkey = user2HDKey
@@ -1148,182 +2225,17 @@ describe('sync.register_dap', () => {
         });
     });
 
-    it('Should go through full accepting store request process without properties', async () => {
-        // Generating random username
-        const username = Math.random().toString(36).substring(7);
-        log.info('Your random username for this run is:');
-        log.info(username);
-        // Sending registration to the network
-        // Note: in this example we assume that account owner is the same
-        // person who funds registration, so only one private key is used.
-        // Otherwise, owner should create registration transaction and
-        // sign it with his own private key, and then pass it to the
-        // funder, which will also sign this transaction with his key.
-        await registerUser(username, privateKeyString);
-
-        // Caution: this will work only in regtest mode.
-        log.info('Mining block to confirm transaction.');
-        log.info('Block hash is', await api.generate(1));
-
-        // Checking user data
-        let blockchainUser = await api.getUser(username);
-        log.info('User profile:', blockchainUser);
-
-        // Registering second user, which we will use later in this example
-        const otherUserUsername = Math.random().toString(36).substring(7);
-        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-        log.info('Second user is', otherUserUsername, otherUserId);
-
-        // To up user credits
-        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
-        // Caution: this will work only in regtest mode.
-        log.info('Mining block to confirm transaction.');
-        log.info('Block hash is', await api.generate(1));
-
-        // Check user data
-        blockchainUser = await api.getUser(username);
-        log.info('User credits after top up:', blockchainUser.credits);
-
-        // Registering dap, if it's not registered already:
-        let dashPayDataContract = await api.getDapContract(dashPayId);
-
-        if (!dashPayDataContract) {
-            log.info('DashPay data contract not found. Creating one');
-            dashPayId = await registerDap(
-                Schema.Daps.DashPay,
-                privateKeyString,
-                blockchainUser.regtxid,
-            );
-            log.info('dashPayId:', dashPayId);
-            // Confirming dap contract creation on-chain
-            await api.generate(1);
-            // Checking if it's really created
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
-        }
-
-        log.info('DashPay data contract:');
-        log.info(dashPayDataContract);
-
-        // This code is DashPay-specific.
-
-        log.info(`Creating friend request from ${username} to ${otherUserUsername}`);
-        // Creating "store" object
-        const storeRequest = Schema.create.dapobject('store');
-        // we don't set any properties for dap store
-        log.info('Store request object:');
-        log.info(storeRequest);
-
-        // End of DashPay-specific code.
-
-        log.info('Sending store request to the network');
-        await updateUserState(dashPayId, blockchainUser.regtxid, [storeRequest], privateKeyString);
-
-        log.info('Mining block to confirm changes');
-        // Generate 1 block to confirm transition
-        await api.generate(1);
-
-        // Check first user dap space - store request should appear there:
-
-        let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
-        log.info(`${username}'s DashPay dap space:`);
-        log.info(user1Space);
-        log.info('Contact request in the first user\'s space:');
-        log.info(user1Space.objects[0]);
-
-        // Check second user dap context - friend request should appear there:
-
-        // NOTE: If you get error around this line that says 'Cannot read property...'
-        // You probably has different users stored in virtual dashdrive and dashcore.
-        // It can happen if you flushed regtest data in dashcore, but not in virtual dashdrive.
-        // To fix this, go to DAPI folder and delete vmn/stack-db.json
-        const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
-        log.info(`${otherUserUsername}'s DahPay dap context:`);
-        log.info(user2Context);
-        log.info('Contact request in the second user\'s space:');
-        log.info(user2Context.related[0]);
-
-        // Now we need to accept first user store request, i.e. create store object
-        // on second user side, referencing first user's id:
-
-        log.info(`Accepting store request from ${otherUserUsername} by ${username}`);
-        // Creating "store" object
-        const storeAcceptance = Schema.create.dapobject('store');
-        // Generate an HD public key for the user
-        storeAcceptance.store.hdextpubkey = user2HDKey
-            .derive(derivingPath).hdPublicKey.toString();
-        // Setting a relation to that user in object. Later this user can retrieve this object
-        // from DAPI with getDapContext
-        storeAcceptance.store.relation = blockchainUser.regtxid;
-        log.info('Contact request object:');
-        log.info(storeAcceptance);
-
-        // End of DashPay-specific code.
-
-        log.info('Sending store request to the network');
-        await updateUserState(dashPayId, otherUserId.txid, [storeAcceptance], privateKeyString);
-
-        log.info('Mining block to confirm changes');
-        // Generate 1 block to confirm transition
-        await api.generate(1);
-
-        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
-        log.info(`${username}'s DashPay dap space:`);
-        log.info(user1Space);
-        log.info('Store in the first user\'s space:');
-        log.info(user1Space.objects[0]);
-
-        expect(user1Space.objects[0]).to.be.deep.equal({
-            "store": {
-                "act": 1,
-                "idx": 0,
-                "rev": 0,
-            }
-        });
-
-        const user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
-        log.info(`${otherUserUsername}'s DashPay dap space:`);
-        log.info(user2Space);
-        log.info('Store in the second user\'s space:');
-        log.info(user2Space.objects[0]);
-
-        expect(user2Space.dapid).to.equal(dashPayId);
-        expect(user2Space.uid).to.equal(otherUserId.txid);
-        expect(user2Space.objects).to.have.lengthOf(1);
-        expect(user2Space.objects[0]).to.be.deep.equal({
-            "store":
-                {
-                    "act": 1,
-                    "idx": 0,
-                    "rev": 0,
-                    "relation": user1Space.uid,
-                    "hdextpubkey": storeAcceptance.store.hdextpubkey
-                }
-        });
-    });
-
-
     it('Should go through full accepting store request process with extra properties', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
         await api.generate(1);
-
         let blockchainUser = await api.getUser(username);
-
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
-
         let dashPayDataContract = await api.getDapContract(dashPayId);
-
         if (!dashPayDataContract) {
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
@@ -1332,22 +2244,33 @@ describe('sync.register_dap', () => {
             );
             await api.generate(1);
             dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
 
         const storeRequest = Schema.create.dapobject('store');
         storeRequest.store.storename = 999;
-
         storeRequest.store.extra_property = "Why we allow to set extra property";
 
         await updateUserState(dashPayId, blockchainUser.regtxid, [storeRequest], privateKeyString);
-
         await api.generate(1);
 
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "store": {
+                "act": 1,
+                "extra_property": "Why we allow to set extra property",
+                "idx": 0,
+                "storename": 999,
+                "rev": 0
+            }
+        });
 
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.equal(null);
+        expect(user2Context.related).to.have.lengthOf(0);
 
         const storeAcceptance = Schema.create.dapobject('store');
         storeAcceptance.store.hdextpubkey = user2HDKey
@@ -1385,22 +2308,14 @@ describe('sync.register_dap', () => {
     it('Should go through full accepting store request process with properties', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
-
         await api.generate(1);
-
         let blockchainUser = await api.getUser(username);
-
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
-
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
-
         await api.generate(1);
-
         blockchainUser = await api.getUser(username);
-
         let dashPayDataContract = await api.getDapContract(dashPayId);
-
         if (!dashPayDataContract) {
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
@@ -1408,21 +2323,31 @@ describe('sync.register_dap', () => {
                 blockchainUser.regtxid,
             );
             await api.generate(1);
-            dashPayDataContract = await api.getDapContract(dashPayId);
-        } else {
-            log.info('DashPay contract is already created. No need to create one');
         }
 
         const storeRequest = Schema.create.dapobject('store');
         storeRequest.store.storename = 999;
 
         await updateUserState(dashPayId, blockchainUser.regtxid, [storeRequest], privateKeyString);
-
         await api.generate(1);
 
         let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "store": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "storename": 999
+            }
+        });
 
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.equal(null);
+        expect(user2Context.related).to.have.lengthOf(0);
 
         const storeAcceptance = Schema.create.dapobject('store');
         storeAcceptance.store.hdextpubkey = user2HDKey
@@ -1453,5 +2378,106 @@ describe('sync.register_dap', () => {
                     "hdextpubkey": storeAcceptance.store.hdextpubkey
                 }
         });
+    });
+
+    it('Should go through full accepting store request process without properties', async () => {
+        const username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString);
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
+        const otherUserUsername = Math.random().toString(36).substring(7);
+        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+            dashPayDataContract = await api.getDapContract(dashPayId);
+        }
+
+        const storeRequest = Schema.create.dapobject('store');
+        await updateUserState(dashPayId, blockchainUser.regtxid, [storeRequest], privateKeyString);
+        await api.generate(1);
+
+        let user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.dapid).to.be.deep.equal(dashPayId);
+        expect(user1Space.objects).to.have.lengthOf(1);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "store": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0
+            }
+        });
+
+        const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
+        expect(user2Context.dapid).to.equal(dashPayId);
+        expect(user2Context.maxidx).to.equal(-1);
+        expect(user2Context.objects).to.equal(null);
+        expect(user2Context.related).to.have.lengthOf(0);
+
+        const storeAcceptance = Schema.create.dapobject('store');
+        storeAcceptance.store.hdextpubkey = user2HDKey
+            .derive(derivingPath).hdPublicKey.toString();
+        storeAcceptance.store.relation = blockchainUser.regtxid;
+        await updateUserState(dashPayId, otherUserId.txid, [storeAcceptance], privateKeyString);
+
+        await api.generate(1);
+
+        user1Space = await api.getUserDapSpace(dashPayId, blockchainUser.regtxid);
+        expect(user1Space.objects[0]).to.be.deep.equal({
+            "store": {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+            }
+        });
+
+        const user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space.dapid).to.equal(dashPayId);
+        expect(user2Space.uid).to.equal(otherUserId.txid);
+        expect(user2Space.objects).to.have.lengthOf(1);
+        expect(user2Space.objects[0]).to.be.deep.equal({
+            "store":
+                {
+                    "act": 1,
+                    "idx": 0,
+                    "rev": 0,
+                    "relation": user1Space.uid,
+                    "hdextpubkey": storeAcceptance.store.hdextpubkey
+                }
+        });
+    });
+
+
+    it('Should not be able to update user state with invalid parameter type', async () => {
+        const username = Math.random().toString(36).substring(7);
+        await registerUser(username, privateKeyString);
+        await api.generate(1);
+        let blockchainUser = await api.getUser(username);
+        const otherUserUsername = Math.random().toString(36).substring(7);
+        const otherUserId = await registerUser(otherUserUsername, privateKeyString);
+        await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
+        await api.generate(1);
+        blockchainUser = await api.getUser(username);
+        let dashPayDataContract = await api.getDapContract(dashPayId);
+        if (!dashPayDataContract) {
+            dashPayId = await registerDap(
+                Schema.Daps.DashPay,
+                privateKeyString,
+                blockchainUser.regtxid,
+            );
+            await api.generate(1);
+        }
+
+        const storeRequest = Schema.create.dapobject('store');
+        storeRequest.store.storename = "999";
+        return expect(updateUserState(dashPayId, blockchainUser.regtxid, [storeRequest], privateKeyString)).to.be.rejectedWith('DAPI RPC error: sendRawTransition: Wasn\'t able to pin packet');
     });
 });

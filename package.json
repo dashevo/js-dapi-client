@@ -59,7 +59,7 @@
     "build": "webpack --display-error-details",
     "lint": "eslint .",
     "test": "npm run build && npm run test:node && npm run test:firefox",
-    "test:node": "mocha --no-timeouts --recursive",
+    "test:node": "mocha './{,!(integration)/**}/test/src/**/*.js' --no-timeouts",
     "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run",
     "test:integration": "mocha --no-timeouts --ui bdd  test/integration/*",
     "coverage": "nyc mocha --recursive"

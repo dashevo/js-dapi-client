@@ -60,7 +60,7 @@ describe('sync.topup_user_credits', () => {
     });
 
     beforeEach(async () => {
-        await timeout(500);
+        await timeout(800);
     });
 
     it('Should go through the full Top Up process', async () => {
@@ -214,7 +214,7 @@ describe('sync.topup_user_credits', () => {
 
     });
 
-    it('SendRawTransaction pass when re-sign with valid privateKey', async () => {
+    it('Should throw error when try to serialize without sign', async () => {
         let username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
@@ -225,7 +225,7 @@ describe('sync.topup_user_credits', () => {
 
         await subTx
             .fund(blockChainUser.regtxid, fundingInDuffs, inputs, address);
-        // try to use wrong privateKey
+        // try to serialize without sign
         expect(() => subTx.serialize()).to.throw('Some inputs have not been fully signed');
     });
 

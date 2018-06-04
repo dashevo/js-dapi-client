@@ -260,7 +260,7 @@ describe('sync.registerUser', () => {
 
     it('Should throw Error when create user with existing name and new requestedFunding with confirmation', async () => {
         let username = Math.random().toString(36).substring(7);
-        await timeout(1000);
+        await timeout(1200);
         registerUser(username, privateKeyString, 99999);
         await api.generate(7);
         let blockChainUser = await api.getUser(username);

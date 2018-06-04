@@ -60,7 +60,7 @@ describe('sync.topup_user_credits', () => {
     });
 
     beforeEach(async () => {
-        await timeout(800);
+        await timeout(1000);
     });
 
     it('Should go through the full Top Up process', async () => {

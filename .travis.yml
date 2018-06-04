@@ -15,7 +15,11 @@ env:
   - DOCKER_COMPOSE_VERSION: 1.18.0
 
 install:
-  - git clone --depth=50 --branch=feature/integration_tests git@github.com:dashevo/mn-bootstrap.git $TRAVIS_BUILD_DIR/../mn-bootstrap
+  - git clone --depth=50 --branch=feature/integration_tests git@github.com:dashevo/mn-bootstrap.git ../mn-bootstrap
+  - cd ../mn-bootstrap
+  - . ./.env
+  - $(aws ecr get-login --no-include-email)
+  - cd ../dapi-sdk
   - npm install
 before_install:
   - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc

@@ -20,7 +20,8 @@ async function execCommand(command, params, options, waitString) {
         sp.stdout.on('data', data => {
             // console.log(`stdout: ${data}`);
             result += data;
-            if (waitString != undefined && data.indexOf(waitString)>1){
+            if (waitString != undefined && data.indexOf(waitString) > 1) {
+                console.log(`found stdout: ${data}`);
                 sp.stdin.end();
                 sp.stdout.destroy();
                 sp.stderr.destroy();
@@ -28,12 +29,12 @@ async function execCommand(command, params, options, waitString) {
         });
 
         sp.stderr.on('data', data => {
-            // console.log(`stderr: ${data}`);
+            console.log(`stderr: ${data}`);
             result += data;
         });
 
         sp.on('close', code => {
-            // console.log(`child process exited with code ${code}`);
+            console.log(command, params, options, `command, params, options, child process exited with code ${code}`);
             resolve(result)
         });
     });

@@ -2,11 +2,11 @@ language: node_js
 node_js:
   - '8'
 install:
+  - git clone --depth=50 --branch=feature/integration_tests git@github.com:dashevo/mn-bootstrap.git $TRAVIS_BUILD_DIR/mn-bootstrap
   - npm install
 before_install:
   - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
 before_script:
-  - git clone -b feature/integration_tests https://github.com/dashevo/mn-bootstrap.git $TRAVIS_BUILD_DIR/mn-bootstrap
   - npm run lint
 env:
   - MOZ_HEADLESS=1

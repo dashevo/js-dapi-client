@@ -6,6 +6,7 @@ install:
 before_install:
   - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
 before_script:
+  - git clone -b https://github.com/dashevo/mn-bootstrap.git $TRAVIS_BUILD_DIR/mn-bootstrap
   - npm run lint
 env:
   - MOZ_HEADLESS=1

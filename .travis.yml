@@ -16,7 +16,6 @@ env:
 
 install:
   - pip install awscli --upgrade --user
-  - pwd
   - cd ..
   - git clone --depth=50 --branch=feature/integration_tests git@github.com:dashevo/mn-bootstrap.git mn-bootstrap
   - cd mn-bootstrap

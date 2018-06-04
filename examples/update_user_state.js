@@ -3,14 +3,14 @@ const { PrivateKey } = require('@dashevo/dashcore-lib');
 const { Api } = require('../src');
 const Schema = require('@dashevo/dash-schema');
 
-const api = new Api();
+const api = new Api({ port: 3010 });
 
 async function updateUserState(dapId, userId, objects, privateKeyString) {
   const privateKey = new PrivateKey(privateKeyString);
 
   const dashPayContract = await api.getDapContract(dapId);
 
-  const user = await api.getUser(userId);
+  const user = await api.getUserById(userId);
 
   // create a packet
   const tsp = Schema.create.tspacket();

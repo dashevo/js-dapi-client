@@ -4,7 +4,7 @@ const Api = require('../src/api');
 const log = console;
 const { PrivateKey, PublicKey, Address } = BitcoreLib;
 const { Registration } = BitcoreLib.Transaction.SubscriptionTransactions;
-const api = new Api();
+const api = new Api({ port: 3010 });
 
 /**
  * Register user

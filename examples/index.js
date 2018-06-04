@@ -10,21 +10,15 @@ const { privateKeyString } = require('./data');
 const user1HDKey = new Bitcore.HDPrivateKey();
 const user2HDKey = new Bitcore.HDPrivateKey();
 const derivingPath = 'm/1';
-const config = require('../src/config');
 
 const log = console;
-
-// Setting port to local instance of DAPI.
-// Comment this line if you want to use default port that points to
-// mn-bootstrap
-config.Api.port = 3010;
 
 // This id is depends on user, who registered this dap.
 // Actually, DashPay id will be different for each run
 // until you paste your dashpay id here
 let dashPayId = 'b4de10e1ddb8e225cd04a406deb98e6081f9bd26f98f46c0932d0bdfb2bd0623';
 
-const api = new Api();
+const api = new Api({ port: 3010 });
 
 async function main() {
   // Generating random username
@@ -44,7 +38,7 @@ async function main() {
   log.info('Block hash is', await api.generate(1));
 
   // Checking user data
-  let blockchainUser = await api.getUser(username);
+  let blockchainUser = await api.getUserByName(username);
   log.info('User profile:', blockchainUser);
 
   // Registering second user, which we will use later in this example
@@ -59,7 +53,7 @@ async function main() {
   log.info('Block hash is', await api.generate(1));
 
   // Check user data
-  blockchainUser = await api.getUser(username);
+  blockchainUser = await api.getUserByName(username);
   log.info('User credits after top up:', blockchainUser.credits);
 
   // Registering dap, if it's not registered already:

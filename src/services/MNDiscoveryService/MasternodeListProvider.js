@@ -23,7 +23,7 @@ const config = require('../../config/index');
  */
 
 class MasternodeListProvider {
-  constructor(seeds) {
+  constructor(seeds, DAPIPort = config.Api.port) {
     const seedsIsArray = Array.isArray(seeds);
 
     if (seeds && !seedsIsArray) {
@@ -34,6 +34,7 @@ class MasternodeListProvider {
      * @type Array<Masternode>
      */
     this.masternodeList = seedsIsArray ? seeds.slice() : config.DAPIDNSSeeds.slice();
+    this.DAPIPort = DAPIPort;
     this.lastUpdateDate = 0;
   }
   /**
@@ -45,8 +46,8 @@ class MasternodeListProvider {
     const randomMasternode = sample(this.masternodeList);
     const MNList = await RPCClient.request({
       host: randomMasternode.ip,
-      port: config.Api.port,
-    }, 'getMNList', []);
+      port: this.DAPIPort,
+    }, 'getMNList', {});
     if (!MNList) {
       throw new Error('Failed to fetch masternodes list');
     }

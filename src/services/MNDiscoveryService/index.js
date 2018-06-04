@@ -13,15 +13,16 @@ class MNDiscovery {
    * @class
    * @param {Array} [seeds] - optional. Seeds to use. If nothing passed, default seeds will be used.
    * Default will be fine in most of situations.
+   * @param {number} [port] - optional. Default port for connection to the DAPI
    */
-  constructor(seeds) {
+  constructor(seeds, port) {
     /**
      * @private
      * @protected
      * For test purposes only: tests wraps .getMNList() method of that object to ensure
      * it was called.
      */
-    this.masternodeListProvider = new MasternodeListProvider(seeds);
+    this.masternodeListProvider = new MasternodeListProvider(seeds, port);
     /**
      * @private
      * @protected

@@ -260,7 +260,7 @@ describe('sync.registerUser', () => {
 
     it('Should throw Error when create user with existing name and new requestedFunding with confirmation', async () => {
         let username = Math.random().toString(36).substring(7);
-        await timeout(1200);
+        await timeout(1000);
         registerUser(username, privateKeyString, 99999);
         await api.generate(7);
         let blockChainUser = await api.getUser(username);
@@ -270,7 +270,8 @@ describe('sync.registerUser', () => {
         expect(blockChainUser.uname).to.equal(username);
         expect(blockChainUser.credits).to.be.a('number');
         expect(blockChainUser.credits).to.equal(99999);
-        await expect(registerUser(username, privateKeyString)).to.be.eventually.rejectedWith('DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-dupusername. Code:-26');
+        // now we try to register user with 1000 * 1000 requestedFunding
+        await expect(registerUser(username, privateKeyString)).to.be.eventually.rejectedWith(/DAPI RPC error: sendRawTransaction: 400 - "16: bad-subtx-dupusername. Code:-26|DAPI RPC error: sendRawTransaction: 400 - "18: subtx-dup-username. Code:-26"/);
     });
 
     it('Should create users with case sensitive names', async () => { // TODO is it True?

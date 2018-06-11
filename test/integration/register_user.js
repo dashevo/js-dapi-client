@@ -79,6 +79,7 @@ describe('async.registerUser', async () => {
     });
 
     const signatures = [undefined, Signature.SIGHASH_ALL, Signature.SIGHASH_NONE, Signature.SIGHASH_SINGLE, Signature.SIGHASH_ANYONECANPAY];
+    // https://dashpay.atlassian.net/browse/EV-901
     // TODO for SIGHASH_ANYONECANPAY:  Error: DAPI RPC error: sendRawTransaction: 400 - "64: non-mandatory-script-verify-flag (Signature hash type missing or not understood). Code:-26"
     signatures.forEach(function (signature) {
         it('Should register user with diff signature', async () => {

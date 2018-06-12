@@ -69,7 +69,7 @@ describe('sync.topup_user_credits', () => {
 
         await api.generate(7);
 
-        let blockChainUserAfterCreation = await api.getUser(username);
+        let blockChainUserAfterCreation = await api.getUserByName(username);
 
         expect(blockChainUserAfterCreation.uname).to.equal(username);
         expect(blockChainUserAfterCreation.credits).to.equal(10000);
@@ -95,7 +95,7 @@ describe('sync.topup_user_credits', () => {
         let txId = await api.sendRawTransaction(subTx.serialize());
         expect(txId).to.be.an('object').that.has.all.keys('txid');
 
-        let blockChainUserAfterTopUp = await api.getUser(username);
+        let blockChainUserAfterTopUp = await api.getUserByName(username);
 
         expect(blockChainUserAfterTopUp.uname).to.equal(username);
         expect(blockChainUserAfterTopUp.credits).to.equal(10000 + fundingInDuffs);
@@ -109,7 +109,7 @@ describe('sync.topup_user_credits', () => {
 
         await api.generate(1);
 
-        let blockChainUserAfterBlockGen = await api.getUser(username);
+        let blockChainUserAfterBlockGen = await api.getUserByName(username);
 
         expect(blockChainUserAfterBlockGen.uname).to.equal(username);
         expect(blockChainUserAfterBlockGen.credits).to.equal(10000 + fundingInDuffs);
@@ -137,7 +137,7 @@ describe('sync.topup_user_credits', () => {
 
         let expectedCredits = 10000
         for (let num of [1, 2, 3, 4]) {
-            let blockChainUser = await api.getUser(username);
+            let blockChainUser = await api.getUserByName(username);
             let inputs = await api.getUTXO(address);
             let subTx = new TopUp();
             subTx
@@ -152,7 +152,7 @@ describe('sync.topup_user_credits', () => {
 
             let txId = await api.sendRawTransaction(subTx.serialize());
             expect(txId).to.be.an('object').that.has.all.keys('txid');
-            blockChainUser = await api.getUser(username);
+            blockChainUser = await api.getUserByName(username);
             expect(blockChainUser.uname).to.equal(username);
             expect(blockChainUser.credits).to.equal(expectedCredits);
             expect(blockChainUser.state).to.equal('open');
@@ -167,7 +167,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
         await subTx
@@ -178,7 +178,7 @@ describe('sync.topup_user_credits', () => {
 
         // we need to reset 'inputs = await api.getUTXO(address)' but we skip it expressly
         subTx = new TopUp();
-        blockChainUser = await api.getUser(username);
+        blockChainUser = await api.getUserByName(username);
         await subTx
             .fund(blockChainUser.regtxid, fundingInDuffs * 5, inputs, address);
         subTx.sign(privateKey);
@@ -193,7 +193,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
         await subTx
@@ -204,7 +204,7 @@ describe('sync.topup_user_credits', () => {
 
         // we need to reset 'inputs = await api.getUTXO(address)' but we skip it expressly
         // subTx = new TopUp();
-        blockChainUser = await api.getUser(username);
+        blockChainUser = await api.getUserByName(username);
         await subTx
             .fund(blockChainUser.regtxid, fundingInDuffs * 5, inputs, address);
         subTx.sign(privateKey);
@@ -219,7 +219,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
 
@@ -234,7 +234,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
 
@@ -252,7 +252,7 @@ describe('sync.topup_user_credits', () => {
             await registerUser(username, privateKeyString, 10000);
             await api.generate(7);
 
-            let blockChainUser = await api.getUser(username);
+            let blockChainUser = await api.getUserByName(username);
             let subTx = new TopUp();
             let inputs = await api.getUTXO(address);
 
@@ -273,7 +273,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
 
@@ -293,7 +293,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
 
@@ -310,7 +310,7 @@ describe('sync.topup_user_credits', () => {
 
         inputs = await api.getUTXO(address);
 
-        blockChainUser = await api.getUser(username);
+        blockChainUser = await api.getUserByName(username);
         // we need to reinitialize 'subTx = new TopUp()' but  we skip it expressly
         await subTx
             .fund(blockChainUser.regtxid, fundingInDuffs * 5, inputs, address);
@@ -331,7 +331,7 @@ describe('sync.topup_user_credits', () => {
             await registerUser(username, privateKeyString, fundingInDuffs);
             await api.generate(7);
 
-            let blockChainUser = await api.getUser(username);
+            let blockChainUser = await api.getUserByName(username);
             let subTx = new TopUp();
             let inputs = await api.getUTXO(address);
 
@@ -347,7 +347,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
 
@@ -369,7 +369,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, fundingInDuffs);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
 
@@ -413,7 +413,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
         inputs[0].satoshis += 10000;
@@ -428,7 +428,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
         inputs[0].address = 'ygPcCwVy6Fxg7ruxZzqVYdPLtvw7auHAFh';
@@ -441,7 +441,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
         inputs[0].amount += 1;
@@ -456,7 +456,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
         inputs[0].confirmations += 1;
@@ -471,7 +471,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
         inputs[0].height += 1;
@@ -486,7 +486,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
         inputs[0].scriptPubKey = '76a914dc2bfda564dc6217c55c842d65cc0242e095d2d788ac';
@@ -501,7 +501,7 @@ describe('sync.topup_user_credits', () => {
         await registerUser(username, privateKeyString, 10000);
         await api.generate(7);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
         let subTx = new TopUp();
         let inputs = await api.getUTXO(address);
         inputs[0].txid = 'a3690bea9fadcba57b3138df56ccfd6e15823071d5e5f43fbbbdf947d0ccbe41';

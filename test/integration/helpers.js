@@ -8,7 +8,7 @@ const BitcoreLib = require('@dashevo/dashcore-lib');
 const {PrivateKey, PublicKey, Address} = BitcoreLib;
 const {Registration, TopUp} = BitcoreLib.Transaction.SubscriptionTransactions;
 
-const api = new Api();
+const api = new Api({ port: 3000 });
 
 const timeout = ms => new Promise(res => setTimeout(res, ms))
 
@@ -106,7 +106,7 @@ async function updateUserState(dapId, userId, objects, privateKeyString) {
 
     const dashPayContract = await api.getDapContract(dapId);
 
-    const user = await api.getUser(userId);
+    const user = await api.getUserById(userId);
 
     // create a packet
     const tsp = Schema.create.tspacket();

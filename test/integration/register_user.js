@@ -86,7 +86,7 @@ describe('async.registerUser', async () => {
             let username = Math.random().toString(36).substring(7);
             await registerUser(username, privateKeyString, 10000, false, signature);
 
-            let blockChainUser = await api.getUser(username);
+            let blockChainUser = await api.getUserByName(username);
 
             expect(blockChainUser).to.be.an('object');
             expect(blockChainUser.uname).to.be.a('string');
@@ -144,7 +144,7 @@ describe('async.registerUser', async () => {
 
             await registerUser(username, privateKeyString, requestedFunding);
 
-            let blockChainUser = await api.getUser(username);
+            let blockChainUser = await api.getUserByName(username);
 
             expect(blockChainUser).to.be.an('object');
             expect(blockChainUser.uname).to.be.a('string');
@@ -167,7 +167,7 @@ describe('async.registerUser', async () => {
 
             await registerUser(username, privateKeyString);
 
-            let blockChainUser = await api.getUser(username);
+            let blockChainUser = await api.getUserByName(username);
 
             expect(blockChainUser).to.be.an('object');
             expect(blockChainUser.uname).to.be.a('string');
@@ -243,7 +243,7 @@ describe('sync.registerUser', () => {
         await api.generate(7);
         await registerUser(username, privateKeyString, 10001);
 
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
 
         expect(blockChainUser).to.be.an('object');
         expect(blockChainUser.uname).to.be.a('string');
@@ -264,7 +264,7 @@ describe('sync.registerUser', () => {
         await timeout(1000);
         registerUser(username, privateKeyString, 99999);
         await api.generate(7);
-        let blockChainUser = await api.getUser(username);
+        let blockChainUser = await api.getUserByName(username);
 
         expect(blockChainUser).to.be.an('object');
         expect(blockChainUser.uname).to.be.a('string');
@@ -285,7 +285,7 @@ describe('sync.registerUser', () => {
         }
 
         for (let un of [username.toLowerCase(), username.toUpperCase()]) {
-            let blockChainUserLower = await api.getUser(un);
+            let blockChainUserLower = await api.getUserByName(un);
             expect(blockChainUserLower).to.be.an('object');
             expect(blockChainUserLower.uname).to.be.a('string');
             expect(blockChainUserLower.uname).to.equal(un);

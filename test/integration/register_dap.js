@@ -49,7 +49,6 @@ describe('sync.register_dap', () => {
             ['regtest', 'logs', '-f'],
             {cwd: process.cwd() + '/../mn-bootstrap/'}, 'join new Quorum');
         await api.generate(10);
-        await timeout(3000);
         await
             execCommand(
                 'sh',
@@ -64,16 +63,16 @@ describe('sync.register_dap', () => {
         await timeout(1000);
     });
 
-    it('Should not be able accept contact if it has been deleted', async () => {
+    it('Should not be able to accept contact if it has been deleted', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -104,7 +103,7 @@ describe('sync.register_dap', () => {
                 "hdextpubkey": contactRequest.contact.hdextpubkey
             }
         });
-
+        // TODO post a ticket
         let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.regtxid);
         expect(user2Space).to.equal(undefined);
 
@@ -190,11 +189,11 @@ describe('sync.register_dap', () => {
                 }
         });
 
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         expect(blockchainUser.subtx).to.have.lengthOf(2);
         expect(blockchainUser.transitions).to.have.lengthOf(3);
 
-        let otherUser = await api.getUser(otherUserUsername);
+        let otherUser = await api.getUserByName(otherUserUsername);
         expect(otherUser.subtx).to.have.lengthOf(1);
         expect(otherUser.transitions).to.have.lengthOf(1);
     });
@@ -203,12 +202,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -271,12 +270,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -421,11 +420,11 @@ describe('sync.register_dap', () => {
                 }
         });
 
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         expect(blockchainUser.subtx).to.have.lengthOf(2);
         expect(blockchainUser.transitions).to.have.lengthOf(2);
 
-        let otherUser = await api.getUser(otherUserUsername);
+        let otherUser = await api.getUserByName(otherUserUsername);
         expect(otherUser.subtx).to.have.lengthOf(1);
         expect(otherUser.transitions).to.have.lengthOf(1);
 
@@ -515,12 +514,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -553,8 +552,8 @@ describe('sync.register_dap', () => {
             }
         });
 
-        let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.regtxid);
-        expect(user2Space).to.equal(undefined);
+        // let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.regtxid);
+        // expect(user2Space).to.equal(undefined);
 
         let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.txid);
         expect(user1Context.dapid).to.equal(dashPayId);
@@ -637,7 +636,7 @@ describe('sync.register_dap', () => {
             }
         });
 
-        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
         expect(user2Space.dapid).to.equal(dashPayId);
         expect(user2Space.uid).to.equal(otherUserId.txid);
         expect(user2Space.objects).to.have.lengthOf(1);
@@ -652,11 +651,11 @@ describe('sync.register_dap', () => {
                 }
         });
 
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         expect(blockchainUser.subtx).to.have.lengthOf(2);
         expect(blockchainUser.transitions).to.have.lengthOf(1); // ????
 
-        let otherUser = await api.getUser(otherUserUsername);
+        let otherUser = await api.getUserByName(otherUserUsername);
         expect(otherUser.subtx).to.have.lengthOf(1);
         expect(otherUser.transitions).to.have.lengthOf(1);
 
@@ -744,12 +743,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -879,11 +878,11 @@ describe('sync.register_dap', () => {
                 }
         });
 
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         expect(blockchainUser.subtx).to.have.lengthOf(2);
         expect(blockchainUser.transitions).to.have.lengthOf(1);
 
-        let otherUser = await api.getUser(otherUserUsername);
+        let otherUser = await api.getUserByName(otherUserUsername);
         expect(otherUser.subtx).to.have.lengthOf(1);
         expect(otherUser.transitions).to.have.lengthOf(1);
 
@@ -972,12 +971,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -1005,10 +1004,10 @@ describe('sync.register_dap', () => {
             const username2 = Math.random().toString(36).substring(7);
             await registerUser(username2, privateKeyString);
             await api.generate(1);
-            let blockchainUser2 = await api.getUser(username2);
+            let blockchainUser2 = await api.getUserByName(username2);
             await topUpUserCredits(blockchainUser2.regtxid, privateKeyString);
             await api.generate(1);
-            blockchainUser2 = await api.getUser(username2);
+            blockchainUser2 = await api.getUserByName(username2);
             blockchainUsers.push(blockchainUser2);
 
             let dashPayId2 = await registerDap(
@@ -1081,12 +1080,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -1107,10 +1106,10 @@ describe('sync.register_dap', () => {
         const username2 = Math.random().toString(36).substring(7);
         await registerUser(username2, privateKeyString);
         await api.generate(1);
-        let blockchainUser2 = await api.getUser(username2);
+        let blockchainUser2 = await api.getUserByName(username2);
         await topUpUserCredits(blockchainUser2.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser2 = await api.getUser(username2);
+        blockchainUser2 = await api.getUserByName(username2);
         await api.generate(1);
 
         const contactRequest2 = Schema.create.dapobject('contact');
@@ -1226,12 +1225,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -1252,10 +1251,10 @@ describe('sync.register_dap', () => {
         const username2 = Math.random().toString(36).substring(7);
         await registerUser(username2, privateKeyString);
         await api.generate(1);
-        let blockchainUser2 = await api.getUser(username2);
+        let blockchainUser2 = await api.getUserByName(username2);
         await topUpUserCredits(blockchainUser2.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser2 = await api.getUser(username2);
+        blockchainUser2 = await api.getUserByName(username2);
 
         let dashPayId2 = await registerDap(
             Schema.Daps.DashPay,
@@ -1377,12 +1376,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -1529,10 +1528,10 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
 
         let dashPayDataContract = await api.getDapContract(dashPayId);
         // TODO need fix from Anton
@@ -1565,12 +1564,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -1624,12 +1623,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -1672,7 +1671,7 @@ describe('sync.register_dap', () => {
             }
         });
 
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         const contactRequest2 = Schema.create.dapobject('contact');
         contactRequest2.contact.hdextpubkey = user1HDKey
             .derive(derivingPath).hdPublicKey.toString();
@@ -1687,12 +1686,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -1723,12 +1722,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -1839,12 +1838,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -1973,11 +1972,11 @@ describe('sync.register_dap', () => {
                 }
         });
 
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         expect(blockchainUser.subtx).to.have.lengthOf(2);
         expect(blockchainUser.transitions).to.have.lengthOf(1);
 
-        let otherUser = await api.getUser(otherUserUsername);
+        let otherUser = await api.getUserByName(otherUserUsername);
         expect(otherUser.subtx).to.have.lengthOf(1);
         expect(otherUser.transitions).to.have.lengthOf(1);
     });
@@ -1986,12 +1985,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -2070,12 +2069,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -2153,12 +2152,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         // Registering dap, if it's not registered already:
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
@@ -2229,12 +2228,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
             dashPayId = await registerDap(
@@ -2309,12 +2308,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
             dashPayId = await registerDap(
@@ -2384,12 +2383,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
             dashPayId = await registerDap(
@@ -2460,12 +2459,12 @@ describe('sync.register_dap', () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
-        let blockchainUser = await api.getUser(username);
+        let blockchainUser = await api.getUserByName(username);
         const otherUserUsername = Math.random().toString(36).substring(7);
         const otherUserId = await registerUser(otherUserUsername, privateKeyString);
         await topUpUserCredits(blockchainUser.regtxid, privateKeyString);
         await api.generate(1);
-        blockchainUser = await api.getUser(username);
+        blockchainUser = await api.getUserByName(username);
         let dashPayDataContract = await api.getDapContract(dashPayId);
         if (!dashPayDataContract) {
             dashPayId = await registerDap(

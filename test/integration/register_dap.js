@@ -49,7 +49,7 @@ describe('sync.register_dap', () => {
             ['regtest', 'logs', '-f'],
             {cwd: process.cwd() + '/../mn-bootstrap/'}, 'join new Quorum');
         await api.generate(10);
-
+        await timeout(3000);
         await
             execCommand(
                 'sh',

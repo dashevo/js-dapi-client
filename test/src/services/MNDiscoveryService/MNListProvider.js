@@ -82,6 +82,11 @@ describe('MNListProvider', async () => {
         .returns(new Promise((resolve) => {
           resolve(MockedMNList);
         }));
+      RPCClientStub
+        .withArgs({ host: '127.0.0.1', port: config.Api.port +1 }, 'getMNList', {})
+        .returns(new Promise((resolve) => {
+          resolve(MockedMNList);
+        }));
 
       // Stubs for request to any MN from MNList, returned by seed. This call should return updated list
       for (let masternode of MockedMNList) {
@@ -129,11 +134,14 @@ describe('MNListProvider', async () => {
       expect(MNListItem.rank).to.be.a('number');
       expect(MNListItem.lastseen).to.be.a('number');
       expect(MNListItem.activeseconds).to.be.a('number');
+      expect(MNListItem.payee).to.be.a('string');
+      expect(MNListItem.protocol).to.be.a('number');
+      expect(MNListItem.rank).to.be.a('number');
+      expect(MNListItem.vin).to.be.a('string');
 
       expect(mnListProvider.lastUpdateDate).be.closeTo(Date.now(), 10000);
       expect(mnListProvider.masternodeList.length).to.equal(3);
     });
-
     it('Should update MNList if needed and return updated list', async () => {
       const mnListProvider = new MNListProvider();
       let MNList = await mnListProvider.getMNList();
@@ -185,6 +193,17 @@ describe('MNListProvider', async () => {
       const mnListProvider = new MNListProvider();
       return expect(mnListProvider.getMNList()).to.be.rejectedWith('Failed to fetch masternodes list');
     });
+    it('Should throw error if can\'t connect to dns seeder, wrong port', async () => {
+        // Override stub behaviour for next call
+        RPCClient.request.resetHistory();
+        RPCClient.request
+          .withArgs({ host: '127.0.0.1', port: config.Api.port+1 }, 'getMNList', {})
+          .onFirstCall()
+          .returns(new Promise(resolve => resolve(null)));
+
+        const mnListProvider = new MNListProvider();
+        return expect(mnListProvider.getMNList()).to.be.rejectedWith('Failed to fetch masternodes list');
+      });
     it('Should throw error if can\'t update masternode list', async () => {
       // Override stub behaviour for next call
       RPCClient.request.resetHistory();

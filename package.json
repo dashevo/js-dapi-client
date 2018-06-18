@@ -49,7 +49,7 @@
     "karma-mocha-reporter": "^2.2.5",
     "karma-webpack": "^2.0.13",
     "mocha": "^3.3.0",
-    "nyc": "^11.4.1",
+    "nyc": "^11.9.0",
     "should": "^11.2.1",
     "sinon": "^4.2.2",
     "webcoin-dash-testnet": "git+https://github.com/pvrooyen/webcoin-dash-testnet.git",
@@ -61,7 +61,7 @@
     "test": "npm run build && npm run test:node && npm run test:firefox",
     "test:node": "mocha --no-timeouts --recursive",
     "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run",
-    "coverage": "nyc mocha --recursive"
+    "coverage": "nyc --reporter=html --reporter=text mocha --recursive"
   },
   "author": "",
   "license": "ISC"

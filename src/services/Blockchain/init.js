@@ -11,7 +11,7 @@ const EE2 = require('eventemitter2');
 let listOfHeader = [];
 let lastTip = null;
 const fetchAndAdd = async (startHeight, numberOfBlock) => {
-  const blockHeaders = await this.Explorer.API.getBlockHeaders(startHeight, numberOfBlock, 1);
+  const blockHeaders = await this.Explorer.API.getBlockHeaders(startHeight, numberOfBlock);
   await this.Blockchain.addBlock(blockHeaders);
   console.log(blockHeaders[0].height, blockHeaders[blockHeaders.length - 1].height);
   return startHeight + numberOfBlock;
@@ -103,7 +103,7 @@ const startQuickFetch = async (config) => {
   // Fetching last block
   const lastHeight = lastTip.height;
   const blockHeaders =
-    await this.Explorer.API.getBlockHeaders(lastHeight - 1, config.numberOfHeadersToFetch, false);
+    await this.Explorer.API.getBlockHeaders(lastHeight - 1, config.numberOfHeadersToFetch);
   if (!blockHeaders || blockHeaders.length < 1) {
     console.log(blockHeaders);
     throw new Error('Missing block. Initialization impossible.');

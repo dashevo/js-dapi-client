@@ -106,7 +106,7 @@ class DAPI {
   getUserDapContext(dapId, userId) { return this.makeRequestToRandomDAPINode('getUserDapContext', { userId, dapId }); }
 
   // Temp methods for SPV testing/POC
-  // In future SPV will choose a spesific node and stick with
+  // In future SPV will choose a specific node and stick with
   // the node for as long as possible for SPV interaction (to prevent dapi chain rescans)
   loadBloomFilter(filter) { return this.makeRequestToRandomDAPINode('loadBloomFilter', { filter }); }
   addToBloomFilter(originalFilter, element) { return this.makeRequestToRandomDAPINode('addToBloomFilter', { originalFilter, element }); }

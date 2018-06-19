@@ -14,6 +14,10 @@ addons:
 env:
   - DOCKER_COMPOSE_VERSION: 1.18.0
 
+script:
+  - npm test
+  - npm run test:integration
+
 install:
   - pip install awscli --upgrade --user
   - cd ..

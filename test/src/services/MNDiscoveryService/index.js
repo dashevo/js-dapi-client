@@ -82,7 +82,7 @@ describe('MNDiscovery', async () => {
             const discovery = new MNDiscovery();
             sinon.spy(discovery.masternodeListProvider, 'getMNList');
 
-            ips = [];
+            var ips = [];
             async function verifyRandomf(array) {
                 for (const item of array) {
                     let randomMasternode = await discovery.getRandomMasternode();
@@ -95,14 +95,14 @@ describe('MNDiscovery', async () => {
                     ips.push(randomMasternode.ip);
                 }
                 expect(discovery.masternodeListProvider.getMNList.callCount).to.equal(array.length);
-                uniqueIps = ips.filter(function (elem, pos) {
+                let uniqueIps = ips.filter(function (elem, pos) {
                     return ips.indexOf(elem) == pos;
                 });
                 expect(uniqueIps.length > 1).to.be.true;
                 discovery.masternodeListProvider.getMNList.restore();
             }
 
-            await verifyRandomf([0, 1, 2, 3, 4]);
+            await verifyRandomf([0, 1, 2, 3]);
         });
     });
 

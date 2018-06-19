@@ -27,35 +27,40 @@ let dashPayId = 'b4de10e1ddb8e225cd04a406deb98e6081f9bd26f98f46c0932d0bdfb2bd062
 
 describe('sync.register_dap', () => {
     before(async () => {
-        privateKey = new PrivateKey(privateKeyString);
-        publicKey = PublicKey.fromPrivateKey(privateKey);
-        address = Address.fromPublicKey(publicKey, 'testnet').toString();
-        api = new Api();
+        try {
+          privateKey = new PrivateKey(privateKeyString);
+          publicKey = PublicKey.fromPrivateKey(privateKey);
+          address = Address.fromPublicKey(publicKey, 'testnet').toString();
+          api = new Api();
 
-        await execCommand(
+          await execCommand(
             './mn-bootstrap.sh',
             ['regtest', 'up', '-d'],
             {cwd: process.cwd() + '/../mn-bootstrap/'},
-        );
+          );
 
-        await execCommand(
+          await execCommand(
             './mn-bootstrap.sh',
             ['regtest', 'logs', '-f'],
             {cwd: process.cwd() + '/../mn-bootstrap/'}, 'Dash Daemon Ready');
-        await api.generate(101);
+          await api.generate(101);
 
-        await execCommand(
+          await execCommand(
             './mn-bootstrap.sh',
             ['regtest', 'logs', '-f'],
             {cwd: process.cwd() + '/../mn-bootstrap/'}, 'join new Quorum');
-        await api.generate(10);
-        await
+          await api.generate(10);
+          await
             execCommand(
-                'sh',
-                ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
-                {cwd: process.cwd() + '/../mn-bootstrap/'},
+              'sh',
+              ['dash-cli-without-tty.sh', 'regtest', 'sendtoaddress', 'ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh', 500],
+              {cwd: process.cwd() + '/../mn-bootstrap/'},
             );
-        await api.generate(7);
+          await api.generate(7);
+        } catch (e) {
+          console.error(e);
+          process.exit(1);
+        }
     });
 
     beforeEach(async () => {

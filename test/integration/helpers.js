@@ -10,21 +10,71 @@ const {Registration, TopUp} = BitcoreLib.Transaction.SubscriptionTransactions;
 
 const api = new Api({ port: 3000 });
 
-const timeout = ms => new Promise(res => setTimeout(res, ms))
+class Timeout {
+    constructor(milliseconds, interval, message = 'Timeout') {
+        this.interval = interval;
+        this.message = message;
+        this.started = Date.now();
+        this.expires = this.started + milliseconds;
+        this.timeout = null;
+        this.callback = null;
+        this.isActive = true;
+        this.check();
+    }
+
+    isExpired() {
+        return Date.now() > this.expires;
+    }
+
+    check() {
+        if (this.isExpired()) {
+            this.deactivate();
+            if (this.callback) {
+                return this.callback();
+            }
+            throw new Error(this.message);
+        } else if (this.isActive) {
+          this.timeout = setTimeout(() => {
+            this.clearPrevStep();
+            this.check();
+          }, this.interval);
+        }
+    }
+
+    onExpired(callback) {
+        this.callback = callback;
+    }
+
+    clearPrevStep() {
+        clearTimeout(this.timeout);
+    }
+
+    deactivate() {
+        this.isActive = false;
+        this.clearPrevStep();
+    }
+}
+
+const timeout = ms => new Promise(res => setTimeout(res, ms));
 
 async function execCommand(command, params, options, waitString) {
     return new Promise(resolve => {
         let result = '';
         const sp = spawn(command, params, options);
 
+        const timeout = new Timeout(5000, 100);
+        timeout.onExpired(() => {
+          throw new Error(`Command ${command} ${params.join(' ')} ${JSON.stringify(options)} timed out`);
+        });
+
         sp.stdout.on('data', data => {
             // console.log(`stdout: ${data}`);
             result += data;
             if (waitString != undefined && data.indexOf(waitString) > 1) {
                 console.log(`found stdout: ${data}`);
-                sp.stdin.end();
-                sp.stdout.destroy();
-                sp.stderr.destroy();
+                timeout.deactivate();
+                sp.kill(0);
+                resolve(result);
             }
         });
 
@@ -34,8 +84,12 @@ async function execCommand(command, params, options, waitString) {
         });
 
         sp.on('close', code => {
+            if (code !== 0) {
+                throw new Error(`Command ${command} ${params.join(' ')} ${JSON.stringify(options)} exited with non-zero code: ${code}`);
+            }
             console.log(command, params, options, `command, params, options, child process exited with code ${code}`);
-            resolve(result)
+            timeout.deactivate();
+            return resolve(result)
         });
     });
 }

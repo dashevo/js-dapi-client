@@ -64,7 +64,7 @@ async function execCommand(command, params, options, waitString) {
 
         const timeout = new Timeout(5000, 100);
         timeout.onExpired(() => {
-          throw new Error(`Command ${command} ${params.join(' ')} ${JSON.stringify(options)} timed out`);
+          throw new Error(`Command ${command} ${params.join(' ')} ${JSON.stringify(options)} timed out. Waited for output: ${waitString}`);
         });
 
         sp.stdout.on('data', data => {
@@ -74,7 +74,7 @@ async function execCommand(command, params, options, waitString) {
                 console.log(`found stdout: ${data}`);
                 timeout.deactivate();
                 sp.kill(0);
-                resolve(result);
+                return resolve(result);
             }
         });
 

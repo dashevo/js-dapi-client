@@ -45,7 +45,7 @@ describe('sync.topup_user_credits', () => {
         await execCommand(
             './mn-bootstrap.sh',
             ['regtest', 'logs', '-f'],
-            {cwd: process.cwd() + '/../mn-bootstrap/'}, 'join new Quorum');
+            {cwd: process.cwd() + '/../mn-bootstrap/'}, 'Awaiting full sync before running Sentinel');
         await api.generate(10);
 
         await

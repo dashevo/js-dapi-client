@@ -62,7 +62,7 @@ async function execCommand(command, params, options, waitString) {
         let result = '';
         const sp = spawn(command, params, options);
 
-        const timeout = new Timeout(5000, 100);
+        const timeout = new Timeout(500000, 100);
         timeout.onExpired(() => {
           throw new Error(`Command ${command} ${params.join(' ')} ${JSON.stringify(options)} timed out. Waited for output: ${waitString}`);
         });

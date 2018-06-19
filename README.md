@@ -53,7 +53,6 @@ This package requires the use of Node >= 8.0.0 and is broadly compatible with mo
 
 You can check our [test folder](https://github.com/dashevo/dapi-sdk/tree/master/test) to see some usage examples.
 
-
 ##### Import the package :
 ```js
 

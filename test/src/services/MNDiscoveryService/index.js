@@ -102,7 +102,7 @@ describe('MNDiscovery', async () => {
                 discovery.masternodeListProvider.getMNList.restore();
             }
 
-            await verifyRandomf([0, 1, 2, 3]);
+            await verifyRandomf([0, 1, 2, 3, 4]);
         });
     });
 

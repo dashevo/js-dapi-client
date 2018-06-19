@@ -33,6 +33,19 @@ const validTransactionHex = 'ffffffff0000ffffffff';
 const transactionHash = 'a8502e9c08b3c851201a71d25bf29fd38a664baedb777318b12d19242f0e46ab';
 const invalidTransactionHex = 'invalidtransactionhex';
 
+const validBlockchainUserObject = {
+    uname: validUsername,
+    regtxid: 'e1abfdbda9e0204573f03c8c354c40649c711253ec3c978011ef320bd5bbc33a',
+    pubkeyid: 'd7d295e04202cc652d845cc51762dc64a5fd2bdc',
+    credits: 10000,
+    data: '0000000000000000000000000000000000000000000000000000000000000000',
+    state: 'open',
+    subtx:
+        ['e1abfdbda9e0204573f03c8c354c40649c711253ec3c978011ef320bd5bbc33a'],
+    transitions: [],
+    from_mempool: true
+};
+
 function validateUsername(uname) {
   return uname.length >= 3 && uname.length <= 12 && /^[\x00-\x7F]+$/.test('uname');
 }
@@ -43,7 +56,7 @@ describe('api', () => {
     // stub requests to DAPI
     sinon.stub(rpcClient, 'request').callsFake(async function(url, method, params) {
       const {
-        address, username, rawTransaction, rawTransitionHeader, rawTransitionPacket, height
+        address, username, userId, rawTransaction, rawTransitionHeader, rawTransitionPacket, height
       } = params;
 
       if (method === 'getUTXO') {
@@ -70,24 +83,27 @@ describe('api', () => {
         }
         throw new Error('Address not found');
       }
-      if (method === 'getUser') {
-        /*
-        Since dash schema uses fs, it would be impossible to run tests in browser
-        with current version of validation from dash-schema
-        */
-        const isValidUsername = validateUsername(username);
-        const validRegTxId = false;
-        if (isValidUsername) {
-          if (username === validUsername) {
-            return {}; //todo
-          }
-          throw new Error('User with such username not found');
+        if (method === 'getUser') {
+            /*
+            Since dash schema uses fs, it would be impossible to run tests in browser
+            with current version of validation from dash-schema
+            */
+            if (username !== undefined) {
+                const isValidUsername = validateUsername(username);
+                if (isValidUsername) {
+                    if (username === validUsername) {
+                        return validBlockchainUserObject;
+                    }
+                }
+                throw new Error('User with such username not found');
+            } else {
+                if (userId === validBlockchainUserObject.regtxid) {
+                    return validBlockchainUserObject;
+                }
+                throw new Error('User with such od not found');
+            }
+            throw new Error('Not found');
         }
-        if (validRegTxId) {
-
-        }
-        throw new Error('Not found');
-      }
       if (method === 'sendRawTransaction') {
         const transaction = new RegSubTx();
         transaction.fromString(rawTransaction);
@@ -126,6 +142,7 @@ describe('api', () => {
       expect(dapi.DAPIPort).to.be.equal(1234);
       expect(dapi.MNDiscovery.masternodeListProvider.DAPIPort).to.be.equal(1234);
       expect(dapi.MNDiscovery.masternodeListProvider.masternodeList).to.be.deep.equal([{ip:'127.1.2.3'}]);
+      expect(dapi.MNDiscovery.seeds).to.be.deep.equal([{ip:'127.1.2.3'}]);
 
       await dapi.getBestBlockHeight();
       expect(rpcClient.request.calledWith({ host: '127.1.2.3', port: 1234 }, 'getMNList', {})).to.be.true;
@@ -187,7 +204,25 @@ describe('api', () => {
       expect(user).to.be.an('object');
     });
   });
-  describe('.transaction.sendRaw', () => {
+  describe('.user.getUserById', () => {
+      it('Should throw error if use id is incorrect', async () => {
+          const dapi = new Api();
+          const user= await dapi.getUserByName(validUsername);
+          dapi.generate(10);
+          return expect(dapi.getUserById(user.regtxid+"fake")).to.be.rejected;
+      });
+      it('Should throw error if user id not found', async () => {
+          const dapi = new Api();
+          return expect(dapi.getUserById(notExistingUsername)).to.be.rejected;
+        });
+        it('Should return user data if user exists', async () => {
+            const dapi = new Api();
+            const user = await dapi.getUserByName(validUsername);
+            const userById = await dapi.getUserById(user.regtxid)
+            expect(userById).to.be.an('object');
+        });
+    });
+    describe('.transaction.sendRaw', () => {
     it('Should return hash of transaction', async () => {
       const dapi = new Api();
       const hash = await dapi.sendRawTransaction(validTransactionHex);
@@ -218,6 +253,7 @@ describe('api', () => {
       const dapi = new Api();
       const bestBlockHeight = await dapi.getBestBlockHeight();
       expect(bestBlockHeight).to.be.a('number');
+        expect(bestBlockHeight).to.be.equal(100);
     });
   });
   describe('.block.getBlockHash', () => {
@@ -225,11 +261,15 @@ describe('api', () => {
       const dapi = new Api();
       const blockHash = await dapi.getBlockHash(2357);
       expect(blockHash).to.be.a('string');
+      expect(blockHash).to.be.equal(validBlockHash);
     });
     it('Should be rejected if height is invalid', async () => {
       const dapi = new Api();
       await expect(dapi.getBlockHash(1000000)).to.be.rejected;
       await expect(dapi.getBlockHash('some string')).to.be.rejected;
+      await expect(dapi.getBlockHash(1.2)).to.be.rejected;
+      await expect(dapi.getBlockHash(-1)).to.be.rejected;
+      await expect(dapi.getBlockHash(true)).to.be.rejected;
     });
   });
 });

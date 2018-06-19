@@ -48,7 +48,7 @@ This package requires the use of Node >= 8.0.0 and is broadly compatible with mo
 
 ## Getting Started
 ### Install DAPI-SDK
-* npm : `npm i -S dapi-sdk`
+* npm : `npm i -S @dashevo/dapi-sdk`
 * github : `npm i -S github:dashevo/dapi-sdk`
 
 ### Uses : 

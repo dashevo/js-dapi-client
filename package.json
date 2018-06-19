@@ -60,7 +60,7 @@
     "build": "webpack --display-error-details",
     "lint": "eslint .",
     "test": "npm run build && npm run test:node && npm run test:firefox",
-    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=87 --branches=73 --functions=69 mocha --recursive",
+    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=89 --branches=73 --functions=73 mocha --recursive",
     "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run"
   },
   "author": "",

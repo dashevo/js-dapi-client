@@ -84,7 +84,7 @@ class DAPI {
   getBlockHash(height) { return this.makeRequestToRandomDAPINode('getBlockHash', { height }); }
 
   /**
-   * Returns block headers from [offset] with length [limit], where limit is <= 250
+   * Returns block headers from [offset] with length [limit], where limit is <= 25
    * @param {number} offset
    * @param {number} limit
    * @returns {Promise<[objects]>} - array of header objects

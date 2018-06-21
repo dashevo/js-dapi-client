@@ -60,8 +60,9 @@
     "build": "webpack --display-error-details",
     "lint": "eslint .",
     "test": "npm run build && npm run test:node && npm run test:firefox",
-    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=89 --branches=73 --functions=73 mocha --recursive",
-    "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run"
+    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=89 --branches=73 --functions=73 mocha test/src --recursive",
+    "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run",
+    "test:integration": "mocha --no-timeouts test/integration/*"
   },
   "author": "",
   "license": "ISC"

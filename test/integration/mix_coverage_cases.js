@@ -22,7 +22,7 @@ let address;
 let privateKey;
 let publicKey;
 
-describe('sync.topup_user_credits', () => {
+describe('sync.mix_coverage_cases', () => {
     before(async () => {
         privateKey = new PrivateKey(privateKeyString);
         publicKey = PublicKey.fromPrivateKey(privateKey);
@@ -258,7 +258,7 @@ describe('sync.topup_user_credits', () => {
             });
         }
 
-        it('Should be able to call generate with 0 blocks to generate', async () => {
+        it('Should be able to searchDapContracts', async () => {
             const username = Math.random().toString(36).substring(7);
             await registerUser(username, privateKeyString);
             await api.generate(1);
@@ -288,7 +288,7 @@ describe('sync.topup_user_credits', () => {
             dashPayDataContract = await api.getDapContract(dashPayId);
             let dapContracts = await api.searchDapContracts(dashPayDataContract.dapcontract.dapname);
             expect(dapContracts).to.be.an('array');
-            expect(dapContracts).to.have.lengthOf.above(1);
+            expect(dapContracts).to.have.lengthOf.above(0);
             verifyDapContracts(dapContracts, dashPayDataContract.dapcontract.dapname);
 
         });

@@ -140,28 +140,19 @@ describe('sync.mix_coverage_cases', () => {
             verifyHeaders(blockHeaders, false);
         });
 
-        /*
-        // https://dashpay.atlassian.net/browse/EV-927
-        it('Should return array of 25 headers when offset=0, limit=250', async () => {
-            let blockHeaders = await api.getBlockHeaders(0, 250);
+        it('Should return array of 25 headers when offset=0, limit=25', async () => {
+            let blockHeaders = await api.getBlockHeaders(0, 25);
             expect(blockHeaders).to.be.an('object');
             expect(Object.keys(blockHeaders)).to.have.lengthOf(1);
             expect(blockHeaders.headers).to.be.an('array');
-            expect(blockHeaders.headers).to.have.lengthOf(1);
+            expect(blockHeaders.headers).to.have.lengthOf(25);
 
             verifyHeaders(blockHeaders, false);
         });
-        // https://dashpay.atlassian.net/browse/EV-927
-        it('Should return array of 25 headers when offset=0, limit=251', async () => {
-            let blockHeaders = await api.getBlockHeaders(0, 251);
-            expect(blockHeaders).to.be.an('object');
-            expect(Object.keys(blockHeaders)).to.have.lengthOf(1);
-            expect(blockHeaders.headers).to.be.an('array');
-            expect(blockHeaders.headers).to.have.lengthOf(1);
 
-            verifyHeaders(blockHeaders, false);
+        it('Should throw error when > 25', async () => {
+            return expect(api.getBlockHeaders(0, 26)).to.be.rejectedWith('DAPI RPC error: getBlockHeaders: params.limit should be <= 25');
         });
-        */
 
         it('Should return array of 25 headers when offset=1, limit=0', async () => {
             let blockHeaders = await api.getBlockHeaders(1, 0);

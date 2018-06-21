@@ -108,16 +108,24 @@ describe('sync.register_dap', () => {
                 "hdextpubkey": contactRequest.contact.hdextpubkey
             }
         });
-        // TODO post a ticket
         let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
         expect(user2Space).to.equal(undefined);
 
         let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+        {
+            "act": 1,
+            "idx": 0,
+            "rev": 0,
+            "relation": otherUserId.txid,
+            "hdextpubkey": contactRequest.contact.hdextpubkey
+        });
         expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -157,9 +165,9 @@ describe('sync.register_dap', () => {
         user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
-        expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.objects).to.be.deep.equal([]);
+        expect(user1Context.related).to.have.lengthOf(1);
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -330,9 +338,19 @@ describe('sync.register_dap', () => {
         let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+            {
+                "act": 2,
+                "extra_param": "new_param_added",
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            });
         expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -364,9 +382,31 @@ describe('sync.register_dap', () => {
         user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
-        expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+            {
+                "act": 2,
+                "extra_param": "new_param_added",
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            });
+        expect(user1Context.related).to.have.lengthOf(1);
+        expect(user1Context.related[0].contact).to.be.deep.equal(
+            {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": blockchainUser.regtxid,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "meta": {
+                    "uid":  contactRequest.contact.relation,
+                    "uname": otherUserUsername
+                }
+            });
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -494,9 +534,22 @@ describe('sync.register_dap', () => {
         user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
-        expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(0);
+        expect(user1Context.related).to.have.lengthOf(1);
+        expect(user1Context.related[0].contact).to.be.deep.equal(
+            {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": blockchainUser.regtxid,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "meta": {
+                    "uid":  contactRequest.contact.relation,
+                    "uname": otherUserUsername
+                }
+            });
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -515,7 +568,7 @@ describe('sync.register_dap', () => {
     });
 
 
-    it('TODO why we can set act = 3 for non created contact?', async () => {
+    it('Shoule be able to set act = 3 for non created contact', async () => {
         const username = Math.random().toString(36).substring(7);
         await registerUser(username, privateKeyString);
         await api.generate(1);
@@ -557,15 +610,24 @@ describe('sync.register_dap', () => {
             }
         });
 
-        // let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
-        // expect(user2Space).to.equal(undefined);
+        let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        expect(user2Space).to.equal(undefined);
 
         let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+            {
+                "act": 3,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            });
         expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -597,9 +659,30 @@ describe('sync.register_dap', () => {
         user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
-        expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+            {
+                "act": 3,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            });
+        expect(user1Context.related).to.have.lengthOf(1);
+        expect(user1Context.related[0].contact).to.be.deep.equal(
+            {
+                "act": 3,
+                "idx": 0,
+                "rev": 0,
+                "relation": blockchainUser.regtxid,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "meta": {
+                    "uid":  contactRequest.contact.relation,
+                    "uname": otherUserUsername
+                }
+            });
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -641,7 +724,7 @@ describe('sync.register_dap', () => {
             }
         });
 
-        let user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
+        user2Space = await api.getUserDapSpace(dashPayId, otherUserId.txid);
         expect(user2Space.dapid).to.equal(dashPayId);
         expect(user2Space.uid).to.equal(otherUserId.txid);
         expect(user2Space.objects).to.have.lengthOf(1);
@@ -723,9 +806,21 @@ describe('sync.register_dap', () => {
         user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
-        expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.objects).to.be.deep.equal([]);
+        expect(user1Context.related).to.have.lengthOf(1);
+        expect(user1Context.related[0].contact).to.be.deep.equal(
+            {
+                "act": 3,
+                "idx": 0,
+                "rev": 0,
+                "relation": blockchainUser.regtxid,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "meta": {
+                    "uid":  contactRequest.contact.relation,
+                    "uname": otherUserUsername
+                }
+            });
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -791,9 +886,18 @@ describe('sync.register_dap', () => {
         let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+            {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            });
         expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -824,9 +928,18 @@ describe('sync.register_dap', () => {
         user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
-        expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+            {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            });
+        expect(user1Context.related).to.have.lengthOf(1);
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -951,9 +1064,22 @@ describe('sync.register_dap', () => {
         user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
-        expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(0);
+        expect(user1Context.related).to.have.lengthOf(1);
+        expect(user1Context.related[0].contact).to.be.deep.equal(
+            {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": blockchainUser.regtxid,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "meta": {
+                    "uid":  contactRequest.contact.relation,
+                    "uname": otherUserUsername
+                }
+            });
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -1539,7 +1665,6 @@ describe('sync.register_dap', () => {
         blockchainUser = await api.getUserByName(username);
 
         let dashPayDataContract = await api.getDapContract(dashPayId);
-        // TODO need fix from Anton
         if (!dashPayDataContract) {
             dashPayId = await registerDap(
                 Schema.Daps.DashPay,
@@ -1775,9 +1900,21 @@ describe('sync.register_dap', () => {
         const user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+            {
+                "act": 1,
+                "extrapropboolean": true,
+                "extrapropnum": -1,
+                "extrapropstr": "stringgg",
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            });
         expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         const user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -1886,9 +2023,19 @@ describe('sync.register_dap', () => {
         let user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+            {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            });
         expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.related).to.have.lengthOf(0);
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         let user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);
@@ -1919,9 +2066,30 @@ describe('sync.register_dap', () => {
         user1Context = await api.getUserDapContext(dashPayId, blockchainUser.regtxid);
         expect(user1Context.dapid).to.equal(dashPayId);
         expect(user1Context.maxidx).to.equal(-1);
-        expect(user1Context.objects).to.equal(null);
-        expect(user1Context.related).to.have.lengthOf(0);
-        expect(user1Context.uid).to.equal(null);
+        expect(user1Context.objects).to.be.an('array');
+        expect(user1Context.objects.length).to.be.equal(1);
+        expect(user1Context.objects[0].contact).to.be.deep.equal(
+            {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": otherUserId.txid,
+                "hdextpubkey": contactRequest.contact.hdextpubkey
+            });
+        expect(user1Context.related).to.have.lengthOf(1);
+        expect(user1Context.related[0].contact).to.be.deep.equal(
+            {
+                "act": 1,
+                "idx": 0,
+                "rev": 0,
+                "relation": blockchainUser.regtxid,
+                "hdextpubkey": contactAcceptance.contact.hdextpubkey,
+                "meta": {
+                    "uid":  contactRequest.contact.relation,
+                    "uname": otherUserUsername
+                }
+            });
+        expect(user1Context.uid).to.equal(blockchainUser.regtxid);
 
         user2Context = await api.getUserDapContext(dashPayId, otherUserId.txid);
         expect(user2Context.dapid).to.equal(dashPayId);

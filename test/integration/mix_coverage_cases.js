@@ -87,8 +87,6 @@ describe('sync.topup_user_credits', () => {
     });
 
     describe('.api.getBlockHeaders', () => {
-        let expected_error = 'DAPI RPC error: getBlockHeaders: Internal error';
-
         function verifyHeaders(blockHeaders, prevHashInFirstBlockExists) {
             (blockHeaders.headers).forEach(function (blockHeader) {
                 if (blockHeader == blockHeaders.headers[0] && !prevHashInFirstBlockExists) {
@@ -186,17 +184,15 @@ describe('sync.topup_user_credits', () => {
         });
 
         it('Should throw error when getBlockHeaders without limit parameter', async () => {
-            return expect(api.getBlockHeaders(1)).to.be.rejectedWith(expected_error);
+            return expect(api.getBlockHeaders(1)).to.be.rejectedWith('DAPI RPC error: getBlockHeaders: params should have required property \'limit\'');
         });
 
         it('Should throw error when getBlockHeaders without parameters', async () => {
-            return expect(api.getBlockHeaders()).to.be.rejectedWith(expected_error);
+            return expect(api.getBlockHeaders()).to.be.rejectedWith('DAPI RPC error: getBlockHeaders: params should have required property \'limit\'');
         });
     });
 
     describe('.api.generate', () => {
-        let expected_error = 'DAPI RPC error: generate: Internal error';
-
         it('Should return array of  block hashes', async () => {
             let hashes = await api.generate(13);
             expect(hashes).to.be.an('array');
@@ -209,23 +205,23 @@ describe('sync.topup_user_credits', () => {
         });
 
         it('Should throw error when num of blocks negative', async () => {
-            return expect(api.generate(-1)).to.be.rejectedWith(expected_error);
+            return expect(api.generate(-1)).to.be.rejectedWith('DAPI RPC error: generate: params.amount should be >= 0');
         });
 
         it('Should throw error when num of blocks is string', async () => {
-            return expect(api.generate('string')).to.be.rejectedWith(expected_error);
+            return expect(api.generate('string')).to.be.rejectedWith('DAPI RPC error: generate: params.amount should be integer');
         });
 
         it('Should throw error when num of blocks is float', async () => {
-            return expect(api.generate(1.2)).to.be.rejectedWith(expected_error);
+            return expect(api.generate(1.2)).to.be.rejectedWith('DAPI RPC error: generate: params.amount should be integer');
         });
 
         it('Should throw error when num of blocks is boolean', async () => {
-            return expect(api.generate(true)).to.be.rejectedWith(expected_error);
+            return expect(api.generate(true)).to.be.rejectedWith('DAPI RPC error: generate: params.amount should be integer');
         });
 
         it('Should throw error when num of blocks is array', async () => {
-            return expect(api.generate([1])).to.be.rejectedWith(expected_error);
+            return expect(api.generate([1])).to.be.rejectedWith('DAPI RPC error: generate: params.amount should be integer');
         });
     });
 

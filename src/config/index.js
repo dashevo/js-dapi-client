@@ -1,6 +1,6 @@
 const config = {
   Api: {
-    port: 6001,
+    port: 3000,
   },
   MNListUpdateInterval: 60000,
   quorumUpdateInterval: 60000,

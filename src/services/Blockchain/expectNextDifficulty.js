@@ -1,5 +1,5 @@
-/* eslint no-underscore-dangle: 0, no-console: 0 */
-const DGW = require('dark-gravity-wave-js');
+/* eslint-disable */
+const DGW = require('@dashevo/dgw');
 
 
 const expectNextDifficulty = () => async () => new Promise((async (resolve) => {

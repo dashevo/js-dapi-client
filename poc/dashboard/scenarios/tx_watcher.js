@@ -4,20 +4,26 @@ const dashcore = require('@dashevo/dashcore-lib');
 const { MerkleProof } = require('@dashevo/dash-spv');
 
 class TxWathcer extends Base {
-  constructor() {
+  constructor(api) {
     super();
-
-    this.bloomFilter = null;
+    this.api = api;
+    this.filter = null;
     this.txData = null;
     this.txConfirms = '';
+    this.answers = null;
   }
 
   init() {
+    super.init();
     this.intervalIds.push(setInterval(() => this.getSpvTransactions(this.api), 1000));
   }
 
   getOutput() {
     return this.txConfirms;
+  }
+
+  setAnswers(answers) {
+    this.answers = answers;
   }
 
   updateTxConfirmations() {
@@ -37,6 +43,8 @@ class TxWathcer extends Base {
         Transactions: 
 
         ${txData.map(tx => `\n\t\t ${tx}`)}`;
+      }).catch((ex) => {
+        this.txConfirms = ex;
       });
   }
 
@@ -66,16 +74,19 @@ class TxWathcer extends Base {
     ];
   }
 
-  setBloomFilter(txObj) {
-    this.filter =
-      bloomFilter.create(txObj.noElements, txObj.fpRate, 0, bloomFilter.BLOOM_UPDATE_ALL);
-    const pubKey = new dashcore.PrivateKey(txObj.pkseed).toPublicKey();
+  setBloomFilter() {
+    this.filter = bloomFilter.create(
+      this.answers.noElements,
+      this.answers.fpRate, 0, bloomFilter.BLOOM_UPDATE_ALL,
+    );
+    const pubKey = new dashcore.PrivateKey(this.answers.pkseed).toPublicKey();
+
     this.filter.insert(dashcore.crypto.Hash.sha256ripemd160(pubKey.toBuffer()));
   }
 
-  getSpvTransactions(api) {
-    if (this.bloomFilter) {
-      api.getSpvData(this.bloomFilter)
+  getSpvTransactions() {
+    if (this.filter) {
+      this.api.getSpvData(this.filter)
         .then((data) => {
           if (data && data.transactions) {
             this.txData = data.transactions
@@ -87,15 +98,12 @@ class TxWathcer extends Base {
                   merkleBlock: data.merkleblocks.filter(mb => mb.hashes.includes(Buffer.from(txHash, 'hex').reverse().toString('hex')))[0],
                 }));
           }
-          return null;
+        }).catch(() => {
+
         });
     }
 
-    this.setBloomFilter({
-      pkseed: this.answers[0],
-      noElements: this.answers[1],
-      fpRate: this.answers[0],
-    });
+    this.setBloomFilter();
   }
 }
 

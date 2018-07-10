@@ -24,6 +24,8 @@ function initChain() {
     })
     .then((headerObj) => {
       chain = new SpvChain('custom_genesis', headerObj.headers[0]);
+    }).catch(() => {
+      // todo logging
     });
 }
 
@@ -41,6 +43,8 @@ function headerCollector() {
       if (headersObj && headersObj.headers.length > 0) {
         chain.addHeaders(headersObj.headers);
       }
+    }).catch(() => {
+      // todo logging
     });
 }
 
@@ -49,23 +53,21 @@ const selectTest =
   type: 'list',
   name: 'selectTest',
   message: 'Choose a test:',
-  choices: fs.readdirSync(path.dirname(require.main.filename).concat('/scenarios'))
-    .map(f => f.slice(0, -3)),
+  choices: fs.readdirSync(path.dirname(require.main.filename).concat('/scenarios')),
 };
 
-let liveUpdates = false;
+const peers = api.MNDiscovery.masternodeListProvider.masternodeList;
 function setNewScenario(Scenario) {
-  liveUpdates = false;
   process.stdout.write('\x1Bc');
   if (!Scenario) {
     prompt(selectTest)
       .then((answer) => {
         switch (answer.selectTest) {
-          case 'chain_status':
-            setNewScenario(ChainStatus);
+          case 'chain_status.js':
+            setNewScenario(new ChainStatus(chain, peers));
             break;
-          case 'tx_watcher':
-            setNewScenario(TxWatcher);
+          case 'tx_watcher.js':
+            setNewScenario(new TxWatcher(api));
             break;
           default:
             break;
@@ -75,31 +77,27 @@ function setNewScenario(Scenario) {
     if (currScenario) {
       currScenario.clearIntervals();
     }
-    currScenario = new Scenario(chain);
-    const userInput = currScenario.getInput && currScenario.getInput();
+
+    const userInput = Scenario.getInput && Scenario.getInput();
     if (userInput) {
       prompt(userInput)
         .then((answers) => {
-          currScenario.answers = answers;
-          liveUpdates = true;
+          Scenario.setAnswers(answers);
+          currScenario = Scenario;
         });
     } else {
-      liveUpdates = true;
+      currScenario = Scenario;
     }
   }
 }
 
-process.stdin.on('keypress', (ch, key) => {
-  if (key.name === 'escape') {
-    setNewScenario(null);
-  }
-});
-
+// currScenario = new TxWatcher();
 initChain()
   .then(() => {
     setNewScenario(null);
     setInterval(() => {
-      if (liveUpdates) {
+      if (currScenario) {
+        currScenario.init();
         ui.updateBottomBar(currScenario.getOutput());
       }
       headerCollector();

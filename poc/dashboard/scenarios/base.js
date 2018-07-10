@@ -3,8 +3,12 @@ const Api = require('../../../src/api');
 class BaseScenario {
   constructor() {
     this.api = new Api();
-    this.intervalIds = [];
+    this.intervalIds = null;
     this.answers = [];
+  }
+
+  init() {
+    this.intervalIds = [];
   }
 
   clearIntervals() {

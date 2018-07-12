@@ -16,7 +16,7 @@ env:
 
 script:
   - npm test
-  # - npm run test:integration
+  - npm run test:integration
 
 install:
   - pip install awscli --upgrade --user

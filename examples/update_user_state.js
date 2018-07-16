@@ -28,7 +28,7 @@ async function updateUserState(dapId, userId, objects, privateKeyString) {
     .addObject(tsp);
 
   const transitionHeader = new TransitionHeader()
-    .setMerkleRoot(transitionPacket.getMerkleRoot().toString('hex'))
+    .setHashSTPacket(transitionPacket.getMerkleRoot().toString('hex'))
     .setRegTxHash(userId);
 
   if (user.transitions.length > 0) {

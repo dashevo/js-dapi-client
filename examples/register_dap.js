@@ -25,7 +25,7 @@ async function registerDap(dapSchema, privateKeyString, userId) {
     .addObject(tsp);
 
   const transitionHeader = new TransitionHeader()
-    .setMerkleRoot(transitionPacket.getMerkleRoot().toString('hex'))
+    .setHashSTPacket(transitionPacket.getMerkleRoot().toString('hex'))
     .setRegTxHash(userId)
     .sign(privateKey)
     .serialize();

@@ -6,7 +6,7 @@
  */
 const BitcoreLib = require('@dashevo/dashcore-lib');
 const Schema = require('@dashevo/dash-schema/lib');
-const DAPI = require('./api');
+const DAPI = require('./index');
 const EventEmitter = require('eventemitter2');
 
 const { Registration } = BitcoreLib.Transaction.SubscriptionTransactions;

@@ -1,14 +1,14 @@
 /**
  * This module provides list of masternode addresses.
- * No need to use this module manually - it's part of MNDiscoveryService.
+ * No need to use this module manually - it's part of MNDiscovery.
  * It is written as class for testability purposes - there is need to be a way to
  * reset internal state of object.
  * @module MasternodeListProvider
  */
 
-const RPCClient = require('../../utils/RPCClient');
+const RPCClient = require('../RPCClient');
 const sample = require('lodash/sample');
-const config = require('../../config/index');
+const config = require('../config');
 
 /**
  @typedef {object} Masternode

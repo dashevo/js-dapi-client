@@ -1,9 +1,9 @@
-const MNDiscovery = require('../../../../src/services/MNDiscoveryService/index');
+const MNDiscovery = require('../../../src/MNDiscovery/index');
 const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const RPCClient = require('../../../../src/utils/RPCClient');
-const config = require('../../../../src/config/index');
+const RPCClient = require('../../../src/RPCClient');
+const config = require('../../../src/config');
 
 chai.use(chaiAsPromised);
 const {expect} = chai;

@@ -46,7 +46,7 @@ class MNDiscovery {
   /**
    * @private
    * Deletes cached MNList and resets it back to initial seed.
-   * Used in MNDiscoveryService tests; No need to call that method manually.
+   * Used in MNDiscovery tests; No need to call that method manually.
    * @return void
    */
   reset() {

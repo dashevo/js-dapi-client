@@ -10,7 +10,6 @@
     "@dashevo/dgw": "git+ssh://git@github.com/dashevo/dark-gravity-wave-js.git#develop",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",
-    "bitcore-message-dash": "^1.0.9",
     "@dashevo/dashcore-mnemonic": "^1.5.0",
     "bloom-filter": "^0.2.0",
     "bluebird": "^3.5.1",

@@ -10,8 +10,7 @@
     "@dashevo/dgw": "git+ssh://git@github.com/dashevo/dark-gravity-wave-js.git#develop",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",
-    "bitcore-message-dash": "^1.0.9",
-    "bitcore-mnemonic-dash": "^1.2.3",
+    "@dashevo/dashcore-mnemonic": "^1.5.0",
     "bloom-filter": "^0.2.0",
     "bluebird": "^3.5.1",
     "eventemitter2": "^4.1.2",
@@ -22,7 +21,7 @@
     "log-update": "^2.3.0",
     "lowdb": "^1.0.0",
     "memdown": "^1.2.4",
-    "quorums-dash": "^1.0.1",
+    "@dashevo/quorums": "^1.0.2",
     "rxjs": "^6.2.1",
     "socket.io-client": "^2.0.3",
     "ws": "^3.3.3"

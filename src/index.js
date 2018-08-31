@@ -92,6 +92,13 @@ class DAPIClient {
   getBlockHeaders(offset, limit) { return this.makeRequestToRandomDAPINode('getBlockHeaders', { offset, limit }); }
 
   /**
+   * Returns block header by hash
+   * @param {string} blockHash
+   * @returns {Promise<[objects]>} - array of header objects
+   */
+  getBlockHeader(blockHash) { return this.makeRequestToRandomDAPINode('getBlockHeader', { blockHash }); }
+
+  /**
    * ONLY FOR TESTING PURPOSES WITH REGTEST. WILL NOT WORK ON TESTNET/LIVENET.
    * @param {number} amount - Number of blocks to generate
    * @returns {Promise<string[]>} - block hashes

@@ -1,5 +1,5 @@
 const Client = require('../');
-// Add this code back when proofs available.
+// Add this ref back when proofs available.
 // const { MerkleProof } = require('dash-spv');
 
 const client = new Client();
@@ -9,10 +9,12 @@ function getBestBlockHash() {
     .then(height => client.getBlockHash(height));
 }
 
-function constructMnList(originalMnList, latestMnList) {
+function constructMnList(originalMnList, diffList) {
+  const replacements = diffList.mnList.map(x => x.proRegTxHash);
   return originalMnList
-    .filter(mn => !latestMnList.deletedMNs.includes(mn.proRegTxHash))
-    .concat(latestMnList.mnList)
+    .filter(mn => !diffList.deletedMNs.includes(mn.proRegTxHash)) // remove deleted
+    .filter(mn => !replacements.includes(mn.proRegTxHash)) // to be replaced
+    .concat(diffList.mnList) // replace
     .sort((itemA, itemB) => itemA.proRegTxHash > itemB);
 }
 
@@ -43,17 +45,17 @@ function stubDiffList(mnListDiff) {
   return mnListDiff;
 }
 
-const nullhash = '0000000000000000000000000000000000000000000000000000000000000000';
-async function getVerfiedMnList(_targetHash, offSetHash = nullhash, lastSyncedMnList = []) {
+
+async function getVerfiedMnList(offSetHash, lastSyncedMnList, _targetHash) {
   const targetHash = _targetHash || await getBestBlockHash();
-  const latestHeader = await client.getBlockHeader(targetHash);
+  const refHeader = await client.getBlockHeader(targetHash);
   const candidateList = await client.getMnListDiff(offSetHash, targetHash);
   const newList = constructMnList(lastSyncedMnList, candidateList);
 
   // Todo: pending core RPC bug
   stubDiffList(candidateList);
 
-  while (!validateDiffListProofs(candidateList, latestHeader, newList)) {
+  while (!validateDiffListProofs(candidateList, refHeader, newList)) {
     // Todo get new mnlist from different node until a list is obtained
     // which does validate correctly
   }

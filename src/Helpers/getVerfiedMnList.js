@@ -45,7 +45,7 @@ function stubDiffList(mnListDiff) {
 
 const nullhash = '0000000000000000000000000000000000000000000000000000000000000000';
 async function getVerfiedMnList(_targetHash, offSetHash = nullhash, lastSyncedMnList = []) {
-  const targetHash = await getBestBlockHash();
+  const targetHash = _targetHash || await getBestBlockHash();
   const latestHeader = await client.getBlockHeader(targetHash);
   const candidateList = await client.getMnListDiff(offSetHash, targetHash);
   const newList = constructMnList(lastSyncedMnList, candidateList);

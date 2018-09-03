@@ -44,14 +44,13 @@ function stubDiffList(mnListDiff) {
 }
 
 const nullhash = '0000000000000000000000000000000000000000000000000000000000000000';
-async function getVerfiedMnList(lastSyncedHash = nullhash, lastSyncedMnList = []) {
-  // Todo: not ideal pattern (think some dapi architecture needs to change to improve)
-  const bestHash = await getBestBlockHash();
-  const latestHeader = await client.getBlockHeader(bestHash);
-  const candidateList = await client.getMnListDiff(lastSyncedHash, bestHash);
+async function getVerfiedMnList(_targetHash, offSetHash = nullhash, lastSyncedMnList = []) {
+  const targetHash = await getBestBlockHash();
+  const latestHeader = await client.getBlockHeader(targetHash);
+  const candidateList = await client.getMnListDiff(offSetHash, targetHash);
   const newList = constructMnList(lastSyncedMnList, candidateList);
 
-  // todo: remove
+  // Todo: pending core RPC bug
   stubDiffList(candidateList);
 
   while (!validateDiffListProofs(candidateList, latestHeader, newList)) {

@@ -40,11 +40,11 @@ async function getVerfiedMnList(offSetHash, lastSyncedMnList, _targetHash) {
   const candidateDiffList = await client.getMnListDiff(offSetHash, targetHash);
   const newList = constructMnList(lastSyncedMnList, candidateDiffList);
 
-  while (!validateDiffListProofs(candidateDiffList, refHeader, newList)) {
-    // Todo get new mnlist from different node until a list is obtained
-    // which does validate correctly
-  }
-  return newList;
+  return {
+    mnList: newList,
+    valid: validateDiffListProofs(candidateDiffList, refHeader, newList),
+    targetHash,
+  };
 }
 
 module.exports = getVerfiedMnList;

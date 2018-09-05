@@ -30,10 +30,10 @@ function sample2() {
   let lastTargetHash = '3f4a8012763b1d9b985cc77b0c0bca918830b1ef7dd083665bdc592c2cd31cf6';
 
   setInterval(() => {
-    getVerfiedMnList(lastTargetHash)
+    getVerfiedMnList(lastTargetHash, [])
       .then((res) => {
         if (res.valid) {
-          log.info(`List at block: ${res.targetHash} contains ${res.mnList.length} active MN's (including PoSe banned`);
+          log.info(`MN List at block: ${res.targetHash} contains ${res.mnList.length} active MN's (including PoSe banned)`);
           lastTargetHash = res.targetHash;
         } else {
           log.info(`No valid proofs found for mnlist at block ${res.targetHash} - retry at differrent node`);

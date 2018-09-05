@@ -34,28 +34,13 @@ function validateDiffListProofs(mnlistDiff, header, newList) {
   // MerkleProof.validateMnListMerkleRoot(mnlistDiff.mnlistMerkleRoot, newList);
 }
 
-// Todo: pending core RPC bug currently not returning these proofs
-/* eslint-disable no-param-reassign */
-function stubDiffList(mnListDiff) {
-  mnListDiff.totalTransactions = 0;
-  mnListDiff.merkleHashes = [];
-  mnListDiff.merkleFlags = [];
-  mnListDiff.cbTx = {};
-
-  return mnListDiff;
-}
-
-
 async function getVerfiedMnList(offSetHash, lastSyncedMnList, _targetHash) {
   const targetHash = _targetHash || await getBestBlockHash();
   const refHeader = await client.getBlockHeader(targetHash);
-  const candidateList = await client.getMnListDiff(offSetHash, targetHash);
-  const newList = constructMnList(lastSyncedMnList, candidateList);
+  const candidateDiffList = await client.getMnListDiff(offSetHash, targetHash);
+  const newList = constructMnList(lastSyncedMnList, candidateDiffList);
 
-  // Todo: pending core RPC bug
-  stubDiffList(candidateList);
-
-  while (!validateDiffListProofs(candidateList, refHeader, newList)) {
+  while (!validateDiffListProofs(candidateDiffList, refHeader, newList)) {
     // Todo get new mnlist from different node until a list is obtained
     // which does validate correctly
   }

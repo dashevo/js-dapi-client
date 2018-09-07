@@ -1,4 +1,4 @@
-const getVerfiedMnList = require('../src/Helpers/getVerfiedMnList');
+const getVerifiedMnList = require('../src/Helpers/getVerifiedMnList');
 
 const log = console;
 
@@ -10,15 +10,15 @@ function sample1() {
   const allMnsActiveAtHash = '000004543e350b99f43114fe0bf649344a28f4fde6785d80e487d90689ae3918';
   const deletedMnHash = '00000f5da94df7df6d8715e149467a5e859fe5db48366a68ab94dadc389097e7';
 
-  getVerfiedMnList(nullhash, [], allMnsActiveAtHash)
+  getVerifiedMnList(nullhash, [], allMnsActiveAtHash)
     .then((res) => {
       log.info('\nMnList @ block 2896 - 3 mns valid:');
       log.info(JSON.stringify(res.mnList, null, 4));
-      return getVerfiedMnList(allMnsActiveAtHash, res.mnList, deletedMnHash);
+      return getVerifiedMnList(allMnsActiveAtHash, res.mnList, deletedMnHash);
     }).then((res) => {
       log.info('\nMnList @ block 2897 - 2 mns valid, 1 removed:');
       log.info(JSON.stringify(res.mnList, null, 4));
-      return getVerfiedMnList(deletedMnHash, res.mnList);
+      return getVerifiedMnList(deletedMnHash, res.mnList);
     }).then((res) => {
       log.info('\nMnList @ latest block - deleted mn added back at block 2904:');
       log.info(JSON.stringify(res.mnList, null, 4));
@@ -30,7 +30,7 @@ function sample2() {
   let lastTargetHash = '3f4a8012763b1d9b985cc77b0c0bca918830b1ef7dd083665bdc592c2cd31cf6';
 
   setInterval(() => {
-    getVerfiedMnList(lastTargetHash, [])
+    getVerifiedMnList(lastTargetHash, [])
       .then((res) => {
         if (res.valid) {
           log.info(`MN List at block: ${res.targetHash} contains ${res.mnList.length} active MN's (including PoSe banned)`);

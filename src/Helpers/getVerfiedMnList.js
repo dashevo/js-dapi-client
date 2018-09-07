@@ -34,7 +34,7 @@ function validateDiffListProofs(mnlistDiff, header, newList) {
   // MerkleProof.validateMnListMerkleRoot(mnlistDiff.mnlistMerkleRoot, newList);
 }
 
-async function getVerfiedMnList(offSetHash, lastSyncedMnList, _targetHash) {
+async function getVerifiedMnList(offSetHash, lastSyncedMnList, _targetHash) {
   const targetHash = _targetHash || await getBestBlockHash();
   const refHeader = await client.getBlockHeader(targetHash);
   const candidateDiffList = await client.getMnListDiff(offSetHash, targetHash);
@@ -47,5 +47,5 @@ async function getVerfiedMnList(offSetHash, lastSyncedMnList, _targetHash) {
   };
 }
 
-module.exports = getVerfiedMnList;
+module.exports = getVerifiedMnList;
 

@@ -54,8 +54,7 @@ async function validateCbTx(headerChain, cbTx) {
 
 }
 
-async function start() {
-
+async function usecase_NodeDiscovery() {
     const api = new Api()
     const trustedMnLists = getTrustedMnLists(); api.MNDiscovery.masternodeListProvider.masternodeList.concat(trustedMnLists);
     const verifiedMnList = await getVerifiedMnList();
@@ -64,7 +63,10 @@ async function start() {
     const isValidCbTx = await validateCbTx(headerChain, verifiedMnList.cbTx)
 
     console.log(`Node discvory ${isValidCbTx ? 'complete' : 'failed'}`)
+}
 
+async function start() {
+    usecase_NodeDiscovery();
 }
 
 // will fail halfway if executed

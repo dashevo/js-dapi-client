@@ -67,4 +67,5 @@ async function start() {
 
 }
 
-start();
+// will fail halfway if executed
+// start();

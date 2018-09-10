@@ -98,6 +98,81 @@ class DAPIClient {
    */
   generate(amount) { return this.makeRequestToRandomDAPINode('generate', { amount }); }
 
+  /**
+   * Estimate fee
+   * @param {number} numberOfBlocksToWait
+   * @return {Promise<number>} - duffs per byte
+   */
+  estimateFee(numberOfBlocksToWait) { return this.makeRequestToRandomDAPINode('estimateFee', { nbBlocks: numberOfBlocksToWait }); }
+
+  /**
+   * @param {string} address
+   * @return {Promise<object>}
+   */
+  getAddressSummary(address) { return this.makeRequestToRandomDAPINode('getAddressSummary', { address }); }
+
+  /**
+   * @param {string} address
+   * @return {Promise<number>}
+   */
+  getAddressTotalSent(address) { return this.makeRequestToRandomDAPINode('getAddressTotalSent', { address }); }
+
+  /**
+   * @param {string} address
+   * @return {Promise<number>}
+   */
+  getAddressUnconfirmedBalance(address) { return this.makeRequestToRandomDAPINode('getAddressUnconfirmedBalance', { address }); }
+
+  /**
+   * @param {string} address
+   * @return {Promise<number>}
+   */
+  getAddressTotalReceived(address) { return this.makeRequestToRandomDAPINode('getAddressTotalReceived', { address }); }
+
+  /**
+   * @param {string} blockHash
+   * @return {Promise<object>}
+   */
+  getBlockHeader(blockHash) { return this.makeRequestToRandomDAPINode('getBlockHeader', { blockHash }); }
+
+  // TODO: Do we really need it this way?
+  /**
+   * Get block summaries for the day
+   * @param {string} blockDate string in format 'YYYY-MM-DD'
+   * @param limit
+   * @return {Promise<object>}
+   */
+  getBlocks(blockDate, limit) { return this.makeRequestToRandomDAPINode('getBlocks', { blockDate, limit }); }
+
+  /**
+   * @param {string} blockHash
+   * @return {Promise<object>}
+   */
+  getRawBlock(blockHash) { return this.makeRequestToRandomDAPINode('getRawBlock', { blockHash }); }
+
+  /**
+   * @param {string} txid - transaction hash
+   * @return {Promise<object>}
+   */
+  getTransactionById(txid) { return this.makeRequestToRandomDAPINode('getTransactionById', { txid }); }
+
+  /**
+   * @param address
+   * @return {Promise<object[]>}
+   */
+  getTransactionsByAddress(address) { return this.makeRequestToRandomDAPINode('getTransactionsByAddress', { address }); }
+
+  /**
+   * @return {Promise<object>}
+   */
+  getHistoricBlockchainDataSyncStatus() { return this.makeRequestToRandomDAPINode('getHistoricBlockchainDataSyncStatus'); }
+
+  /**
+   * @param {string} rawIxTransaction - hex-serialized instasend transaction
+   * @return {Promise<string>} - transaction id
+   */
+  sendRawIxTransaction(rawIxTransaction) { return this.makeRequestToRandomDAPINode('sendRawIxTransaction', { rawIxTransaction }); }
+
   // Here go methods that used in VMN. Most of this methods will work only in regtest mode
   searchUsers(pattern, limit = 10, offset = 0) { return this.makeRequestToRandomDAPINode('searchUsers', { pattern, limit, offset }); }
   getDapContract(dapId) { return this.makeRequestToRandomDAPINode('getDapContract', { dapId }); }

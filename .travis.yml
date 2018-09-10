@@ -12,6 +12,7 @@ addons:
       - docker-ce
 
 env:
+  - MOZ_HEADLESS=1
   - DOCKER_COMPOSE_VERSION: 1.18.0
 
 script:
@@ -23,6 +24,3 @@ before_install:
   - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" > .npmrc
 before_script:
   - npm run lint
-env:
-  - MOZ_HEADLESS=1
-

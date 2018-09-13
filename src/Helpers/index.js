@@ -48,5 +48,8 @@ async function getVerfiedMnList(offSetHash, lastSyncedMnList, _targetHash) {
   };
 }
 
-module.exports = getVerfiedMnList;
+module.exports = {
+  getVerfiedMnList,
+  constructMnList,
+};
 

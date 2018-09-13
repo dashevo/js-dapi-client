@@ -5,9 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git#v2",
-    "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git",
+    "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git#develop",
     "@dashevo/dashcore-lib": "git+ssh://git@github.com/dashevo/bitcore-lib-dash-private.git#develop",
-    "@dashevo/dgw": "git+ssh://git@github.com/dashevo/dark-gravity-wave-js.git#develop",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",
     "bitcore-message-dash": "^1.0.9",

@@ -53,7 +53,7 @@ async function getValidatedHeaderchain() {
   const dapinetGenesisHash = await api.getBlockHash(pocGenesis);
   const dapinetGenesisHeader = await api.getBlockHeader(dapinetGenesisHash);
   dapinetGenesisHeader.prevHash = '0000000000000000000000000000000000000000000000000000000000000000';
-  // dapinetGenesisHeader.bits = +(`0x${dapinetGenesisHeader.bits}`);
+  dapinetGenesisHeader.bits = +(`0x${dapinetGenesisHeader.bits}`);
   const numConfirms = 10000;
 
   headerChain = new SpvChain('custom_genesis', numConfirms, dapinetGenesisHeader);

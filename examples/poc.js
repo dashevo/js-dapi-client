@@ -138,6 +138,7 @@ async function getMnListDiff() {
 async function GetVerifiedMnList() {
   const diffList = await getMnListDiff();
   const trustedMnList = constructMnList(validMnList, diffList);
+  // Todo: replace pocBestHeight with diffList.cbTx.height (pocBestHeight should be same val)
   const cbTxHeader = await headerChain.getHeader(await api.getBlockHash(pocBestHeight));
   const proofsIsValid = validateDiffListProofs(diffList, cbTxHeader, trustedMnList);
 

@@ -1,4 +1,4 @@
-const getVerfiedMnList = require('../src/Helpers/getVerfiedMnList');
+const { getVerfiedMnList } = require('../src/Helpers');
 
 const log = console;
 

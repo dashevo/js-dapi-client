@@ -30,7 +30,7 @@ async function logOutput(msg, delay = 50) {
 
 async function init() {
   api = new Api();
-  // using genesiss as nullhash as core is bugged
+  // using genesis as nullhash as core is bugged
   nullHash = await api.getBlockHash(0);
 }
 

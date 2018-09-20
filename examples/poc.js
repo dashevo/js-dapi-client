@@ -22,7 +22,7 @@ let headerChain = null;
 const log = console;
 
 async function logOutput(msg, delay = 50) {
-  log.info(`${msg}\n`);
+  log.info(`${msg}`);
   await new Promise(resolve => setTimeout(resolve, delay));
 }
 

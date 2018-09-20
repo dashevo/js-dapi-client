@@ -37,15 +37,19 @@ function validateDiffListProofs(mnlistDiff, header, newList) {
 async function getVerifiedMnList(offSetHash, lastSyncedMnList, _targetHash) {
   const targetHash = _targetHash || await getBestBlockHash();
   const refHeader = await client.getBlockHeader(targetHash);
-  const candidateDiffList = await client.getMnListDiff(offSetHash, targetHash);
-  const newList = constructMnList(lastSyncedMnList, candidateDiffList);
+  const difflist = await client.getMnListDiff(offSetHash, targetHash);
+  const newList = constructMnList(lastSyncedMnList, difflist);
 
   return {
     mnList: newList,
-    valid: validateDiffListProofs(candidateDiffList, refHeader, newList),
+    valid: validateDiffListProofs(difflist, refHeader, newList),
+    cbTxHash: '//todo pending core bug: difflist.cbTx.hash',
     targetHash,
   };
 }
 
-module.exports = getVerifiedMnList;
+module.exports = {
+  getVerifiedMnList,
+  constructMnList,
+};
 

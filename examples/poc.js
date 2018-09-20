@@ -143,7 +143,7 @@ async function GetVerifiedMnList() {
   const proofsIsValid = validateDiffListProofs(diffList, cbTxHeader, trustedMnList);
 
   if (proofsIsValid) {
-    validMnList = trustedMnList;
+    validMnList = [...trustedMnList];
     await logOutput(`Checkpoints valid on headerChain with tip ${headerChain.getTipHash()}`);
   } else {
     await logOutput('INVALID MNLIST! please query other dapi nodes');

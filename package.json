@@ -8,7 +8,6 @@
     "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git",
     "@dashevo/dashcore-lib": "^1.0.0-alpha.8",
     "@dashevo/dashcore-mnemonic": "^1.5.0",
-    "@dashevo/dgw": "git+ssh://git@github.com/dashevo/dark-gravity-wave-js.git#develop",
     "@dashevo/quorums": "^1.0.2",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",

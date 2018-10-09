@@ -61,7 +61,7 @@
     "dashboard": "node ./poc/dashboard/index.js",
     "lint": "eslint .",
     "test": "npm run build && npm run test:node && npm run test:firefox",
-    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=85 --branches=72 --functions=68 mocha test/src --recursive",
+    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=79 --branches=72 --functions=56 mocha test/src --recursive",
     "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run"
   },
   "author": "",

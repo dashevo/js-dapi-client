@@ -111,6 +111,14 @@ describe('api', () => {
       if (method === 'getMNList') {
         return [];
       }
+      if (method === 'getAddressSummary') {
+        return {
+          balanceSat: 10000,
+          unconfirmedBalanceSat: 1000,
+          transactions: [],
+          addrStr: address
+        };
+      }
     });
   });
 

@@ -121,12 +121,6 @@ class DAPIClient {
 
   /**
    * @param {string} address
-   * @return {Promise<object>}
-   */
-  getAddressSummary(address) { return this.makeRequestToRandomDAPINode('getAddressSummary', { address }); }
-
-  /**
-   * @param {string} address
    * @return {Promise<number>}
    */
   getAddressTotalSent(address) { return this.makeRequestToRandomDAPINode('getAddressTotalSent', { address }); }
@@ -142,12 +136,6 @@ class DAPIClient {
    * @return {Promise<number>}
    */
   getAddressTotalReceived(address) { return this.makeRequestToRandomDAPINode('getAddressTotalReceived', { address }); }
-
-  /**
-   * @param {string} blockHash
-   * @return {Promise<object>}
-   */
-  getBlockHeader(blockHash) { return this.makeRequestToRandomDAPINode('getBlockHeader', { blockHash }); }
 
   // TODO: Do we really need it this way?
   /**

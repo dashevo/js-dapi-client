@@ -1,14 +1,12 @@
 {
-  "name": "@dashevo/dapi-sdk",
+  "name": "@dashevo/dapi-client",
   "version": "1.2.0",
   "description": "Client SDK for DASH DAPI.",
   "main": "index.js",
   "dependencies": {
-    "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git#v2",
     "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git#feat/mnlistmerkleroot",
     "@dashevo/dashcore-lib": "^1.0.0-alpha.8",
     "@dashevo/dashcore-mnemonic": "^1.5.0",
-    "@dashevo/dgw": "git+ssh://git@github.com/dashevo/dark-gravity-wave-js.git#develop",
     "@dashevo/quorums": "^1.0.2",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",
@@ -61,7 +59,7 @@
     "dashboard": "node ./poc/dashboard/index.js",
     "lint": "eslint .",
     "test": "npm run build && npm run test:node && npm run test:firefox",
-    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=85 --branches=72 --functions=68 mocha test/src --recursive",
+    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=79 --branches=72 --functions=56 mocha test/src --recursive",
     "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run"
   },
   "author": "",

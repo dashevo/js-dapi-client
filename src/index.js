@@ -40,6 +40,13 @@ class DAPIClient {
   getBalance(address) { return this.makeRequestToRandomDAPINode('getBalance', { address }); }
 
   /**
+   * Returns a summary (balance, txs) for a given address
+   * @param {string} address
+   * @returns {Promise<Object>} - an object with basic address info
+   */
+  getAddressSummary(address) { return this.makeRequestToRandomDAPINode('getAddressSummary', { address }); }
+
+  /**
    * Returns blockchain user by its username or regtx id
    * @param {string} username
    * @returns {Promise<Object>} - blockchain user
@@ -105,12 +112,87 @@ class DAPIClient {
    */
   generate(amount) { return this.makeRequestToRandomDAPINode('generate', { amount }); }
 
+  /**
+   * Estimate fee
+   * @param {number} numberOfBlocksToWait
+   * @return {Promise<number>} - duffs per byte
+   */
+  estimateFee(numberOfBlocksToWait) { return this.makeRequestToRandomDAPINode('estimateFee', { nbBlocks: numberOfBlocksToWait }); }
+
+  /**
+   * @param {string} address
+   * @return {Promise<number>}
+   */
+  getAddressTotalSent(address) { return this.makeRequestToRandomDAPINode('getAddressTotalSent', { address }); }
+
+  /**
+   * @param {string} address
+   * @return {Promise<number>}
+   */
+  getAddressUnconfirmedBalance(address) { return this.makeRequestToRandomDAPINode('getAddressUnconfirmedBalance', { address }); }
+
+  /**
+   * @param {string} address
+   * @return {Promise<number>}
+   */
+  getAddressTotalReceived(address) { return this.makeRequestToRandomDAPINode('getAddressTotalReceived', { address }); }
+
+  // TODO: Do we really need it this way?
+  /**
+   * Get block summaries for the day
+   * @param {string} blockDate string in format 'YYYY-MM-DD'
+   * @param limit
+   * @return {Promise<object>}
+   */
+  getBlocks(blockDate, limit) { return this.makeRequestToRandomDAPINode('getBlocks', { blockDate, limit }); }
+
+  /**
+   * @param {string} blockHash
+   * @return {Promise<object>}
+   */
+  getRawBlock(blockHash) { return this.makeRequestToRandomDAPINode('getRawBlock', { blockHash }); }
+
+  /**
+   * @param {string} txid - transaction hash
+   * @return {Promise<object>}
+   */
+  getTransactionById(txid) { return this.makeRequestToRandomDAPINode('getTransactionById', { txid }); }
+
+  /**
+   * @param address
+   * @return {Promise<object[]>}
+   */
+  getTransactionsByAddress(address) { return this.makeRequestToRandomDAPINode('getTransactionsByAddress', { address }); }
+
+  /**
+   * @return {Promise<object>}
+   */
+  getHistoricBlockchainDataSyncStatus() { return this.makeRequestToRandomDAPINode('getHistoricBlockchainDataSyncStatus'); }
+
+  /**
+   * @param {string} rawIxTransaction - hex-serialized instasend transaction
+   * @return {Promise<string>} - transaction id
+   */
+  sendRawIxTransaction(rawIxTransaction) { return this.makeRequestToRandomDAPINode('sendRawIxTransaction', { rawIxTransaction }); }
+
+  fetchDapContract(dapId) { return this.makeRequestToRandomDAPINode('fetchDapContract', { dapId }); }
+
+  /**
+   * Fetch DAP Objects from DashDrive State View
+   * @param {string} dapId
+   * @param {string} type - Dap objects type to fetch
+   * @param options
+   * @param {Object} options.where - Mongo-like query
+   * @param {Object} options.orderBy - Mongo-like sort field
+   * @param {number} options.limit - how many objects to fetch
+   * @param {number} options.startAt - number of objects to skip
+   * @param {number} options.startAfter - exclusive skip
+   * @return {Promise<Object[]>}
+   */
+  fetchDapObjects(dapId, type, options) { return this.makeRequestToRandomDAPINode('fetchDapObjects', { dapId, type, options }); }
+
   // Here go methods that used in VMN. Most of this methods will work only in regtest mode
   searchUsers(pattern, limit = 10, offset = 0) { return this.makeRequestToRandomDAPINode('searchUsers', { pattern, limit, offset }); }
-  getDapContract(dapId) { return this.makeRequestToRandomDAPINode('getDapContract', { dapId }); }
-  searchDapContracts(pattern, limit = 10, offset = 0) { return this.makeRequestToRandomDAPINode('searchDapContracts', { pattern, limit, offset }); }
-  getUserDapSpace(dapId, userId) { return this.makeRequestToRandomDAPINode('getUserDapSpace', { userId, dapId }); }
-  getUserDapContext(dapId, userId) { return this.makeRequestToRandomDAPINode('getUserDapContext', { userId, dapId }); }
 
   // Temp methods for SPV testing/POC
   // In future SPV will choose a specific node and stick with

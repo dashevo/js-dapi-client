@@ -4,7 +4,6 @@
   "description": "Client SDK for DASH DAPI.",
   "main": "index.js",
   "dependencies": {
-    "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema.git#v2",
     "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git",
     "@dashevo/dashcore-lib": "^1.0.0-alpha.8",
     "@dashevo/dashcore-mnemonic": "^1.5.0",

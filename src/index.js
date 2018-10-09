@@ -40,6 +40,13 @@ class DAPIClient {
   getBalance(address) { return this.makeRequestToRandomDAPINode('getBalance', { address }); }
 
   /**
+   * Returns a summary (balance, txs) for a given address
+   * @param {string} address
+   * @returns {Promise<Object>} - an object with basic address info
+   */
+  getAddressSummary(address) { return this.makeRequestToRandomDAPINode('getAddressSummary', { address }); }
+
+  /**
    * Returns blockchain user by its username or regtx id
    * @param {string} username
    * @returns {Promise<Object>} - blockchain user

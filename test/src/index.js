@@ -172,6 +172,17 @@ describe('api', () => {
       return expect(dapi.getBalance(invalidAddress)).to.be.rejected;
     });
   });
+  describe('.address.getAddressSummary', () => {
+    it('Should return a summary for an address', async () => {
+      const dapi = new Api();
+      const summary = await dapi.getAddressSummary(validAddressWithOutputs);
+      expect(summary).to.be.an('object');
+      expect(summary.balanceSat).to.be.a('number');
+      expect(summary.unconfirmedBalanceSat).to.be.an('number');
+      expect(summary.transactions).to.be.an('array');
+      expect(summary.addrStr).to.be.equal(validAddressWithOutputs);
+    });
+  });
   describe('.user.getUserByName', () => {
     it('Should throw error if username or regtx is incorrect', async () => {
       const dapi = new Api();

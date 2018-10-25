@@ -156,6 +156,12 @@ class DAPIClient {
    * @param {string} txid - transaction hash
    * @return {Promise<object>}
    */
+  getTransaction(txid) { return this.getTransactionById(txid); }
+
+  /**
+   * @param {string} txid - transaction hash
+   * @return {Promise<object>}
+   */
   getTransactionById(txid) { return this.makeRequestToRandomDAPINode('getTransactionById', { txid }); }
 
   /**

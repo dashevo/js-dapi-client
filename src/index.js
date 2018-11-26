@@ -25,6 +25,8 @@ class DAPIClient {
     return rpcClient.request({ host: randomMasternode.ip, port: this.DAPIPort }, method, params);
   }
 
+  /* Layer 1 commands */
+
   /**
    * Returns UTXO for given address
    * @param {string} address
@@ -47,35 +49,11 @@ class DAPIClient {
   getAddressSummary(address) { return this.makeRequestToRandomDAPINode('getAddressSummary', { address }); }
 
   /**
-   * Returns blockchain user by its username or regtx id
-   * @param {string} username
-   * @returns {Promise<Object>} - blockchain user
-   */
-  getUserByName(username) { return this.makeRequestToRandomDAPINode('getUser', { username }); }
-
-  /**
-   * Returns blockchain user by its username or regtx id
-   * @param {string} userId - user reg tx id
-   * @returns {Promise<Object>} - blockchain user
-   */
-  getUserById(userId) { return this.makeRequestToRandomDAPINode('getUser', { userId }); }
-
-  /**
    * Sends serialized transaction to the network
    * @param {string} rawTransaction - hex string representing serialized transaction
    * @returns {Promise<string>} - transaction id
    */
   sendRawTransaction(rawTransaction) { return this.makeRequestToRandomDAPINode('sendRawTransaction', { rawTransaction }); }
-
-  /**
-   * Sends serialized state transition header and data packet
-   * @param {string} rawTransitionHeader - hex string representing state transition header
-   * @param {string} rawTransitionPacket - hex string representing state transition data
-   * @returns {Promise<string>} - header id
-   */
-  sendRawTransition(rawTransitionHeader, rawTransitionPacket) {
-    return this.makeRequestToRandomDAPINode('sendRawTransition', { rawTransitionHeader, rawTransitionPacket });
-  }
 
   /**
    * Returns best block height
@@ -181,6 +159,22 @@ class DAPIClient {
    */
   sendRawIxTransaction(rawIxTransaction) { return this.makeRequestToRandomDAPINode('sendRawIxTransaction', { rawIxTransaction }); }
 
+  /* Layer 2 commands */
+
+  /**
+   * Returns blockchain user by its username or regtx id
+   * @param {string} username
+   * @returns {Promise<Object>} - blockchain user
+   */
+  getUserByName(username) { return this.makeRequestToRandomDAPINode('getUser', { username }); }
+
+  /**
+   * Returns blockchain user by its username or regtx id
+   * @param {string} userId - user reg tx id
+   * @returns {Promise<Object>} - blockchain user
+   */
+  getUserById(userId) { return this.makeRequestToRandomDAPINode('getUser', { userId }); }
+
   fetchDapContract(dapId) { return this.makeRequestToRandomDAPINode('fetchDapContract', { dapId }); }
 
   /**
@@ -197,8 +191,19 @@ class DAPIClient {
    */
   fetchDapObjects(dapId, type, options) { return this.makeRequestToRandomDAPINode('fetchDapObjects', { dapId, type, options }); }
 
+  /**
+   * Sends serialized state transition header and data packet
+   * @param {string} rawTransitionHeader - hex string representing state transition header
+   * @param {string} rawTransitionPacket - hex string representing state transition data
+   * @returns {Promise<string>} - header id
+   */
+  sendRawTransition(rawTransitionHeader, rawTransitionPacket) {
+    return this.makeRequestToRandomDAPINode('sendRawTransition', { rawTransitionHeader, rawTransitionPacket });
+  }
+
   // Here go methods that used in VMN. Most of this methods will work only in regtest mode
   searchUsers(pattern, limit = 10, offset = 0) { return this.makeRequestToRandomDAPINode('searchUsers', { pattern, limit, offset }); }
+
 
   // Temp methods for SPV testing/POC
   // In future SPV will choose a specific node and stick with

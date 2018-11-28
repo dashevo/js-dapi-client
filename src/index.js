@@ -21,7 +21,8 @@ class DAPIClient {
    * @returns {Promise<*>}
    */
   async makeRequestToRandomDAPINode(method, params) {
-    const randomMasternode = await this.MNDiscovery.getRandomMasternode();
+    // let randomMasternode = await this.MNDiscovery.getRandomMasternode();
+    const randomMasternode = { ip: '127.0.0.1' };
     return rpcClient.request({ host: randomMasternode.ip, port: this.DAPIPort }, method, params);
   }
 

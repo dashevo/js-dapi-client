@@ -1,4 +1,8 @@
 require('../utils/bootstrap');
+
+const sinon = require('sinon');
+
+const MNDiscovery = require('../../../src/MNDiscovery/index');
 const {startDapi} = require('@dashevo/js-evo-services-ctl');
 const DAPIClient = require('../../../src/index');
 
@@ -17,10 +21,9 @@ const wait = require('../utils/wait');
 
 
 describe('basic E2E tests', () => {
-    let master1;
+    let masterNode;
 
-    const attempts = 400;
-    const testTimeout = 1200000;
+    const attempts = 40;
 
     let dapiClient;
     let dapId;
@@ -58,35 +61,35 @@ describe('basic E2E tests', () => {
         dapContract = Schema.create.dapcontract(dapSchema);
         dapId = doubleSha256(Schema.serialize.encode(dapContract.dapcontract));
 
+        sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
+            .returns(Promise.resolve({result: {ip: '127.0.0.1'}}));
 
-        [master1] = await startDapi.many(1);
+        [masterNode] = await startDapi.many(1);
 
-        const seeds = [{ip: master1.dapi.container.getIp()}]; //, { ip: master2.dapi.container.getIp()}];
-        await master1.dashCore.getApi().generate(1500);
+        const seeds = [{ip: masterNode.dapi.container.getIp()}]; //, { ip: master2.dapi.container.getIp()}];
+        await masterNode.dashCore.getApi().generate(1500);
 
-        let count = await master1.dashCore.getApi().getBlockCount();
-        //2 core -> connect -> spork
-        // let countMn = await master1.dashCore.getMNList();
         dapiClient = new DAPIClient({
             seeds,
-            port: master1.dapi.options.getRpcPort(),
+            port: masterNode.dapi.options.getRpcPort(),
         });
 
         // dash-cli -regtest -rpcuser=dashrpc -rpcpassword=password -rpcport=21456 sendtoaddress ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh 1
 
-        await master1.dashCore.getApi().sendToAddress(faucetAddress, 100);
+        await masterNode.dashCore.getApi().sendToAddress(faucetAddress, 100);
         await dapiClient.generate(20);
-        let result = await master1.dashCore.getApi().getAddressUtxos({"addresses": ["ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh"]});
 
     });
 
     after('cleanup lone services', async () => {
         const instances = [
-            master1,
+            masterNode,
         ];
 
         await Promise.all(instances.filter(i => i)
             .map(i => i.remove()));
+
+        MNDiscovery.prototype.getRandomMasternode.restore();
     });
 
     describe('Bob', () => {
@@ -122,8 +125,6 @@ describe('basic E2E tests', () => {
         });
 
         it('should publish "Contacts" contract', async function it() {
-            this.timeout(testTimeout);
-
             // 1. Create ST packet
             let {stpacket: stPacket} = Schema.create.stpacket();
             stPacket = Object.assign(stPacket, dapContract);
@@ -169,8 +170,6 @@ describe('basic E2E tests', () => {
         });
 
         it('should create profile in "Contacts" app', async function it() {
-            this.timeout(testTimeout);
-
             const userRequest = Schema.create.dapobject('user');
             userRequest.aboutme = 'This is story about me';
             userRequest.avatar = 'My avatar here';
@@ -237,12 +236,12 @@ describe('basic E2E tests', () => {
         it('should register blockchain user', async function it() {
             this.timeout(50000);
 
-            const seeds = [{ip: master1.dapi.container.getIp()}];
-            await master1.dashCore.getApi().generate(500);
+            const seeds = [{ip: masterNode.dapi.container.getIp()}];
+            await masterNode.dashCore.getApi().generate(500);
 
-            let count = await master1.dashCore.getApi().getBlockCount();
+            let count = await masterNode.dashCore.getApi().getBlockCount();
 
-            let result = await master1.dashCore.getApi().sendToAddress(faucetAddress, 100);
+            let result = await masterNode.dashCore.getApi().sendToAddress(faucetAddress, 100);
 
             await dapiClient.generate(20);
 
@@ -254,26 +253,6 @@ describe('basic E2E tests', () => {
             let inputs = await dapiClient.getUTXO(faucetAddress);
             expect(inputs).to.have.lengthOf(2);
 
-            // const {result: inputsCore} = await master1.dashCore.getApi().getAddressUtxos({"addresses": ["ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh"]});
-
-            // inputs = [
-            //     {
-            //         "address": "ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh",
-            //         "txid": "01455420c1a190254441fe105da98813796f424c951c60580d56797988b47aa1",
-            //         "outputIndex": 1,
-            //         "script": "76a914dc2bfda564dc6217c55c842d65cc0242e095d2d788ac",
-            //         "satoshis": 9999980000,
-            //         "height": 1524
-            //     },
-            //     {
-            //         "address": "ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh",
-            //         "txid": result.result,
-            //         "outputIndex": 1,
-            //         "script": "76a914dc2bfda564dc6217c55c842d65cc0242e095d2d788ac",
-            //         "satoshis": 10000000000,
-            //         "height": (count.result + 1)
-            //     }
-            // ];
             const transaction = Transaction()
                 .setType(Transaction.TYPES.TRANSACTION_SUBTX_REGISTER)
                 .setExtraPayload(validPayload)
@@ -295,8 +274,6 @@ describe('basic E2E tests', () => {
         });
 
         it('should create profile in "Contacts" app', async function it() {
-            this.timeout(testTimeout);
-
             const userRequest = Schema.create.dapobject('user');
             userRequest.aboutme = 'I am Alice';
             userRequest.avatar = 'Alice\'s avatar here';
@@ -358,8 +335,6 @@ describe('basic E2E tests', () => {
         });
 
         it('should be able to update her profile', async function it() {
-            this.timeout(testTimeout);
-
             const userRequest = Schema.create.dapobject('user');
             userRequest.aboutme = 'I am Alice2';
             userRequest.avatar = 'Alice\'s avatar here2';
@@ -422,8 +397,6 @@ describe('basic E2E tests', () => {
 
     describe('Bob', () => {
         it('should be able to send contact request', async function it() {
-            this.timeout(testTimeout);
-
             const bobContactRequest = Schema.create.dapobject('contact');
             bobContactRequest.hdextpubkey = bobPrivateKey.toPublicKey().toString('hex');
             bobContactRequest.relation = aliceRegTxId;
@@ -487,8 +460,6 @@ describe('basic E2E tests', () => {
 
     describe('Alice', () => {
         it('should be able to approve contact request', async function it() {
-            this.timeout(testTimeout);
-
             const contactAcceptance = Schema.create.dapobject('contact');
             contactAcceptance.hdextpubkey = alicePrivateKey.toPublicKey().toString('hex');
             contactAcceptance.relation = bobRegTxId;
@@ -550,8 +521,6 @@ describe('basic E2E tests', () => {
         });
 
         it('should be able to remove contact approvement', async function it() {
-            this.timeout(testTimeout);
-
             const contactDeleteRequest = Schema.create.dapobject('contact');
             contactDeleteRequest.hdextpubkey = alicePrivateKey.toPublicKey().toString('hex');
             contactDeleteRequest.relation = bobRegTxId;

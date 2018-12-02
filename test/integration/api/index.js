@@ -1,5 +1,8 @@
 require('../utils/bootstrap');
 
+const sinon = require('sinon');
+
+const MNDiscovery = require('../../../src/MNDiscovery/index');
 const fetch = require('node-fetch');
 const {startDapi} = require('@dashevo/js-evo-services-ctl');
 const DAPIClient = require('../../../src/index');
@@ -11,8 +14,6 @@ const {
     Address,
 } = require('@dashevo/dashcore-lib');
 
-// const SubTxRegisterPayload = require('@dashevo/dashcore-lib/lib/Tr');
-
 const Schema = require('@dashevo/dash-schema/dash-schema-lib');
 const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 
@@ -21,11 +22,9 @@ const wait = require('../utils/wait');
 
 
 describe('basicAPIs', () => {
-    let master1;
+    let masterNode;
 
-    // const timeout = 1000;
-    const attempts = 400;
-    const testTimeout = 1200000;
+    const attempts = 40;
 
     let transactionIdSendToAddress;
     let insightURL;
@@ -62,38 +61,43 @@ describe('basicAPIs', () => {
         dapContract = Schema.create.dapcontract(dapSchema);
         dapId = doubleSha256(Schema.serialize.encode(dapContract.dapcontract));
 
-        [master1] = await startDapi.many(1);
+        sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
+            .returns(Promise.resolve({result: {ip: '127.0.0.1'}}));
 
-        const seeds = [{ip: master1.dapi.container.getIp()}]; //, { ip: master2.dapi.container.getIp()}];
-        await master1.dashCore.getApi().generate(1500);
+        [masterNode] = await startDapi.many(1);
+
+        const seeds = [{ip: masterNode.dapi.container.getIp()}]; //, { ip: master2.dapi.container.getIp()}];
+        await masterNode.dashCore.getApi().generate(1500);
 
         dapiClient = new DAPIClient({
             seeds,
-            port: master1.dapi.options.getRpcPort(),
+            port: masterNode.dapi.options.getRpcPort(),
         });
 
-        insightURL = `http://127.0.0.1:${master1.insight.options.getApiPort()}/insight-api-dash`;
+        insightURL = `http://127.0.0.1:${masterNode.insight.options.getApiPort()}/insight-api-dash`;
 
-        transactionIdSendToAddress = await master1.dashCore.getApi().sendToAddress(faucetAddress, 100);
+        transactionIdSendToAddress = await masterNode.dashCore.getApi().sendToAddress(faucetAddress, 100);
         await dapiClient.generate(20);
-        let result = await master1.dashCore.getApi().getAddressUtxos({"addresses": ["ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh"]});
+        let result = await masterNode.dashCore.getApi().getAddressUtxos({"addresses": ["ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh"]});
         await wait(20000);
 
     });
 
     after('cleanup lone services', async () => {
         const instances = [
-            master1,
+            masterNode,
         ];
 
         await Promise.all(instances.filter(i => i)
             .map(i => i.remove()));
+
+        MNDiscovery.prototype.getRandomMasternode.restore();
     });
 
     describe('Address', () => {
         it('should return correct getUTXO', async function it() {
             let dapiOutput = await dapiClient.getUTXO(faucetAddress);
-            const {result: coreOutput} = await master1.dashCore.getApi().getAddressUtxos({"addresses": [faucetAddress]});
+            const {result: coreOutput} = await masterNode.dashCore.getApi().getAddressUtxos({"addresses": [faucetAddress]});
             expect(dapiOutput).to.be.deep.equal([
                 {
                     "address": faucetAddress,
@@ -110,7 +114,7 @@ describe('basicAPIs', () => {
 
         it('should return correct getAddressSummary', async function it() {
             let dapiOutput = await dapiClient.getAddressSummary(faucetAddress);
-            const {result: coreOutput} = await master1.dashCore.getApi().getAddressUtxos({"addresses": [faucetAddress]});
+            const {result: coreOutput} = await masterNode.dashCore.getApi().getAddressUtxos({"addresses": [faucetAddress]});
             expect(dapiOutput).to.be.deep.equal({
                 "addrStr": faucetAddress,
                 "balance": coreOutput[0].satoshis / 100000000,
@@ -174,7 +178,7 @@ describe('basicAPIs', () => {
     describe('Block', () => {
         it('should return correct getBestBlockHeight', async function it() {
             const dapiOutput = await dapiClient.getBestBlockHeight();
-            const coreOutput = await master1.dashCore.getApi().getblockcount();
+            const coreOutput = await masterNode.dashCore.getApi().getblockcount();
 
             expect(dapiOutput).to.be.deep.equal(coreOutput.result);
         });
@@ -182,7 +186,7 @@ describe('basicAPIs', () => {
         it('should return correct getBlockHash', async function it() {
             const height = await dapiClient.getBestBlockHeight();
             const dapiOutput = await dapiClient.getBlockHash(height);
-            const coreOutput = await master1.dashCore.getApi().getbestblockhash();
+            const coreOutput = await masterNode.dashCore.getApi().getbestblockhash();
             // curl --user myusername --data-binary '{"jsonrpc": "1.0", "id":"curltest", "method": "getbestblockhash", "params": [] }' -H 'content-type: text/plain;' http://127.0.0.1:27410/
 
             expect(dapiOutput).to.be.deep.equal(coreOutput.result);
@@ -193,7 +197,7 @@ describe('basicAPIs', () => {
             const height = await dapiClient.getBestBlockHeight();
             let dapiOutput = await dapiClient.getBlockHeaders(height, 1);
             const blockHash = await dapiClient.getBlockHash(height);
-            const coreOutput = await master1.dashCore.getApi().getblockheaders(blockHash);
+            const coreOutput = await masterNode.dashCore.getApi().getblockheaders(blockHash);
             expect(dapiOutput).to.be.deep.equal([coreOutput.result[0]]);
         });
 
@@ -320,7 +324,6 @@ describe('basicAPIs', () => {
         });
 
         it('should sendRawTransition', async function it() {
-            this.timeout(testTimeout);
 
             // 1. Create ST packet
             let {stpacket: stPacket} = Schema.create.stpacket();
@@ -369,7 +372,6 @@ describe('basicAPIs', () => {
         });
 
         it('should fetchDapObjects', async function it() {
-            this.timeout(testTimeout);
 
             const userRequest = Schema.create.dapobject('user');
             userRequest.aboutme = 'This is story about me';

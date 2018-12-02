@@ -154,7 +154,7 @@ describe('basic E2E tests', () => {
             bobPreviousST = transitionHash;
 
             let dapContractFromDAPI;
-
+            await wait(3000);
             for (let i = 0; i <= attempts; i++) {
                 try {
                     // waiting for Contacts to be added

@@ -201,14 +201,13 @@ describe('basicAPIs', () => {
             expect(dapiOutput).to.be.deep.equal([coreOutput.result[0]]);
         });
 
-        xit('should return correct getBlocks', async function it() {
-            //https://dashpay.atlassian.net/browse/EV-1177
+        it('should return correct getBlocks', async function it() {
             var today = new Date().toISOString().substring(0, 10);
             const dapiOutput = await dapiClient.getBlocks(today, 1);
-            const url = insightURL + `/blocks?blockDate={today}&limit=1`;
+            const url = insightURL + `/blocks?blockDate=${today}&limit=1`;
             const response = await fetch(url);
             const value = await response.json();
-            expect(dapiOutput).to.be.deep.equal(value);
+            expect(dapiOutput).to.be.deep.equal(value.blocks);
         });
 
         it('should return correct getRawBlock', async function it() {

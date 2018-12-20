@@ -1,24 +1,21 @@
 const path = require('path');
+const chai = require('chai');
+const chaiAsPromised = require('chai-as-promised');
+const sinon = require('sinon');
+chai.use(chaiAsPromised);
+const {expect} = chai;
+
+const Schema = require('@dashevo/dash-schema/dash-schema-lib');
+const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 const {
     Transaction,
     PrivateKey,
 } = require('@dashevo/dashcore-lib');
 
-const dotenvSafe = require('dotenv-safe');
-
 const doubleSha256 = require('../utils/doubleSha256');
+const wait = require('../utils/wait');
 const MNDiscovery = require('../../src/MNDiscovery/index');
 
-const Schema = require('@dashevo/dash-schema/dash-schema-lib');
-const DashPay = require('@dashevo/dash-schema/dash-core-daps');
-
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
-const sinon = require('sinon');
-const wait = require('../utils/wait');
-
-chai.use(chaiAsPromised);
-const {expect} = chai;
 
 var async = require("async");
 
@@ -26,27 +23,25 @@ const average = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
 
 require('dotenv').config({path: path.resolve(__dirname, '.env')});
 
-// dotenvSafe.config({
-//     allowEmptyValues: false,
-//     path: path.resolve(__dirname, '.env'),
-// });
 
 const DAPIClient = require('../../src/index');
 
 describe("Performance", function () {
     const timeoutTest = 320000;
     const numRequests = 100;
-    const numPartRequests = 30;
+    const numPartRequests = 30; // for getUTXO requests
     const numLoops = 5;
-    const faucetAddress = process.env.faucetAddress;//"yhvXpqQjfN9S4j5mBKbxeGxiETJrrLETg5";
-    const privKey = process.env.privKey;//"cR4t6evwVZoCp1JsLk4wURK4UmBCZzZotNzn9T1mhBT19SH9JtNt";
+    const faucetAddress = process.env.faucetAddress;
+    const privKey = process.env.privKey;
     const faucetPrivateKey = new PrivateKey(privKey);
     let dapiClient;
 
-    before("create provider", function () {
+
+    before("set dapi node", function () {
+
         const seeds = [{ip: process.env.DAPI_IP}];
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
-            .returns(Promise.resolve({result: {ip: process.env.DAPI_IP}}));
+            .returns(Promise.resolve({ip: process.env.DAPI_IP}));
         dapiClient = new DAPIClient({seeds, port: 3000});
         spy = sinon.spy(dapiClient, 'makeRequestToRandomDAPINode');
     });
@@ -54,58 +49,13 @@ describe("Performance", function () {
 
     beforeEach(async () => {
         spy.resetHistory();
-        // wait when dapi restored after any crashes
+        // wait when dapi restored after any crashes ( getUTXO for example)
         await wait(20000);
     });
 
     after(() => {
         spy.restore();
     });
-
-    function runTest(times, fn, callback) {
-        const start = new Date();
-
-        async.timesSeries(times,
-            function (n, next) {
-                Math.random();
-            }
-            , function (err) {
-                if (err) return callback(err);
-
-                const end = new Date();
-                const actualTime = end.getTime() - start.getTime();
-
-                callback(null, actualTime);
-            });
-    }
-
-    function runAverage(title, number_of_runs, fn_times, fn, callback) {
-        const results = new Array(number_of_runs);
-
-        async.timesSeries(number_of_runs, function (n, next) {
-            process.stdout.write("    " + title + " " + (n + 1) + "...");
-
-            runTest(fn_times, fn, function (err, totalTime) {
-                if (err) return next(err);
-                results[n] = totalTime;
-
-                console.log((totalTime / 1000) + " seconds");
-                next();
-            });
-        }, function (err) {
-            if (err) return callback(err);
-
-            const sum = results.reduce(function (a, b) {
-                return a + b;
-            }, 0);
-
-            const average = sum / number_of_runs;
-
-            console.log("    Average " + (average / 1000) + " seconds");
-
-            callback(null, average);
-        });
-    }
 
     async function runPromise(queries) {
         const start = new Date();
@@ -122,7 +72,7 @@ describe("Performance", function () {
 
     describe('Address', () => {
         it("getUTXO", async function it() {
-            this.timeout(timeoutTest*1.5);
+            this.timeout(timeoutTest * 2);
             let results = [];
             for (var i = 0; i < numLoops; i += 1) {
                 const queries = new Array(numPartRequests);
@@ -231,14 +181,14 @@ describe("Performance", function () {
             expect(spy.callCount).to.be.equal(numLoops * numRequests);
             expect(result).to.not.be.NaN;
             expect(result).to.be.a('number');
-            console.log("average:", result);
+            console.log("average per loop:", result);
 
         });
 
         it("getTransactionsByAddress", async function it() {
             this.timeout(timeoutTest);
             let results = [];
-            for (i = 0; i < numLoops; i += 1) {
+            for (var i = 0; i < numLoops; i += 1) {
                 const queries = new Array(numRequests);
                 for (let index = 0; index < numRequests; ++index) {
                     queries[index] = dapiClient.getTransactionsByAddress(faucetAddress);
@@ -254,17 +204,15 @@ describe("Performance", function () {
             expect(spy.callCount).to.be.equal(numLoops * numRequests);
             expect(result).to.not.be.NaN;
             expect(result).to.be.a('number');
-            console.log("average:", result);
-
+            console.log("average per loop:", result);
         });
-
     });
 
     describe('Block', () => {
         it("getBestBlockHeight", async function it() {
             this.timeout(timeoutTest);
             let results = [];
-            for (i = 0; i < numLoops; i += 1) {
+            for (var i = 0; i < numLoops; i += 1) {
                 const queries = new Array(numRequests);
                 for (let index = 0; index < numRequests; ++index) {
                     queries[index] = dapiClient.getBestBlockHeight();
@@ -281,7 +229,6 @@ describe("Performance", function () {
             expect(result).to.not.be.NaN;
             expect(result).to.be.a('number');
             console.log("average:", result);
-
         });
 
         it("getBlockHash", async function it() {
@@ -342,7 +289,7 @@ describe("Performance", function () {
                     queries[index] = dapiClient.getBlocks(today, 1);
 
                 }
-                 await runPromise(queries).then(function (result) {
+                await runPromise(queries).then(function (result) {
                     results.push(result.time);
                 }, function (failure) {
                     expect(failure, 'Errors found').to.be.undefined;
@@ -493,7 +440,6 @@ describe("Performance", function () {
                     bobRegTxIds = bobRegTxIds.concat(result.result.map(function (item) {
                         return item.txid
                     }));
-                    // result.result[0].txid
                 }, function (failure) {
                     expect(failure, 'Errors found').to.be.undefined;
                 });
@@ -627,7 +573,7 @@ describe("Performance", function () {
         it('fetchDapContract', async function it() {
             this.timeout(timeoutTest * 2);
 
-            for (let i = 0; i <= 200; i++) {
+            for (let i = 0; i <= 240; i++) {
                 try {
                     // waiting for Contacts to be added
                     await dapiClient.fetchDapContract(dapIds[0]);

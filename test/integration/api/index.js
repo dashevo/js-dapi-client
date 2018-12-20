@@ -17,8 +17,8 @@ const {
 const Schema = require('@dashevo/dash-schema/dash-schema-lib');
 const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 
-const doubleSha256 = require('../utils/doubleSha256');
-const wait = require('../utils/wait');
+const doubleSha256 = require('../../utils/doubleSha256');
+const wait = require('../../utils/wait');
 
 
 describe('basicAPIs', () => {
@@ -169,11 +169,8 @@ describe('basicAPIs', () => {
                 to: 1,
                 totalItems: value.pagesTotal
             });
-
         });
-
     });
-
 
     describe('Block', () => {
         it('should return correct getBestBlockHeight', async function it() {
@@ -202,7 +199,7 @@ describe('basicAPIs', () => {
         });
 
         it('should return correct getBlocks', async function it() {
-            var today = new Date().toISOString().substring(0, 10);
+            const today = new Date().toISOString().substring(0, 10);
             const dapiOutput = await dapiClient.getBlocks(today, 1);
             const url = insightURL + `/blocks?blockDate=${today}&limit=1`;
             const response = await fetch(url);
@@ -252,7 +249,6 @@ describe('basicAPIs', () => {
         });
     });
 
-
     describe('All APIs', () => {
         it('should sendRawTransaction', async function it() {
             this.timeout(50000);
@@ -281,6 +277,7 @@ describe('basicAPIs', () => {
             bobPreviousST = result.txid;
 
         });
+
         it('should generate', async function it() {
             const height = await dapiClient.getBestBlockHeight();
             await dapiClient.generate(1);

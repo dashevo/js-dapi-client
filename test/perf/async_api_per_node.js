@@ -71,6 +71,7 @@ describe("Performance", function () {
     }
 
     describe('Address', () => {
+        // https://dashpay.atlassian.net/browse/EV-1208 dapi&dashd crashed on devnet with 20 async getUTXO requests
         it("getUTXO", async function it() {
             this.timeout(timeoutTest * 2);
             let results = [];
@@ -303,6 +304,7 @@ describe("Performance", function () {
 
         });
 
+        // https://dashpay.atlassian.net/browse/EV-1207 dapi-client: getRawBlock kills insight-api
         it("getRawBlock", async function it() {
             this.timeout(timeoutTest);
             const height = await dapiClient.getBestBlockHeight();

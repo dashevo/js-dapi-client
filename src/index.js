@@ -12,6 +12,7 @@ class DAPIClient {
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
+    this.timeout = options.timeout || 0;
   }
 
   /**
@@ -22,7 +23,10 @@ class DAPIClient {
    */
   async makeRequestToRandomDAPINode(method, params) {
     const randomMasternode = await this.MNDiscovery.getRandomMasternode();
-    return rpcClient.request({ host: randomMasternode.ip, port: this.DAPIPort }, method, params);
+    return rpcClient.request({
+      host: randomMasternode.ip,
+      port: this.DAPIPort,
+    }, method, params, { timeout: this.timeout });
   }
 
   /* Layer 1 commands */

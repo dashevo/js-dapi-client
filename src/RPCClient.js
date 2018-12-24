@@ -21,8 +21,9 @@ async function request(url, method, params, options = {}) {
   };
   const res =
     options.timeout ?
-      await axios({ method: 'post', url: destination, data: payload })
-      : await axios.post(destination, payload);
+      await axios({
+        method: 'post', url: destination, data: payload, timeout: options.timeout,
+      }) : await axios.post(destination, payload);
   if (res.status !== 200) {
     throw new Error(res.statusMessage);
   }

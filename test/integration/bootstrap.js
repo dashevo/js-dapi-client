@@ -10,7 +10,7 @@ use(dirtyChai);
 process.env.NODE_ENV = 'test';
 
 dotenvSafe.config({
-    path: path.resolve(__dirname, '..', '.env'),
+    path: path.resolve(__dirname, '.env'),
 });
 
 global.expect = expect;

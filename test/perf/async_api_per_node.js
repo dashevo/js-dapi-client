@@ -573,6 +573,7 @@ describe("Performance", function () {
         });
 
         it('fetchDapContract', async function it() {
+            // https://dashpay.atlassian.net/browse/DD-493
             this.timeout(timeoutTest * 2);
 
             for (let i = 0; i <= 240; i++) {

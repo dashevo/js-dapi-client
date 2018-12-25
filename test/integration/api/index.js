@@ -1,4 +1,4 @@
-require('../utils/bootstrap');
+require('../bootstrap');
 
 const sinon = require('sinon');
 
@@ -288,6 +288,7 @@ describe('basicAPIs', () => {
 
         it('should estimateFee', async function it() {
             const estimateFee = await dapiClient.estimateFee(5);
+            // TODO change after https://dashpay.atlassian.net/browse/EV-1211
             expect(estimateFee).to.be.deep.equal({'5': -1});
         });
 

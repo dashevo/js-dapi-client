@@ -113,7 +113,7 @@ class DAPIClient {
   /**
    * @return {Promise<object>}
    */
-  getHistoricBlockchainDataSyncStatus() { return this.makeRequestToRandomDAPINode('getHistoricBlockchainDataSyncStatus'); }
+  getHistoricBlockchainDataSyncStatus() { return this.makeRequestToRandomDAPINode('getHistoricBlockchainDataSyncStatus', {}); }
 
   /**
    * Get deterministic masternodelist diff

@@ -1,4 +1,4 @@
-require('../utils/bootstrap');
+require('../bootstrap');
 
 const sinon = require('sinon');
 

@@ -1,3 +1,5 @@
+const { promisify } = require('util');
+const WebSocket = require('ws');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
@@ -23,10 +25,28 @@ class DAPIClient {
    */
   async makeRequestToRandomDAPINode(method, params) {
     const randomMasternode = await this.MNDiscovery.getRandomMasternode();
-    return rpcClient.request({
-      host: randomMasternode.ip,
-      port: this.DAPIPort,
-    }, method, params, { timeout: this.timeout });
+    const payload = {
+      jsonrpc: '2.0',
+      method,
+      params,
+      id: 1,
+    };
+    try {
+      const ws = new WebSocket(`ws://${randomMasternode.ip}`);
+      const onAsync = promisify(ws.on);
+      const sendAsync = promisify(ws.send);
+      await onAsync('open');
+      await sendAsync(JSON.stringify(payload));
+      const message = await ws.on('message');
+      const { result } = JSON.parse(message);
+      return result;
+    } catch (error) {
+      // On any error, fall back to HTTP/RPC
+      return rpcClient.request({
+        host: randomMasternode.ip,
+        port: this.DAPIPort,
+      }, method, params, { timeout: this.timeout });
+    }
   }
 
   /* Layer 1 commands */

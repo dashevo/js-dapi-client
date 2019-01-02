@@ -8,11 +8,14 @@ class DAPIClient {
    * @param {Array<Object>} [options.seeds] - seeds. If no seeds provided
    * default seed will be used.
    * @param {number} [options.port] - default port for connection to the DAPI
+   * @param {number} [options.timeout] - timeout for connection to the DAPI
+   * @param {number} [options.retries] - num of retries if connection to DAPI node times out
    */
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
     this.timeout = options.timeout || 0;
+    this.retries = options.retries || 2;
   }
 
   /**

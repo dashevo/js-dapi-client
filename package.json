@@ -5,8 +5,8 @@
   "main": "index.js",
   "dependencies": {
     "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git#feat/mnlistmerkleroot",
-    "@dashevo/dashcore-lib": "^1.0.0-alpha.8",
-    "@dashevo/dashcore-mnemonic": "^1.5.0",
+    "@dashevo/dashcore-lib": "^1.0.0-alpha.24",
+    "@dashevo/dashcore-mnemonic": "^1.6.0",
     "@dashevo/quorums": "^1.0.2",
     "axios": "^0.16.2",
     "bip39": "^2.5.0",

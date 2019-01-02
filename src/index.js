@@ -15,7 +15,7 @@ class DAPIClient {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
     this.timeout = options.timeout || 0;
-    this.retries = options.retries || 2;
+    this.retries = options.retries.isInteger() ? options.retries : 2;
   }
 
   /**
@@ -26,10 +26,19 @@ class DAPIClient {
    */
   async makeRequestToRandomDAPINode(method, params) {
     const randomMasternode = await this.MNDiscovery.getRandomMasternode();
-    return rpcClient.request({
-      host: randomMasternode.ip,
-      port: this.DAPIPort,
-    }, method, params, { timeout: this.timeout });
+    try {
+      return rpcClient.request({
+        host: randomMasternode.ip,
+        port: this.DAPIPort,
+      }, method, params, { timeout: this.timeout });
+    } catch (e) {
+      // console.log(`Error: ${e} with node ${randomMasternode.ip}`);
+      if (this.retries === 0) {
+        throw new Error(`DAPI RPC error: ${method}: max number of retries reached`);
+      }
+      this.retries -= 1;
+      return this.makeRequestToRandomDAPINode(method, params);
+    }
   }
 
   /* Layer 1 commands */

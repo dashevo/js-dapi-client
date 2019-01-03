@@ -16,8 +16,8 @@ const {
 const Schema = require('@dashevo/dash-schema/dash-schema-lib');
 const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 
-const doubleSha256 = require('../utils/doubleSha256');
-const wait = require('../utils/wait');
+const doubleSha256 = require('../../utils/doubleSha256');
+const wait = require('../../utils/wait');
 
 
 describe('basic E2E tests', () => {

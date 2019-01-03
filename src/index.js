@@ -33,6 +33,7 @@ class DAPIClient {
         port: this.DAPIPort,
       }, method, params, { timeout: this.timeout });
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.log(`Error: ${e} with node ${randomMasternode.ip}`);
       if (this.retriesLeft === 0) {
         this.retriesLeft = this.retries;

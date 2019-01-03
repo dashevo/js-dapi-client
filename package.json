@@ -31,7 +31,7 @@
     "babel-preset-env": "^1.6.1",
     "base58": "^1.0.1",
     "blockchain-spv-dash": "git+https://github.com/pvrooyen/blockchain-spv-dash.git",
-    "@dashevo/js-evo-services-ctl": "git+ssh://git@github.com/dashevo/js-evo-services-ctl",
+    "@dashevo/js-evo-services-ctl": "git+ssh://git@github.com/dashevo/js-evo-services-ctl.git",
     "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema#v3.0.0-alpha.3",
     "@dashevo/dashcore-lib": "git+ssh://git@github.com/dashevo/dashcore-lib#v1.0.0-alpha.15",
     "chai": "^4.1.2",

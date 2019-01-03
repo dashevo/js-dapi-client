@@ -9,13 +9,14 @@ class DAPIClient {
    * default seed will be used.
    * @param {number} [options.port] - default port for connection to the DAPI
    * @param {number} [options.timeout] - timeout for connection to the DAPI
-   * @param {number} [options.retries] - num of retries if connection to DAPI node times out
+   * @param {number} [options.retries] - num of retries if there is no response from DAPI node
    */
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
     this.timeout = options.timeout || 0;
     this.retries = options.retries ? parseInt(options.retries, 10) : 2;
+    this.retriesLeft = this.retries;
   }
 
   /**
@@ -32,11 +33,12 @@ class DAPIClient {
         port: this.DAPIPort,
       }, method, params, { timeout: this.timeout });
     } catch (e) {
-      // console.log(`Error: ${e} with node ${randomMasternode.ip}`);
-      if (this.retries === 0) {
+      console.log(`Error: ${e} with node ${randomMasternode.ip}`);
+      if (this.retriesLeft === 0) {
+        this.retriesLeft = this.retries;
         throw new Error(`DAPI RPC error: ${method}: max number of retries reached`);
       }
-      this.retries -= 1;
+      this.retriesLeft -= 1;
       return this.makeRequestToRandomDAPINode(method, params);
     }
   }

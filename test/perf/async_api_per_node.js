@@ -585,7 +585,7 @@ describe("Performance", function () {
                     await wait(1000);
                 }
             }
-            spy.restore();
+            spy.reset();
             let results = [];
             for (var i = 0; i < numLoops; i += 1) {
                 const queries = new Array(numRequests);

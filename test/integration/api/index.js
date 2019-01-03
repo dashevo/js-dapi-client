@@ -62,11 +62,11 @@ describe('basicAPIs', () => {
         dapId = doubleSha256(Schema.serialize.encode(dapContract.dapcontract));
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
-            .returns(Promise.resolve({result: {ip: '127.0.0.1'}}));
+            .returns(Promise.resolve({ip: '127.0.0.1'}));
 
         [masterNode] = await startDapi.many(1);
 
-        const seeds = [{ip: masterNode.dapi.container.getIp()}]; //, { ip: master2.dapi.container.getIp()}];
+        const seeds = [{ip: masterNode.dapi.container.getIp()}];
         await masterNode.dashCore.getApi().generate(1500);
 
         dapiClient = new DAPIClient({
@@ -145,7 +145,7 @@ describe('basicAPIs', () => {
             let dapiOutput = await dapiClient.getAddressTotalReceived(faucetAddress);
             const url = insightURL + `/addr/${faucetAddress}/totalReceived`;
             const response = await fetch(url);
-            const {value} = await response.json();
+            const value = await response.json();
             expect(dapiOutput).to.be.deep.equal(value);
         });
 
@@ -205,6 +205,7 @@ describe('basicAPIs', () => {
             const response = await fetch(url);
             const value = await response.json();
             expect(dapiOutput).to.be.deep.equal(value.blocks);
+            expect(dapiOutput).to.be.an('array')
         });
 
         it('should return correct getRawBlock', async function it() {

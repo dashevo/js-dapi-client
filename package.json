@@ -33,7 +33,7 @@
     "blockchain-spv-dash": "git+https://github.com/pvrooyen/blockchain-spv-dash.git",
     "@dashevo/js-evo-services-ctl": "git+ssh://git@github.com/dashevo/js-evo-services-ctl",
     "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema#v3.0.0-alpha.3",
-    "@dashevo/dashcore-lib": "git+ssh://git@github.com/dashevo/dashcore-lib#v1.0.0-alpha.23",
+    "@dashevo/dashcore-lib": "git+ssh://git@github.com/dashevo/dashcore-lib#v1.0.0-alpha.15",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "dirty-chai": "^2.0.1",

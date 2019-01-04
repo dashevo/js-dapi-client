@@ -375,6 +375,7 @@ describe('api', () => {
 
     before(() => {
         // stub requests to DAPI
+
         sinon.stub(rpcClient, 'request').callsFake(async function (url, method, params) {
                 const {
                     address, username, userId, rawTransaction, rawTransitionHeader, rawTransitionPacket, height, blockHash, baseBlockHash
@@ -501,14 +502,22 @@ describe('api', () => {
                     return dapObjects;
                 }
                 if (method === 'sendRawIxTransaction') {
-                    return [];
+                  return {
+                    "txid": "9eda025a3b9e1e31e883f0cf2d249f4218466677c6707ec98b1f3f4a4570fa1a"
+                  };
                 }
                 if (method === 'searchUsers') {
-                    return {
-                        "totalCount": 0,
-                        "results": []
-                    };
+                    return [];
                 }
+               if (method === 'loadBloomFilter') {
+                    return [];
+               }
+               if (method === 'addToBloomFilter') {
+                     return [];
+               }
+               if (method === 'clearBloomFilter') {
+                    return [];
+               }
             }
         );
     });
@@ -531,7 +540,6 @@ describe('api', () => {
             expect(rpcClient.request.calledWith({host: '127.1.2.3', port: 1234}, 'getBestBlockHeight', {})).to.be.true;
         });
     });
-
     describe('.address.getUTXO', () => {
         it('Should return list with unspent outputs for correct address, if there are any', async () => {
             const dapi = new Api();
@@ -564,6 +572,12 @@ describe('api', () => {
             expect(summary.unconfirmedBalanceSat).to.be.an('number');
             expect(summary.transactions).to.be.an('array');
             expect(summary.addrStr).to.be.equal(validAddressWithOutputs);
+        });
+        it('Should equal options.retries passed in', async () => {
+            const options = {retries : 1};
+            const dapi = new Api(options);
+            const summary = await dapi.getAddressSummary(validAddressWithOutputs);
+            expect(dapi.retriesLeft).to.equal(1);
         });
     });
     describe('.address.getAddressUnconfirmedBalance', () => {
@@ -658,6 +672,15 @@ describe('api', () => {
             const user = await dapi.getUserByName(validUsername);
             const userById = await dapi.getUserById(user.regtxid)
             expect(userById).to.be.an('object');
+        });
+    });
+    describe('.user.searchUsers', () => {
+        it('Should return users', async () => {
+          const dapi = new Api();
+          const pattern = '';
+          const res = await dapi.searchUsers(pattern);
+          // TODO: implement real unit test
+          expect(res).to.be.deep.equal([]);
         });
     });
     describe('.block.getBestBlockHeight', () => {
@@ -804,14 +827,24 @@ describe('api', () => {
             expect(dapContract).to.be.deep.equal(dapObjects);
         });
     });
-    describe('.tx.fetchDapObjects', () => {
-        it('Should fetch dap objects', async () => {
-            const dapi = new Api();
-            const users = await dapi.searchUsers("fake");
-            expect(users).to.be.deep.equal({
-                "totalCount": 0,
-                "results": []
-            });
+
+    describe('.tx.sendRawTransaction', () => {
+        it('Should return txid', async () => {
+          const dapi = new Api();
+          const rawTransaction = {};
+          const tx = await dapi.sendRawTransaction(rawTransaction);
+          // TODO: implement real unit test
+          expect(tx.txid).to.be.deep.equal('9eda025a3b9e1e31e883f0cf2d249f4218466677c6707ec98b1f3f4a4570fa1a');
+        });
+    });
+
+    describe('.tx.sendRawIxTransaction', () => {
+        it('Should return txid', async () => {
+          const dapi = new Api();
+          const rawIxTransaction = {};
+          const tx = await dapi.sendRawIxTransaction(rawIxTransaction);
+          // TODO: implement real unit test
+          expect(tx.txid).to.be.deep.equal('9eda025a3b9e1e31e883f0cf2d249f4218466677c6707ec98b1f3f4a4570fa1a');
         });
     });
 
@@ -824,5 +857,35 @@ describe('api', () => {
             expect(mnlistdiff.deletedMNs).to.be.an('array');
             expect(mnlistdiff.mnList).to.be.an('array');
         });
+    });
+
+    describe('.spv.loadBloomFilter', () => {
+        it('Should return loadBloomFilter', async () => {
+          const dapi = new Api();
+          const filter = '';
+          const res = await dapi.loadBloomFilter(filter);
+          // TODO: implement real unit test
+          expect(res).to.be.deep.equal([]);
+        });
+    });
+
+    describe('.spv.addToBloomFilter', () => {
+      it('Should return addToBloomFilter', async () => {
+        const dapi = new Api();
+        const filter = '';
+        const res = await dapi.addToBloomFilter(filter);
+        // TODO: implement real unit test
+        expect(res).to.be.deep.equal([]);
+      });
+    });
+
+    describe('.spv.clearBloomFilter', () => {
+      it('Should return clearBloomFilter', async () => {
+        const dapi = new Api();
+        const filter = '';
+        const res = await dapi.clearBloomFilter(filter);
+        // TODO: implement real unit test
+        expect(res).to.be.deep.equal([]);
+      });
     });
 });

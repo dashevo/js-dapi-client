@@ -33,8 +33,6 @@ class DAPIClient {
         port: this.DAPIPort,
       }, method, params, { timeout: this.timeout });
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(`Error: ${e} with node ${randomMasternode.ip}`);
       if (this.retriesLeft === 0) {
         this.retriesLeft = this.retries;
         throw new Error(`DAPI RPC error: ${method}: max number of retries reached`);

@@ -32,7 +32,10 @@ class DAPIClient {
         host: randomMasternode.ip,
         port: this.DAPIPort,
       }, method, params, { timeout: this.timeout });
-    } catch (e) {
+    } catch (err) {
+      if (err.code !== 'ECONNABORTED') {
+        throw new Error(`DAPI RPC error: ${method}: ${err}`);
+      }
       if (this.retriesLeft === 0) {
         this.retriesLeft = this.retries;
         throw new Error(`DAPI RPC error: ${method}: max number of retries reached`);

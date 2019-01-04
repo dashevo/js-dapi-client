@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@dashevo/dash-spv": "git+ssh://git@github.com/dashevo/dash-spv.git#feat/mnlistmerkleroot",
-    "@dashevo/dashcore-lib": "git://github.com/dashevo/dashcore-lib.git#update-deps",
+    "@dashevo/dashcore-lib": "git://github.com/dashevo/dashcore-lib.git#evo",
     "@dashevo/dashcore-mnemonic": "^1.6.0",
     "@dashevo/quorums": "^1.0.2",
     "axios": "^0.16.2",

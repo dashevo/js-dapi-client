@@ -30,7 +30,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "base58": "^1.0.1",
-    "@dashevo/js-evo-services-ctl": "git+ssh://git@github.com/dashevo/js-evo-services-ctl.git",
+    "@dashevo/js-evo-services-ctl": "git+ssh://git@github.com/dashevo/js-evo-services-ctl#feature/dapi",
     "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema#v3.0.0-alpha.3",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",

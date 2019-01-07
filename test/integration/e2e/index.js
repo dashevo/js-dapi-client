@@ -1,4 +1,7 @@
-require('../bootstrap');
+require('../../bootstrap');
+
+const path = require('path');
+const dotenvSafe = require('dotenv-safe');
 
 const sinon = require('sinon');
 
@@ -16,9 +19,14 @@ const {
 const Schema = require('@dashevo/dash-schema/dash-schema-lib');
 const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 
-const doubleSha256 = require('../utils/doubleSha256');
-const wait = require('../utils/wait');
+const doubleSha256 = require('../../utils/doubleSha256');
+const wait = require('../../utils/wait');
 
+process.env.NODE_ENV = 'test';
+
+dotenvSafe.config({
+    path: path.resolve(__dirname, '../.env'),
+});
 
 describe('basic E2E tests', () => {
     let masterNode;
@@ -62,7 +70,7 @@ describe('basic E2E tests', () => {
         dapId = doubleSha256(Schema.serialize.encode(dapContract.dapcontract));
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
-            .returns(Promise.resolve({result: {ip: '127.0.0.1'}}));
+            .returns(Promise.resolve({ip: '127.0.0.1'}));
 
         [masterNode] = await startDapi.many(1);
 

@@ -1,4 +1,7 @@
-require('../bootstrap');
+require('../../bootstrap');
+
+const path = require('path');
+const dotenvSafe = require('dotenv-safe');
 
 const sinon = require('sinon');
 
@@ -19,6 +22,12 @@ const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 
 const doubleSha256 = require('../../utils/doubleSha256');
 const wait = require('../../utils/wait');
+
+process.env.NODE_ENV = 'test';
+
+dotenvSafe.config({
+    path: path.resolve(__dirname, '../.env'),
+});
 
 
 describe('basicAPIs', () => {

@@ -1,9 +1,8 @@
+require('../bootstrap');
+
 const path = require('path');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
+
 const sinon = require('sinon');
-chai.use(chaiAsPromised);
-const {expect} = chai;
 
 const Schema = require('@dashevo/dash-schema/dash-schema-lib');
 const DashPay = require('@dashevo/dash-schema/dash-core-daps');
@@ -15,9 +14,6 @@ const {
 const doubleSha256 = require('../utils/doubleSha256');
 const wait = require('../utils/wait');
 const MNDiscovery = require('../../src/MNDiscovery/index');
-
-
-var async = require("async");
 
 const average = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
 
@@ -585,7 +581,7 @@ describe("Performance", function () {
                     await wait(1000);
                 }
             }
-            spy.reset();
+            spy.resetHistory();
             let results = [];
             for (var i = 0; i < numLoops; i += 1) {
                 const queries = new Array(numRequests);

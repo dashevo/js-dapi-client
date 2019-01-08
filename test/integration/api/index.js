@@ -1,4 +1,7 @@
-require('../bootstrap');
+require('../../bootstrap');
+
+const path = require('path');
+const dotenvSafe = require('dotenv-safe');
 
 const sinon = require('sinon');
 
@@ -19,6 +22,12 @@ const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 
 const doubleSha256 = require('../../utils/doubleSha256');
 const wait = require('../../utils/wait');
+
+process.env.NODE_ENV = 'test';
+
+dotenvSafe.config({
+    path: path.resolve(__dirname, '../.env'),
+});
 
 
 describe('basicAPIs', () => {
@@ -62,11 +71,11 @@ describe('basicAPIs', () => {
         dapId = doubleSha256(Schema.serialize.encode(dapContract.dapcontract));
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
-            .returns(Promise.resolve({result: {ip: '127.0.0.1'}}));
+            .returns(Promise.resolve({ip: '127.0.0.1'}));
 
         [masterNode] = await startDapi.many(1);
 
-        const seeds = [{ip: masterNode.dapi.container.getIp()}]; //, { ip: master2.dapi.container.getIp()}];
+        const seeds = [{ip: masterNode.dapi.container.getIp()}];
         await masterNode.dashCore.getApi().generate(1500);
 
         dapiClient = new DAPIClient({
@@ -145,7 +154,7 @@ describe('basicAPIs', () => {
             let dapiOutput = await dapiClient.getAddressTotalReceived(faucetAddress);
             const url = insightURL + `/addr/${faucetAddress}/totalReceived`;
             const response = await fetch(url);
-            const {value} = await response.json();
+            const value = await response.json();
             expect(dapiOutput).to.be.deep.equal(value);
         });
 
@@ -205,6 +214,7 @@ describe('basicAPIs', () => {
             const response = await fetch(url);
             const value = await response.json();
             expect(dapiOutput).to.be.deep.equal(value.blocks);
+            expect(dapiOutput).to.be.an('array')
         });
 
         it('should return correct getRawBlock', async function it() {
@@ -287,9 +297,12 @@ describe('basicAPIs', () => {
         });
 
         it('should estimateFee', async function it() {
-            const estimateFee = await dapiClient.estimateFee(5);
+            const estimateFee = await dapiClient.estimateFee(2);
+            const url = insightURL + `/utils/estimatefee`;
+            const response = await fetch(url);
+            let value = await response.text();
             // TODO change after https://dashpay.atlassian.net/browse/EV-1211
-            expect(estimateFee).to.be.deep.equal({'5': -1});
+            expect(estimateFee).to.be.deep.equal(value);
         });
 
         it('should getUserByName & getUserById', async function it() {

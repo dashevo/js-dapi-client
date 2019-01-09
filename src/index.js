@@ -56,7 +56,7 @@ class DAPIClient {
    * @param {number} numberOfBlocksToWait
    * @return {Promise<number>} - duffs per byte
    */
-  estimateFee(numberOfBlocksToWait) { return this.makeRequestToRandomDAPINode('estimateFee', { nbBlocks: numberOfBlocksToWait }); }
+  estimateFee(numberOfBlocksToWait) { return this.makeRequestToRandomDAPINode('estimateFee', { blocks: numberOfBlocksToWait }); }
 
   /**
    * ONLY FOR TESTING PURPOSES WITH REGTEST. WILL NOT WORK ON TESTNET/LIVENET.

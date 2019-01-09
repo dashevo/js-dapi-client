@@ -13,7 +13,7 @@ module.exports = (config) => {
       './test.spec.js': ['webpack'],
     },
     webpack: {
-      mode: 'development',
+      mode: 'production',
       node: {
         fs: 'empty',
       },

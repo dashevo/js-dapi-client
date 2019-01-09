@@ -1,10 +1,9 @@
 // Todo Extract each usecase into a helper function
-
+const { SpvChain } = require('@dashevo/dash-spv');
+const { MerkleProof } = require('@dashevo/dash-spv');
+const dashcore = require('@dashevo/dashcore-lib');
 const Api = require('../');
 const helpers = require('../src/Helpers');
-const { SpvChain } = require('@dashevo/dash-spv');
-const dashcore = require('@dashevo/dashcore-lib');
-const { MerkleProof } = require('@dashevo/dash-spv');
 
 let validMnList = [];
 
@@ -85,11 +84,10 @@ async function BuildHeaderChain() {
   await getValidatedHeaderchain();
 
   // select 2 random from chain, in production this will be hardcoded
-  const checkpoints =
-    headerChain.getLongestChain()
-      .map(h => h.hash)
-      .sort(() => 0.5 - Math.random()) // 1 liner (sub optimal) shuffle hack
-      .slice(0, 2);
+  const checkpoints = headerChain.getLongestChain()
+    .map(h => h.hash)
+    .sort(() => 0.5 - Math.random()); // 1 liner (sub optimal) shuffle hack
+  // .slice(0, 2);
 
   await validateCheckpoints(checkpoints);
 

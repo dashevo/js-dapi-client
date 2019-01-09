@@ -44,4 +44,3 @@ function sample2() {
 
 sample1();
 sample2();
-

@@ -9,9 +9,9 @@ const { MerkleProof } = require('@dashevo/dash-spv');
    * @param {string} cbTxHash - The fully serialized coinbase transaction of blockHash
    * @returns {boolean}
    */
-const verifyMnListDiff =
-    (header, flags, hashes, numTransactions, cbTxHash) =>
-      MerkleProof.validateMnProofs(header, flags, hashes, numTransactions, cbTxHash);
+const verifyMnListDiff = (header, flags, hashes, numTransactions,
+  cbTxHash) => MerkleProof.validateMnProofs(
+  header, flags, hashes, numTransactions, cbTxHash,
+);
 
 module.exports = verifyMnListDiff;
-

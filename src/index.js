@@ -237,9 +237,13 @@ class DAPIClient {
   // In future SPV will choose a specific node and stick with
   // the node for as long as possible for SPV interaction (to prevent dapi chain rescans)
   loadBloomFilter(filter) { return this.makeRequestToRandomDAPINode('loadBloomFilter', { filter }); }
+
   addToBloomFilter(originalFilter, element) { return this.makeRequestToRandomDAPINode('addToBloomFilter', { originalFilter, element }); }
+
   clearBloomFilter(filter) { return this.makeRequestToRandomDAPINode('clearBloomFilter', { filter }); }
+
   getSpvData(filter) { return this.makeRequestToRandomDAPINode('getSpvData', { filter }); }
+
   requestHistoricData(blockHash) { return this.makeRequestToRandomDAPINode('requestHistoricData', { blockHash }); }
 }
 

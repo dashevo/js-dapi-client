@@ -14,7 +14,7 @@ class DAPIClient {
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
-    this.timeout = options.timeout || 0;
+    this.timeout = options.timeout || 600;
     this.retries = options.retries ? parseInt(options.retries, 10) : 2;
   }
 

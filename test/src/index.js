@@ -579,7 +579,7 @@ describe('api', () => {
             const options = {retries : 1};
             const dapi = new Api(options);
             const summary = await dapi.getAddressSummary(validAddressWithOutputs);
-            expect(dapi.retriesLeft).to.equal(1);
+            expect(dapi.retries).to.equal(1);
         });
     });
     describe('.address.getAddressUnconfirmedBalance', () => {

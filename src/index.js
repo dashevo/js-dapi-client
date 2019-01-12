@@ -16,7 +16,6 @@ class DAPIClient {
     this.DAPIPort = options.port || config.Api.port;
     this.timeout = options.timeout || 0;
     this.retries = options.retries ? parseInt(options.retries, 10) : 2;
-    this.retriesLeft = this.retries;
   }
 
   /**
@@ -26,22 +25,30 @@ class DAPIClient {
    * @returns {Promise<*>}
    */
   async makeRequestToRandomDAPINode(method, params) {
+    this.makeRequest.callCount = 0;
+    return this.makeRequestWithRetries(method, params, this.retries);
+  }
+
+  async makeRequest(method, params) {
+    this.makeRequest.callCount += 1;
     const randomMasternode = await this.MNDiscovery.getRandomMasternode();
+    return rpcClient.request({
+      host: randomMasternode.ip,
+      port: this.DAPIPort,
+    }, method, params, { timeout: this.timeout });
+  }
+
+  async makeRequestWithRetries(method, params, retriesCount = 0) {
     try {
-      return rpcClient.request({
-        host: randomMasternode.ip,
-        port: this.DAPIPort,
-      }, method, params, { timeout: this.timeout });
+      return await this.makeRequest(method, params);
     } catch (err) {
-      if (err.code !== 'ECONNABORTED') {
+      if (err.code !== 'ECONNABORTED' && err.code !== 'ECONNREFUSED') {
         throw new Error(`DAPI RPC error: ${method}: ${err}`);
       }
-      if (this.retriesLeft === 0) {
-        this.retriesLeft = this.retries;
-        throw new Error(`DAPI RPC error: ${method}: max number of retries reached`);
+      if (retriesCount > 0) {
+        return this.makeRequestWithRetries(method, params, retriesCount - 1);
       }
-      this.retriesLeft -= 1;
-      return this.makeRequestToRandomDAPINode(method, params);
+      throw new Error('max retriesCount reached');
     }
   }
 

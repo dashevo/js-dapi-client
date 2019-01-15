@@ -6,8 +6,9 @@ const defaultHost = '127.0.0.1';
  * @param {string|object} url - rpc endpoint config
  * @param {string} [url.host]
  * @param {string|number} [url.port]
- * @param method
- * @param params
+ * @param {string} method
+ * @param {object} params
+ * @param {object} options
  * @returns {Promise<*>}
  */
 async function request(url, method, params, options = {}) {

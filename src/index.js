@@ -8,11 +8,14 @@ class DAPIClient {
    * @param {Array<Object>} [options.seeds] - seeds. If no seeds provided
    * default seed will be used.
    * @param {number} [options.port] - default port for connection to the DAPI
+   * @param {number} [options.timeout] - timeout for connection to the DAPI
+   * @param {number} [options.retries] - num of retries if there is no response from DAPI node
    */
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
-    this.timeout = options.timeout || 0;
+    this.timeout = options.timeout || 600;
+    this.retries = options.retries ? parseInt(options.retries, 10) : 3;
   }
 
   /**
@@ -22,11 +25,31 @@ class DAPIClient {
    * @returns {Promise<*>}
    */
   async makeRequestToRandomDAPINode(method, params) {
+    this.makeRequest.callCount = 0;
+    return this.makeRequestWithRetries(method, params, this.retries);
+  }
+
+  async makeRequest(method, params) {
+    this.makeRequest.callCount += 1;
     const randomMasternode = await this.MNDiscovery.getRandomMasternode();
     return rpcClient.request({
       host: randomMasternode.ip,
       port: this.DAPIPort,
     }, method, params, { timeout: this.timeout });
+  }
+
+  async makeRequestWithRetries(method, params, retriesCount = 0) {
+    try {
+      return await this.makeRequest(method, params);
+    } catch (err) {
+      if (err.code !== 'ECONNABORTED' && err.code !== 'ECONNREFUSED') {
+        throw new Error(`DAPI RPC error: ${method}: ${err}`);
+      }
+      if (retriesCount > 0) {
+        return this.makeRequestWithRetries(method, params, retriesCount - 1);
+      }
+      throw new Error('max retriesCount reached');
+    }
   }
 
   /* Layer 1 commands */

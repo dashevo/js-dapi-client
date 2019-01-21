@@ -48,7 +48,7 @@ class DAPIClient {
       if (retriesCount > 0) {
         return this.makeRequestWithRetries(method, params, retriesCount - 1);
       }
-      throw new Error('max retriesCount reached');
+      throw new Error('max retries to connect to DAPI node reached');
     }
   }
 

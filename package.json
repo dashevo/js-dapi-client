@@ -6,8 +6,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
     "@dashevo/dash-spv": "^1.0.1",
-    "@dashevo/dashcore-lib": "^0.16.5",
-    "@dashevo/dashcore-mnemonic": "^1.6.0",
+    "@dashevo/dashcore-lib": "^0.16.8",
     "@dashevo/quorums": "^1.0.2",
     "axios": "^0.18.0",
     "lodash": "^4.17.11",

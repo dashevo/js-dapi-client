@@ -26,6 +26,7 @@ const wait = require('../../utils/wait');
 process.env.NODE_ENV = 'test';
 
 dotenvSafe.config({
+    sample : path.resolve(__dirname, '../.env'),
     path: path.resolve(__dirname, '../.env'),
 });
 

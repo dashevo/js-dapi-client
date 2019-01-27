@@ -27,6 +27,7 @@ const wait = require('../../utils/wait');
 process.env.NODE_ENV = 'test';
 
 dotenvSafe.config({
+  sample : path.resolve(__dirname, '../.env'),
   path: path.resolve(__dirname, '../.env'),
 });
 
@@ -269,8 +270,7 @@ describe('retry policy', () => {
 
     });
 
-    //https://dashpay.atlassian.net/browse/EV-1231
-    xit('should makeRequestWithRetries be called 1 times with retries=1', async function it() {
+    it('should makeRequestWithRetries be called 1 times with retries=1', async function it() {
       let err = '';
       const retries = 1;
       dapiClient = new DAPIClient({

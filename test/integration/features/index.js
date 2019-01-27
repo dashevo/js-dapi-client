@@ -6,13 +6,11 @@ const dotenvSafe = require('dotenv-safe');
 const sinon = require('sinon');
 
 const MNDiscovery = require('../../../src/MNDiscovery/index');
-const fetch = require('node-fetch');
 const { startDapi } = require('@dashevo/js-evo-services-ctl');
 const DAPIClient = require('../../../src/index');
 
 
 const {
-  Transaction,
   PrivateKey,
   PublicKey,
   Address,
@@ -27,7 +25,7 @@ const wait = require('../../utils/wait');
 process.env.NODE_ENV = 'test';
 
 dotenvSafe.config({
-  sample : path.resolve(__dirname, '../.env'),
+  sample: path.resolve(__dirname, '../.env'),
   path: path.resolve(__dirname, '../.env'),
 });
 
@@ -38,9 +36,6 @@ describe('retry policy', () => {
 
   let spy;
   let spy2;
-  let stub;
-
-  const attempts = 40;
 
   let transactionIdSendToAddress;
   let insightURL;
@@ -53,11 +48,7 @@ describe('retry policy', () => {
   let faucetPrivateKey;
   let faucetAddress;
 
-  let bobPrivateKey;
   let bobUserName;
-  let bobRegTxId;
-
-  let bobPreviousST;
 
   before(async () => {
     const privKey = 'cVwyvFt95dzwEqYCLd8pv9CzktajP4tWH2w9RQNPeHYA7pH35wcJ';
@@ -220,8 +211,7 @@ describe('retry policy', () => {
 
     });
 
-    //https://dashpay.atlassian.net/browse/EV-1231
-    xit('should makeRequestWithRetries be called 1 times with retries=0', async function it() {
+    it('should makeRequestWithRetries be called 1 times with retries=0', async function it() {
       let err = '';
       const retries = 0;
       dapiClient = new DAPIClient({
@@ -245,29 +235,15 @@ describe('retry policy', () => {
 
     });
 
-    //https://dashpay.atlassian.net/browse/EV-1231
-    xit('should makeRequestWithRetries be called 1 times with retries=true', async function it() {
-      let err = '';
+    it('should makeRequestWithRetries be called 1 times with retries=true', async function it() {
       const retries = true;
-      dapiClient = new DAPIClient({
+      return expect(() => new DAPIClient({
         seeds,
         port: masterNode.dapi.options.getRpcPort(),
         retries: retries
-      });
-      let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
-      try {
-        await dapiClient.getBestBlockHeight();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message)
+      }))
         .to
-        .equal('max retries to connect to DAPI node reached');
-      expect(spy.callCount)
-        .to
-        .be
-        .equal(1);
-
+        .throw(Error, 'Invalid Argument: Expect retries to be an unsigned integer');
     });
 
     it('should makeRequestWithRetries be called 1 times with retries=1', async function it() {
@@ -294,103 +270,48 @@ describe('retry policy', () => {
 
     });
 
-    //https://dashpay.atlassian.net/browse/EV-1231
-    xit('should makeRequestWithRetries be called 1 times with retries=-10', async function it() {
-      let err = '';
+    it('should makeRequestWithRetries be called 1 times with retries=-10', async function it() {
       const retries = -10;
-      dapiClient = new DAPIClient({
+      return expect(() => new DAPIClient({
         seeds,
         port: masterNode.dapi.options.getRpcPort(),
         retries: retries
-      });
-      let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
-      try {
-        await dapiClient.getBestBlockHeight();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message)
+      }))
         .to
-        .equal('max retries to connect to DAPI node reached');
-      expect(spy.callCount)
-        .to
-        .be
-        .equal(1);
-
+        .throw(Error, 'Invalid Argument: Expect retries to be an unsigned integer');
     });
 
-    //https://dashpay.atlassian.net/browse/EV-1231
-    xit('should makeRequestWithRetries be called 1 times with retries=str', async function it() {
-      let err = '';
+    it('should makeRequestWithRetries be called 1 times with retries=str', async function it() {
       const retries = 'str';
-      dapiClient = new DAPIClient({
+      return expect(() => new DAPIClient({
         seeds,
         port: masterNode.dapi.options.getRpcPort(),
         retries: retries
-      });
-      let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
-      try {
-        await dapiClient.getBestBlockHeight();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message)
+      }))
         .to
-        .equal('max retries to connect to DAPI node reached');
-      expect(spy.callCount)
-        .to
-        .be
-        .equal(1);
-
+        .throw(Error, 'Invalid Argument: Expect retries to be an unsigned integer');
     });
 
-    //https://dashpay.atlassian.net/browse/EV-1232
-    xit('should DAPIClient throw error when timeout=str', async function it() {
-      let err = '';
-      const timeout = str;
-      dapiClient = new DAPIClient({
+    it('should DAPIClient throw error when timeout=str', async function it() {
+      const timeout = 'str';
+      return expect(() => new DAPIClient({
         seeds,
         port: masterNode.dapi.options.getRpcPort(),
         timeout: timeout
-      });
-      let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
-      try {
-        await dapiClient.getBestBlockHeight();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message)
+      }))
         .to
-        .equal('max retries to connect to DAPI node reached');
-      expect(spy.callCount)
-        .to
-        .be
-        .equal(4);
-
+        .throw(Error, 'Invalid Argument: Expect timeout to be an unsigned integer');
     });
 
     it('should be able to use integer as string for timeout parameter', async function it() {
-      let err = '';
       const timeout = '100';
-      dapiClient = new DAPIClient({
+      return expect(() => new DAPIClient({
         seeds,
         port: masterNode.dapi.options.getRpcPort(),
         timeout: timeout
-      });
-      let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
-      try {
-        await dapiClient.getBestBlockHeight();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message)
+      }))
         .to
-        .equal('max retries to connect to DAPI node reached');
-      expect(spy.callCount)
-        .to
-        .be
-        .equal(4);
-
+        .throw(Error, 'Invalid Argument: Expect timeout to be an unsigned integer');
     });
 
     it('should be able to use integer for timeout parameter', async function it() {
@@ -441,58 +362,39 @@ describe('retry policy', () => {
         .equal(4);
     });
 
-    //https://dashpay.atlassian.net/browse/EV-1232
-    xit('should DAPIClient throw error when timeout=-1', async function it() {
-      let err = '';
+    it('should DAPIClient throw error when timeout=-1', async function it() {
       const timeout = -1;
-      dapiClient = new DAPIClient({
+      return expect(() => new DAPIClient({
         seeds,
         port: masterNode.dapi.options.getRpcPort(),
         timeout: timeout
-      });
-      let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
-
-      try {
-        await dapiClient.getBestBlockHeight();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message)
+      }))
         .to
-        .equal('max retries to connect to DAPI node reached');
-      expect(spy.callCount)
-        .to
-        .be
-        .equal(4);
+        .throw(Error, 'Invalid Argument: Expect timeout to be an unsigned integer');
     });
 
-    //https://dashpay.atlassian.net/browse/EV-1232
-    xit('should DAPIClient throw error when timeout=true', async function it() {
-      let err = '';
+    it('should DAPIClient throw error when timeout=true', async function it() {
       const timeout = true;
-      dapiClient = new DAPIClient({
+      return expect(() => new DAPIClient({
         seeds,
         port: masterNode.dapi.options.getRpcPort(),
         timeout: timeout
-      });
-      let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
-
-      try {
-        await dapiClient.getBestBlockHeight();
-      } catch (e) {
-        err = e;
-      }
-      expect(err.message)
+      }))
         .to
-        .equal('max retries to connect to DAPI node reached');
-      expect(spy.callCount)
-        .to
-        .be
-        .equal(4);
+        .throw(Error, 'Invalid Argument: Expect timeout to be an unsigned integer');
     });
 
+    it('should DAPIClient throw error when timeout="100"', async function it() {
+      const timeout = '100';
+      return expect(() => new DAPIClient({
+        seeds,
+        port: masterNode.dapi.options.getRpcPort(),
+        timeout: timeout
+      }))
+        .to
+        .throw(Error, 'Invalid Argument: Expect timeout to be an unsigned integer');
+    });
   });
-
   describe('dapi started', () => {
     it('should makeRequestWithRetries be called 1 times with default settings', async function it() {
       dapiClient = new DAPIClient({
@@ -578,21 +480,6 @@ describe('retry policy', () => {
         .equal(1);
     });
 
-    it('should makeRequestWithRetries be called 1 times with timeout="100"', async function it() {
-      const timeout = '100';
-      dapiClient = new DAPIClient({
-        seeds,
-        port: masterNode.dapi.options.getRpcPort(),
-        timeout: timeout
-      });
-      let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
-      await dapiClient.getBestBlockHeight();
-      expect(spy.callCount)
-        .to
-        .be
-        .equal(1);
-    });
-
     it('should makeRequestWithRetries be called 1 times with timeout=10000', async function it() {
       const timeout = 10000;
       dapiClient = new DAPIClient({
@@ -608,7 +495,6 @@ describe('retry policy', () => {
         .be
         .equal(1);
     });
-
 
     it('should DAPIClient throw error when timeout too small', async function it() {
       const timeout = 1;
@@ -633,8 +519,7 @@ describe('retry policy', () => {
         .be
         .equal(4);
     });
-
   });
 
-
 });
+

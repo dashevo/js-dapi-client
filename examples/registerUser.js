@@ -5,16 +5,16 @@ const {
 
 const Api = require('../');
 
+const log = console;
 const userName = Math.random().toString(36).substring(7);
 const feePrivateKey = new PrivateKey(process.env.FEE_PRIVATE_KEY);
 const userPrivateKey = new PrivateKey(process.env.USER_PRIVATE_KEY);
 
-api = new Api();
+let api = new Api();
 
 async function registerUser(userName, userPrivateKey, feePrivateKey) {
   // Derive addresses from private keys
-  feeAddress = feePrivateKey.toAddress().toString();
-  userAddress = userPrivateKey.toAddress().toString();
+  let feeAddress = feePrivateKey.toAddress().toString();
 
   // Construct a blockchain user subscription tx payload
   const validPayload = new Transaction.Payload.SubTxRegisterPayload()
@@ -33,7 +33,7 @@ async function registerUser(userName, userPrivateKey, feePrivateKey) {
     .change(feeAddress)
     .sign(feePrivateKey);
 
-  console.log('Subscription transaction:', transaction);
+  log.info('Subscription transaction:', transaction);
 
   // Broadcast the subscription tx
   ({ txid: userRegTxId } = await api.sendRawTransaction(transaction.serialize()));
@@ -43,7 +43,7 @@ async function registerUser(userName, userPrivateKey, feePrivateKey) {
 
 const start = async () => {
   const userRegTxId = await registerUser(userName, userPrivateKey, feePrivateKey);
-  console.log(userName, 'registration txid:', userRegTxId);
+  log.info(userName, 'registration txid:', userRegTxId);
 };
 
 start();

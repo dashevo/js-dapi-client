@@ -10,16 +10,17 @@ const userName = Math.random().toString(36).substring(7);
 const feePrivateKey = new PrivateKey(process.env.FEE_PRIVATE_KEY);
 const userPrivateKey = new PrivateKey(process.env.USER_PRIVATE_KEY);
 
-let api = new Api();
+const api = new Api();
 
-async function registerUser(userName, userPrivateKey, feePrivateKey) {
+async function registerUser(user, userKey, feeKey) {
+  let userRegTxId = null;
   // Derive addresses from private keys
-  let feeAddress = feePrivateKey.toAddress().toString();
+  const feeAddress = feeKey.toAddress().toString();
 
   // Construct a blockchain user subscription tx payload
   const validPayload = new Transaction.Payload.SubTxRegisterPayload()
-    .setUserName(userName)
-    .setPubKeyIdFromPrivateKey(userPrivateKey).sign(userPrivateKey);
+    .setUserName(user)
+    .setPubKeyIdFromPrivateKey(userKey).sign(userKey);
 
   // Get inputs containing a balance to fund tx
   const inputs = await api.getUTXO(feeAddress);
@@ -31,7 +32,7 @@ async function registerUser(userName, userPrivateKey, feePrivateKey) {
     .from(inputs.slice(-1)[0])
     .addFundingOutput(10000)
     .change(feeAddress)
-    .sign(feePrivateKey);
+    .sign(feeKey);
 
   log.info('Subscription transaction:', transaction);
 

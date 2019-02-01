@@ -2,6 +2,7 @@ const config = {
   Api: {
     port: 3000,
   },
+  nullHash: '0000000000000000000000000000000000000000000000000000000000000000',
   MNListUpdateInterval: 60000,
   quorumUpdateInterval: 60000,
   DAPIDNSSeeds: [

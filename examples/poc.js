@@ -1,7 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 // Todo Extract each usecase into a helper function
-const { SpvChain } = require('@dashevo/dash-spv');
-const { MerkleProof } = require('@dashevo/dash-spv');
+const { SpvChain, MerkleProof } = require('@dashevo/dash-spv');
 const dashcore = require('@dashevo/dashcore-lib');
 const path = require('path');
 const sinon = require('sinon');

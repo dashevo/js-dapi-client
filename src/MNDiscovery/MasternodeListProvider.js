@@ -60,8 +60,9 @@ class MasternodeListProvider {
       throw new Error('seed is not an array');
     }
     /**
-     * Masternode list. Initial masternode list is DNS seed from SDK config.
-     * @type Array<Masternode>
+     * Deterministic simplified masternode list.
+     * Initial masternode list is DNS seed from config.
+     * @type Array<SimplifiedMNListEntry>
      */
     this.masternodeList = seedsIsArray ? seeds.slice() : config.DAPIDNSSeeds.slice();
     this.DAPIPort = DAPIPort;
@@ -112,7 +113,7 @@ class MasternodeListProvider {
 
   /**
    * @private
-   * Updates masternodes list. No need to call it manually
+   * Updates simplified masternodes list. No need to call it manually
    * @returns {Promise<void>}
    */
   async updateMNList() {
@@ -127,7 +128,7 @@ class MasternodeListProvider {
 
   /**
    * @private
-   * Checks whether masternode list needs update
+   * Checks whether simplified masternode list needs update
    * @returns {boolean}
    */
   needsUpdate() {
@@ -135,8 +136,8 @@ class MasternodeListProvider {
   }
 
   /**
-   * Returns masternode list
-   * @returns {Promise<Array<Masternode>>}
+   * Returns simplified masternode list
+   * @returns {Promise<Array<SimplifiedMNListEntry>>}
    */
   async getMNList() {
     if (this.needsUpdate()) {

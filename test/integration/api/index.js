@@ -26,6 +26,7 @@ const wait = require('../../utils/wait');
 process.env.NODE_ENV = 'test';
 
 dotenvSafe.config({
+    sample : path.resolve(__dirname, '../.env'),
     path: path.resolve(__dirname, '../.env'),
 });
 
@@ -298,11 +299,7 @@ describe('basicAPIs', () => {
 
         it('should estimateFee', async function it() {
             const estimateFee = await dapiClient.estimateFee(2);
-            const url = insightURL + `/utils/estimatefee`;
-            const response = await fetch(url);
-            let value = await response.text();
-            // TODO change after https://dashpay.atlassian.net/browse/EV-1211
-            expect(estimateFee).to.be.deep.equal(value);
+            expect(estimateFee).to.be.deep.equal(1);
         });
 
         it('should getUserByName & getUserById', async function it() {

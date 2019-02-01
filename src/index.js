@@ -107,7 +107,7 @@ class DAPIClient {
   getBalance(address) { return this.makeRequestToRandomDAPINode('getBalance', { address }); }
 
   /**
-   * Returns best block hash or block hash of chaintip
+   * Returns block hash of chaintip
    * @returns {Promise<string>}
    */
   getBestBlockHash() { return this.makeRequestToRandomDAPINode('getBestBlockHash', {}); }

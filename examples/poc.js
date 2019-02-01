@@ -1,22 +1,22 @@
+/* eslint-disable import/no-extraneous-dependencies */
 // Todo Extract each usecase into a helper function
 const { SpvChain } = require('@dashevo/dash-spv');
 const { MerkleProof } = require('@dashevo/dash-spv');
 const dashcore = require('@dashevo/dashcore-lib');
+const path = require('path');
+const sinon = require('sinon');
 const Api = require('../');
-const helpers = require('../src/Helpers');
+const MNDiscovery = require('../src/MNDiscovery/index');
 
-let validMnList = [];
-
-// Height used for poc (to save syning time)
-const pocBestHeight = 2896;
+const nullHash = '0000000000000000000000000000000000000000000000000000000000000000';
+require('dotenv').config({ path: path.resolve(__dirname, '.env') });
 
 // Go back 20 blocks
 // Todo: DGW not allowing more than 24 blocks, low difficulty regtest problem
-const pocGenesis = pocBestHeight - 20;
 
-let nullHash;
 let api = null;
 let headerChain = null;
+const DAPI_IP = process.env.DAPI_IP ? process.env.DAPI_IP : '35.164.239.224';
 
 const log = console;
 
@@ -28,40 +28,26 @@ async function logOutput(msg, delay = 50) {
 // ==== Client initial state
 
 async function init() {
-  api = new Api();
-  // using genesis as nullhash as core is bugged
-  nullHash = await api.getBlockHash(0);
+  const seeds = [{ ip: DAPI_IP }];
+  sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
+    .returns(Promise.resolve({ ip: DAPI_IP }));
+  api = new Api({ seeds, port: 3000 });
 }
 
 // ==== Client initial state
 
 // ==== Build HeaderChain
 
-async function setTrustedMnLists() {
-  const latestHash = await api.getBlockHash(await api.getBestBlockHeight());
-  const trustedMnListDiff = await api.getMnListDiff(nullHash, latestHash);
-  const trustedMnList = helpers.constructMnList([], trustedMnListDiff);
-
-  // todo - change dapi architecture to accomodate setting new lists
-  // api.MNDiscovery.masternodeListProvider.masternodeList.concat(trustedMnList);
-
-  await logOutput(`Set Trusted MnList: mnlist length = ${trustedMnList.length}`);
-}
-
 async function getValidatedHeaderchain() {
-  const dapinetGenesisHash = await api.getBlockHash(pocGenesis);
-  const dapinetGenesisHeader = await api.getBlockHeader(dapinetGenesisHash);
-  dapinetGenesisHeader.prevHash = '0000000000000000000000000000000000000000000000000000000000000000';
-  dapinetGenesisHeader.bits = +(`0x${dapinetGenesisHeader.bits}`);
-  const numConfirms = 10000;
-
-  headerChain = new SpvChain('custom_genesis', numConfirms, dapinetGenesisHeader);
-
+  headerChain = new SpvChain('testnet');
+  const latestHeight = await api.getBestBlockHeight();
   const maxHeaders = 24;
-  for (let i = pocGenesis + 1; i <= pocBestHeight; i += maxHeaders) {
+  for (let i = 1; i <= latestHeight; i += maxHeaders) {
     /* eslint-disable-next-line no-await-in-loop */
     const newHeaders = await api.getBlockHeaders(i, maxHeaders);
     headerChain.addHeaders(newHeaders);
+    const syncPercent = ((i / latestHeight) * 100).toFixed(2);
+    logOutput(`headerchain ${syncPercent} % synced`);
   }
 
   // NOTE: query a few nodes by repeating the process to make sure you on the longest chain
@@ -79,8 +65,7 @@ async function validateCheckpoints(checkpoints) {
   }
 }
 
-async function BuildHeaderChain() {
-  await setTrustedMnLists();
+async function BuildHeaderChain() { // eslint-disable-line no-unused-vars
   await getValidatedHeaderchain();
 
   // select 2 random from chain, in production this will be hardcoded
@@ -98,62 +83,44 @@ async function BuildHeaderChain() {
 
 // ==== Get Verified MnList
 
-function validateDiffListProofs(mnlistDiff, header, newList) {
-  // Todo: pending core RPC bug currently not returning these proofs
-  // rem next line when proofs available
-  return mnlistDiff && header && newList && dashcore && MerkleProof;
-
+function isValidDiffListProofs(mnlistDiff, header) { // eslint-disable-line no-unused-vars
   // Add this code back when proofs available.
-  // return MerkleProof.validateMnProofs(
-  //   header,
-  //   mnlistDiff.merkleFlags,
-  //   mnlistDiff.merkleHashes,
-  //   mnlistDiff.totalTransactions,
-  //   mnlistDiff.cbTx.hash,
-  // ) &&
-  // MerkleProof.validateMnListMerkleRoot(mnlistDiff.mnlistMerkleRoot, newList);
+  return MerkleProof.validateMnProofs(
+    header,
+    mnlistDiff.cbTxMerkleTree.merkleFlags,
+    mnlistDiff.cbTxMerkleTree.merkleHashes,
+    mnlistDiff.cbTxMerkleTree.totalTransactions,
+    mnlistDiff.cbTx.hash,
+  );
 }
 
-function constructMnList(originalMnList, diffList) {
-  const replacements = diffList.mnList.map(x => x.proRegTxHash);
-  return originalMnList
-    .filter(mn => !diffList.deletedMNs.includes(mn.proRegTxHash)) // remove deleted
-    .filter(mn => !replacements.includes(mn.proRegTxHash)) // to be replaced
-    .concat(diffList.mnList) // replace
-    .sort((itemA, itemB) => itemA.proRegTxHash > itemB);
-}
-
-async function getMnListDiff() {
-  // Suppose to use nullhash as offset for full list but core bug prevent this currently
-  // so using block 1 which will have same effect
-  const offSetHash = await api.getBlockHash(1);
-  const targetHash = await api.getBlockHash(pocBestHeight);
-  const diffList = await api.getMnListDiff(offSetHash, targetHash);
-
-  return diffList;
+async function getValidMnList() {
+  const latestHash = await api.getBlockHash(await api.getBestBlockHeight());
+  const diff = await api.getMnListDiff(nullHash, latestHash);
+  // const cbTx = dashcore.Transaction.Payload.CoinbasePayload.fromBuffer(diff.cbTx);
+  /*
+  const cbTxHeader = await headerChain.getHeader(await api.getBlockHash(cbTx.height));
+  if (!isValidDiffListProofs(diff, cbTxHeader)) {
+    throw new Error ('INVALID MNLIST! please query other dapi nodes');
+  }
+  */
+  const validMnList = new dashcore.SimplifiedMNList(diff).getValidMasternodesList();
+  logOutput(`Set Trusted MnList: mnlist length = ${validMnList.length}`);
+  return validMnList;
 }
 
 async function GetVerifiedMnList() {
-  const diffList = await getMnListDiff();
-  const trustedMnList = constructMnList(validMnList, diffList);
-  // Todo: replace pocBestHeight with diffList.cbTx.height (pocBestHeight should be same val)
-  const cbTxHeader = await headerChain.getHeader(await api.getBlockHash(pocBestHeight));
-  const proofsIsValid = validateDiffListProofs(diffList, cbTxHeader, trustedMnList);
-
-  if (proofsIsValid) {
-    validMnList = [...trustedMnList];
-    await logOutput(`Checkpoints valid on headerChain with tip ${headerChain.getTipHash()}`);
-  } else {
-    await logOutput('INVALID MNLIST! please query other dapi nodes');
-  }
+  const verifiedMnList = await getValidMnList();
+  // await logOutput(`Valid MNLIST on headerChain with tip ${headerChain.getTipHash()}`);
+  console.log('verifiedMnList', verifiedMnList);
 }
 
 // ==== Get Verified MnList
 
-
 async function start() {
   await init(); // Client Initial state
-  await BuildHeaderChain();
+  // let's sync header chain once we can do it with dspv
+  // await BuildHeaderChain();
   await GetVerifiedMnList();
 }
 

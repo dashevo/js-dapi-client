@@ -14,7 +14,13 @@ const config = require('../config');
 
 const headerChain = new SpvChain('testnet');
 
-function isValidDiffListProofs(diff, header) { // eslint-disable-line no-unused-vars
+/**
+ * validates proof params of cbTxMerkleTree
+ * @param {SimplifiedMNListDiff} diff - masternode list diff
+ * @param {string} header - block hash of the ending block of the diff request
+ * @returns {boolean}
+ */
+function isValidDiffListProof(diff, header) { // eslint-disable-line no-unused-vars
   return MerkleProof.validateMnProofs(
     header,
     diff.cbTxMerkleTree.merkleFlags,
@@ -24,6 +30,12 @@ function isValidDiffListProofs(diff, header) { // eslint-disable-line no-unused-
   );
 }
 
+/**
+ * verifies masternode list diff against local header chain
+ * @param {SimplifiedMNListDiff} diff - masternode list diff
+ * @param {string} blockHash - block hash of the ending block of the diff request
+ * @returns {Promise<boolean>}
+ */
 async function verifyDiff(diff, blockHash) {
   const cbTxHeader = await headerChain.getHeader(blockHash);
   if (!cbTxHeader) {
@@ -31,7 +43,7 @@ async function verifyDiff(diff, blockHash) {
     with height ${Transaction.Payload.CoinbasePayload.fromBuffer(diff.cbTx).height}`);
   }
 
-  if (!isValidDiffListProofs(diff, cbTxHeader)) {
+  if (!isValidDiffListProof(diff, cbTxHeader)) {
     throw new Error('Invalid masternode diff proofs');
   }
 
@@ -70,6 +82,11 @@ class MasternodeListProvider {
     this.baseBlockHash = config.nullHash;
   }
 
+  /**
+   * @private
+   * Gets valid masternode list from DAPI.
+   * @returns {Promise<SimplifiedMNList>}
+   */
   async getValidMnList() {
     const diff = await this.getSimplifiedMNListDiff();
     if (!diff) {
@@ -86,7 +103,7 @@ class MasternodeListProvider {
   /**
    * @private
    * Fetches masternode diff from DAPI.
-   * @returns {Promise<Array<SimplifiedMNListDiff>>}
+   * @returns {Promise<SimplifiedMNListDiff>}
    */
   async getSimplifiedMNListDiff() {
     const node = sample(this.masternodeList);

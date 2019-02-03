@@ -36,10 +36,10 @@ function isValidDiffListProof(diff, header) { // eslint-disable-line no-unused-v
  * @param {string} blockHash - block hash of the ending block of the diff request
  * @returns {Promise<boolean>}
  */
-async function verifyDiff(diff, blockHash) {
-  const cbTxHeader = await headerChain.getHeader(blockHash);
+async function verifyDiff(diff) { // eslint-disable-line no-unused-vars
+  const cbTxHeader = await headerChain.getHeader(diff.blockHash);
   if (!cbTxHeader) {
-    throw new Error(`Failed to find cbTxHeader in local store for block hash ${blockHash} 
+    throw new Error(`Failed to find cbTxHeader in local store for block hash ${diff.blockHash} 
     with height ${Transaction.Payload.CoinbasePayload.fromBuffer(diff.cbTx).height}`);
   }
 
@@ -85,7 +85,7 @@ class MasternodeListProvider {
   /**
    * @private
    * Gets valid masternode list from DAPI.
-   * @returns {Promise<SimplifiedMNList>}
+   * @returns {Promise<SimplifiedMNListEntry[]>}
    */
   async getValidMnList() {
     const diff = await this.getSimplifiedMNListDiff();
@@ -93,10 +93,14 @@ class MasternodeListProvider {
       // TODO: query other dapi node
       throw new Error('INVALID MNLIST! please query other dapi nodes');
     }
-    if (!verifyDiff(diff, this.blockHash)) {
+    // TODO: once we have local header chain we can verify diff - for now disabled
+    /*
+    const isValidDiff = await verifyDiff(diff);
+    if (!isValidDiff) {
       // TODO: query other dapi node
       throw new Error('INVALID MNLIST! please query other dapi nodes');
     }
+    */
     return new SimplifiedMNList(diff).getValidMasternodesList();
   }
 

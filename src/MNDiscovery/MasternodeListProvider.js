@@ -33,7 +33,6 @@ function isValidDiffListProof(diff, header) { // eslint-disable-line no-unused-v
 /**
  * verifies masternode list diff against local header chain
  * @param {SimplifiedMNListDiff} diff - masternode list diff
- * @param {string} blockHash - block hash of the ending block of the diff request
  * @returns {Promise<boolean>}
  */
 async function verifyDiff(diff) { // eslint-disable-line no-unused-vars

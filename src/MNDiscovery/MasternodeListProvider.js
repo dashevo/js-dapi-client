@@ -25,14 +25,14 @@ function isValidDiffListProofs(diff, header) { // eslint-disable-line no-unused-
 }
 
 async function verifyDiff(diff, blockHash) {
-  const cbTx = Transaction.Payload.CoinbasePayload.fromBuffer(diff.cbTx);
   const cbTxHeader = await headerChain.getHeader(blockHash);
   if (!cbTxHeader) {
-    throw new Error(`Failed to find cbTxHeader in header store for block hash ${blockHash} with height ${cbTx.height}`);
+    throw new Error(`Failed to find cbTxHeader in local store for block hash ${blockHash} 
+    with height ${Transaction.Payload.CoinbasePayload.fromBuffer(diff.cbTx).height}`);
   }
 
   if (!isValidDiffListProofs(diff, cbTxHeader)) {
-    throw new Error('INVALID MNLIST! please query other dapi nodes');
+    throw new Error('Invalid masternode diff proofs');
   }
 
   return true;

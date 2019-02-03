@@ -68,7 +68,6 @@ class MasternodeListProvider {
     this.DAPIPort = DAPIPort;
     this.lastUpdateDate = 0;
     this.baseBlockHash = config.nullHash;
-    this.blockHash = '';
   }
 
   async getValidMnList() {
@@ -99,7 +98,6 @@ class MasternodeListProvider {
     if (!blockHash) {
       throw new Error(`Failed to get best block hash for getSimplifiedMNListDiff from node ${node.ip}`);
     }
-    this.blockHash = blockHash;
     const diff = await RPCClient.request({
       host: node.ip,
       port: this.DAPIPort,
@@ -107,7 +105,7 @@ class MasternodeListProvider {
     if (!diff) {
       throw new Error(`Failed to get mn diff from node ${node.ip}`);
     }
-    this.baseBlockHash = diff.blockHash;
+    this.baseBlockHash = blockHash;
     return diff;
   }
 

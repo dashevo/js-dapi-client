@@ -56,6 +56,7 @@ async function validateDiff(diff) {
  */
 async function isHeaderInLocalChain(blockHash) { // eslint-disable-line no-unused-vars
   // TODO: implement local headerChain with lightning fast dspv sync
+  // the following line is just a dummy to simulate a header store
   const headerChain = new SpvChain('testnet');
   const header = await headerChain.getHeader(blockHash);
   if (!header) {

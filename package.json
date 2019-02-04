@@ -7,6 +7,7 @@
     "@babel/polyfill": "^7.2.5",
     "@dashevo/dash-spv": "^1.0.1",
     "@dashevo/dashcore-lib": "^0.16.8",
+    "@dashevo/dpp": "^0.4.4",
     "@dashevo/quorums": "^1.0.2",
     "axios": "^0.18.0",
     "lodash": "^4.17.11",
@@ -15,7 +16,6 @@
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",
-    "@dashevo/dash-schema": "git+ssh://git@github.com/dashevo/dash-schema#v3.0.0-alpha.3",
     "@dashevo/js-evo-services-ctl": "git+ssh://git@github.com/dashevo/js-evo-services-ctl",
     "babel-loader": "^8.0.5",
     "chai": "^4.2.0",

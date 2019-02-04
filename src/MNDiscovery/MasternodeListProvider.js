@@ -6,13 +6,11 @@
  * @module MasternodeListProvider
  */
 
-const { MerkleProof, SpvChain } = require('@dashevo/dash-spv');
-const { SimplifiedMNList, Transaction } = require('@dashevo/dashcore-lib');
+const { SpvChain } = require('@dashevo/dash-spv');
+const { SimplifiedMNList, MerkleBlock } = require('@dashevo/dashcore-lib');
 const sample = require('lodash/sample');
 const RPCClient = require('../RPCClient');
 const config = require('../config');
-
-const headerChain = new SpvChain('testnet');
 
 /**
  * validates proof params of cbTxMerkleTree
@@ -20,30 +18,48 @@ const headerChain = new SpvChain('testnet');
  * @param {string} header - block hash of the ending block of the diff request
  * @returns {boolean}
  */
-function isValidDiffListProof(diff, header) { // eslint-disable-line no-unused-vars
-  return MerkleProof.validateMnProofs(
+function isValidDiffListProof(diff, header) {
+  const merkleBlock = new MerkleBlock({
     header,
-    diff.cbTxMerkleTree.merkleFlags,
-    diff.cbTxMerkleTree.merkleHashes,
-    diff.cbTxMerkleTree.totalTransactions,
-    diff.cbTx.hash,
-  );
+    numTransactions: diff.cbTxMerkleTree.totalTransactions,
+    hashes: diff.cbTxMerkleTree.merkleHashes,
+    flags: diff.cbTxMerkleTree.merkleFlags,
+  });
+
+  return merkleBlock.validMerkleTree() && merkleBlock.hasTransaction(diff.cbTx.hash);
+}
+
+/**
+ * validates masternode list diff against local header chain and merkle proof
+ * @param {SimplifiedMNListDiff} diff - masternode list diff
+ * @returns {Promise<boolean>}
+ */
+async function validateDiff(diff) {
+  // TODO: enable below once we have a local header chain
+  /*
+  const validHeader = await isHeaderInLocalChain(diff.blockHash);
+  if (!validHeader) {
+    return false;
+  }
+ */
+  if (!isValidDiffListProof(diff, diff.blockHash)) {
+    throw new Error('Invalid masternode diff proofs');
+  }
+
+  return true;
 }
 
 /**
  * verifies masternode list diff against local header chain
- * @param {SimplifiedMNListDiff} diff - masternode list diff
+ * @param {string} blockHash
  * @returns {Promise<boolean>}
  */
-async function verifyDiff(diff) { // eslint-disable-line no-unused-vars
-  const cbTxHeader = await headerChain.getHeader(diff.blockHash);
-  if (!cbTxHeader) {
-    throw new Error(`Failed to find cbTxHeader in local store for block hash ${diff.blockHash} 
-    with height ${Transaction.Payload.CoinbasePayload.fromBuffer(diff.cbTx).height}`);
-  }
-
-  if (!isValidDiffListProof(diff, cbTxHeader)) {
-    throw new Error('Invalid masternode diff proofs');
+async function isHeaderInLocalChain(blockHash) { // eslint-disable-line no-unused-vars
+  // TODO: implement local headerChain with lightning fast dspv sync
+  const headerChain = new SpvChain('testnet');
+  const header = await headerChain.getHeader(blockHash);
+  if (!header) {
+    throw new Error(`Failed to find cbTxHeader in local store for block hash ${blockHash}`);
   }
 
   return true;
@@ -92,14 +108,14 @@ class MasternodeListProvider {
       // TODO: query other dapi node
       throw new Error('INVALID MNLIST! please query other dapi nodes');
     }
-    // TODO: once we have local header chain we can verify diff - for now disabled
-    /*
-    const isValidDiff = await verifyDiff(diff);
+    // TODO: enable once we have a local header chain
+
+    const isValidDiff = await validateDiff(diff);
     if (!isValidDiff) {
       // TODO: query other dapi node
       throw new Error('INVALID MNLIST! please query other dapi nodes');
     }
-    */
+
     return new SimplifiedMNList(diff).getValidMasternodesList();
   }
 

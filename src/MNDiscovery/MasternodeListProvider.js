@@ -16,7 +16,7 @@ const sample = require('lodash/sample');
 const RPCClient = require('../RPCClient');
 const config = require('../config');
 
-const dummyHeader = '000000204644733449affc715f467ff90aeb6f983b174cb1c089811aea53420100000000720668fc7eb874724c9fb50479009b8747d64f7c36bccb8f7b3fe247f346d6ce27f3355c5cd0211c0f94930d';
+const dummyHeader = '00000020306754be5d6e242258b1ab03999eaa847724718cd410c69a0a92b21300000000ba7f1c1dc4ae5c849813d36a9efa961d3b178489afd6a9bed50de43a2223246e7867335cfc64171cd152f10e';
 
 /**
  * validates proof params of cbTxMerkleTree
@@ -119,13 +119,16 @@ class MasternodeListProvider {
       throw new Error('INVALID MNLIST! please query other dapi nodes');
     }
     // TODO: enable once we have a local header chain
-
     const isValidDiff = await validateDiff(diff);
     if (!isValidDiff) {
       // TODO: query other dapi node
       throw new Error('INVALID MNLIST! please query other dapi nodes');
     }
-    return this.simplifiedMNList.applyDiff(diff).getValidMasternodesList();
+    this.simplifiedMNList.applyDiff(diff);
+    if (!this.simplifiedMNList) {
+      throw new Error('simplifiedMNList is empty');
+    }
+    return this.simplifiedMNList.getValidMasternodesList();
   }
 
   /**
@@ -164,7 +167,6 @@ class MasternodeListProvider {
     const newMNList = await this.getValidMnList();
     // If mn list was updated
     if (newMNList.length) {
-      console.log('newMNList', newMNList);
       this.masternodeList = newMNList;
     }
     this.lastUpdateDate = Date.now();

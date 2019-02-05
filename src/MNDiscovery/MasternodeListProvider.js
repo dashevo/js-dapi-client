@@ -141,20 +141,20 @@ class MasternodeListProvider {
   async getSimplifiedMNListDiff() {
     const node = sample(this.masternodeList);
     const baseHash = this.baseBlockHash;
-    const ipaddress = node.service.split(':')[0];
+    const ipAddress = node.service.split(':')[0];
     const blockHash = await RPCClient.request({
-      host: ipaddress,
+      host: ipAddress,
       port: this.DAPIPort,
     }, 'getBestBlockHash', {});
     if (!blockHash) {
-      throw new Error(`Failed to get best block hash for getSimplifiedMNListDiff from node ${ipaddress}`);
+      throw new Error(`Failed to get best block hash for getSimplifiedMNListDiff from node ${ipAddress}`);
     }
     const diff = await RPCClient.request({
-      host: ipaddress,
+      host: ipAddress,
       port: this.DAPIPort,
     }, 'getMnListDiff', { baseHash, blockHash });
     if (!diff) {
-      throw new Error(`Failed to get mn diff from node ${ipaddress}`);
+      throw new Error(`Failed to get mn diff from node ${ipAddress}`);
     }
     this.baseBlockHash = blockHash;
     return diff;

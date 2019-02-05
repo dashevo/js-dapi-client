@@ -96,31 +96,22 @@ function isValidDiffListProofs(mnlistDiff, header) { // eslint-disable-line no-u
 async function getValidMnList() {
   const latestHash = await api.getBlockHash(await api.getBestBlockHeight());
   const diff = await api.getMnListDiff(nullHash, latestHash);
-  // const cbTx = dashcore.Transaction.Payload.CoinbasePayload.fromBuffer(diff.cbTx);
-  /*
-  const cbTxHeader = await headerChain.getHeader(await api.getBlockHash(cbTx.height));
-  if (!isValidDiffListProofs(diff, cbTxHeader)) {
-    throw new Error ('INVALID MNLIST! please query other dapi nodes');
-  }
-  */
   const validMnList = new dashcore.SimplifiedMNList(diff).getValidMasternodesList();
   logOutput(`Set Trusted MnList: mnlist length = ${validMnList.length}`);
   return validMnList;
 }
 
-async function GetVerifiedMnList() {
+async function getVerifiedMnList() {
   const verifiedMnList = await getValidMnList();
-  // await logOutput(`Valid MNLIST on headerChain with tip ${headerChain.getTipHash()}`);
-  console.log('verifiedMnList', verifiedMnList);
+  return verifiedMnList;
 }
 
 // ==== Get Verified MnList
 
 async function start() {
   await init(); // Client Initial state
-  // let's sync header chain once we can do it with dspv
-  // await BuildHeaderChain();
-  await GetVerifiedMnList();
+  const verifiedList = await getVerifiedMnList();
+  logOutput('verified MN list', verifiedList);
 }
 
 start();

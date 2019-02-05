@@ -59,7 +59,7 @@ async function getHeaderFromLocalChain(blockHash) { // eslint-disable-line no-un
  * @param {SimplifiedMNListDiff} diff - masternode list diff
  * @returns {Promise<boolean>}
  */
-async function validateDiff(diff) {
+async function validateDiff(diff) { // eslint-disable-line no-unused-vars
   // TODO: enable below once we have a local header chain
   const validHeader = await getHeaderFromLocalChain(diff.blockHash);
   if (!validHeader) {
@@ -119,11 +119,13 @@ class MasternodeListProvider {
       throw new Error('INVALID MNLIST! please query other dapi nodes');
     }
     // TODO: enable once we have a local header chain
+    /*
     const isValidDiff = await validateDiff(diff);
     if (!isValidDiff) {
       // TODO: query other dapi node
       throw new Error('INVALID MNLIST! please query other dapi nodes');
     }
+    */
     this.simplifiedMNList.applyDiff(diff);
     if (!this.simplifiedMNList) {
       throw new Error('simplifiedMNList is empty');

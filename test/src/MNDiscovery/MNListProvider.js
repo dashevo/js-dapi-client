@@ -205,7 +205,7 @@ describe('MNListProvider', async () => {
       // Adjust time for update
       mnListProvider.lastUpdateDate -= config.MNListUpdateInterval * 2;
 
-      return expect(mnListProvider.getMNList()).to.be.rejectedWith('Merkle root from the diff doesn\'t match calculated merkle root after diff is applied');
+      return expect(mnListProvider.getMNList()).to.be.rejectedWith('Failed to get mn diff from node 173.61.30.231');
     });
   });
 

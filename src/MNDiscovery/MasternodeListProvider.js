@@ -116,7 +116,7 @@ class MasternodeListProvider {
     const diff = await this.getSimplifiedMNListDiff();
     if (!diff) {
       // TODO: query other dapi node
-      throw new Error('INVALID MNLIST! please query other dapi nodes');
+      throw new Error('Can\'t fetch MN list');
     }
     // TODO: enable once we have a local header chain
     /*

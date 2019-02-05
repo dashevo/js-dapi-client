@@ -109,10 +109,10 @@ class MasternodeListProvider {
 
   /**
    * @private
-   * Gets valid masternode list from DAPI.
-   * @returns {Promise<SimplifiedMNListEntry[]>}
+   * Updates simplified masternodes list. No need to call it manually
+   * @returns {Promise<void>}
    */
-  async getValidMnList() {
+  async updateMNList() {
     const diff = await this.getSimplifiedMNListDiff();
     if (!diff) {
       // TODO: query other dapi node
@@ -130,7 +130,8 @@ class MasternodeListProvider {
     if (!this.simplifiedMNList) {
       throw new Error('simplifiedMNList is empty');
     }
-    return this.simplifiedMNList.getValidMasternodesList();
+    this.masternodeList = this.simplifiedMNList.getValidMasternodesList();
+    this.lastUpdateDate = Date.now();
   }
 
   /**
@@ -156,22 +157,7 @@ class MasternodeListProvider {
     if (!diff) {
       throw new Error(`Failed to get mn diff from node ${ipAddress}`);
     }
-    this.baseBlockHash = blockHash;
     return diff;
-  }
-
-  /**
-   * @private
-   * Updates simplified masternodes list. No need to call it manually
-   * @returns {Promise<void>}
-   */
-  async updateMNList() {
-    const newMNList = await this.getValidMnList();
-    // If mn list was updated
-    if (newMNList.length) {
-      this.masternodeList = newMNList;
-    }
-    this.lastUpdateDate = Date.now();
   }
 
   /**

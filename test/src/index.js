@@ -506,15 +506,17 @@ describe('api', () => {
 
     describe('constructor', () => {
         it('Should set seeds and port, if passed', async () => {
-            const dapi = new Api({seeds: [{service: '127.0.0.1:19999'}], port: 1234});
+            const dapi = new Api({seeds: [{service: '127.1.2.3:19999'}], port: 1234});
             expect(dapi.DAPIPort).to.be.equal(1234);
             expect(dapi.MNDiscovery.masternodeListProvider.DAPIPort).to.be.equal(1234);
-            expect(dapi.MNDiscovery.masternodeListProvider.masternodeList).to.be.deep.equal([{service: '127.0.0.1:19999'}]);
-            expect(dapi.MNDiscovery.seeds).to.be.deep.equal([{service: '127.0.0.1:19999'}]);
+            expect(dapi.MNDiscovery.masternodeListProvider.masternodeList).to.be.deep.equal([{service: '127.1.2.3:19999'}]);
+            expect(dapi.MNDiscovery.seeds).to.be.deep.equal([{service: '127.1.2.3:19999'}]);
 
-            await dapi.getBestBlockHeight();
-            expect(rpcClient.request.calledWith({host: '127.1.2.3', port: 1234}, 'getMNList', {})).to.be.true;
-            expect(rpcClient.request.calledWith({host: '127.1.2.3', port: 1234}, 'getBestBlockHeight', {})).to.be.true;
+            await dapi.getBestBlockHash();
+           const baseHash = config.nullHash;
+           const blockHash = validBlockHash;
+           expect(rpcClient.request.calledWith({host: '127.1.2.3', port: 1234}, 'getMnListDiff', { baseHash, blockHash })).to.be.true;
+           expect(rpcClient.request.calledWith({host: '127.1.2.3', port: 1234}, 'getBestBlockHash', {})).to.be.true;
         });
     });
     describe('.address.getUTXO', () => {

@@ -131,6 +131,7 @@ class MasternodeListProvider {
       throw new Error('simplifiedMNList is empty');
     }
     this.masternodeList = this.simplifiedMNList.getValidMasternodesList();
+    this.baseBlockHash = diff.blockHash;
     this.lastUpdateDate = Date.now();
   }
 

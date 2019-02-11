@@ -19,21 +19,6 @@ const config = require('../config');
 const dummyHeader = '00000020306754be5d6e242258b1ab03999eaa847724718cd410c69a0a92b21300000000ba7f1c1dc4ae5c849813d36a9efa961d3b178489afd6a9bed50de43a2223246e7867335cfc64171cd152f10e';
 
 /**
- * temp function to get genesisHash for use
- * instead of nullHash due to core bug
- * @returns {string} hash - genesis hash
- */
-async function getGenesisHash() {
-  const genesisHeight = 0;
-  const node = sample(this.masternodeList);
-  const ipAddress = node.service.split(':')[0];
-  return RPCClient.request({
-    host: ipAddress,
-    port: this.DAPIPort,
-  }, 'getBlockHash', { genesisHeight });
-}
-
-/**
  * validates proof params of cbTxMerkleTree
  * @param {SimplifiedMNListDiff} diff - masternode list diff
  * @param {string} header - block hash of the ending block of the diff request
@@ -121,7 +106,23 @@ class MasternodeListProvider {
     this.lastUpdateDate = 0;
     // temp deactivate nullHash and use genesis hash
     // this.baseBlockHash = config.nullHash;
-    this.baseBlockHash = getGenesisHash();
+    this.setBaseBlockHashToGenesisHash();
+  }
+
+  /**
+   * @private
+   * temp function to get genesisHash for use
+   * instead of nullHash due to core bug
+   * @returns {string} hash - genesis hash
+   */
+  async setBaseBlockHashToGenesisHash() {
+    const genesisHeight = 0;
+    const node = sample(this.masternodeList);
+    const ipAddress = node.service.split(':')[0];
+    this.baseBlockHash = await RPCClient.request({
+      host: ipAddress,
+      port: this.DAPIPort,
+    }, 'getBlockHash', { genesisHeight });
   }
 
   /**
@@ -147,7 +148,11 @@ class MasternodeListProvider {
     if (!this.simplifiedMNList) {
       throw new Error('simplifiedMNList is empty');
     }
-    this.masternodeList = this.simplifiedMNList.getValidMasternodesList();
+    const validMasternodesList = this.simplifiedMNList.getValidMasternodesList();
+    if (!validMasternodesList.length) {
+      throw new Error('No MNs in list. Can\'t connect to the network.');
+    }
+    this.masternodeList = validMasternodesList;
     this.baseBlockHash = diff.blockHash;
     this.lastUpdateDate = Date.now();
   }

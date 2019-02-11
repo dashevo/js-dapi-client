@@ -104,9 +104,7 @@ class MasternodeListProvider {
     this.simplifiedMNList = new SimplifiedMNList();
     this.DAPIPort = DAPIPort;
     this.lastUpdateDate = 0;
-    // temp deactivate nullHash and use genesis hash
-    // this.baseBlockHash = config.nullHash;
-    this.setBaseBlockHashToGenesisHash();
+    this.baseBlockHash = config.nullHash;
   }
 
   /**
@@ -115,14 +113,14 @@ class MasternodeListProvider {
    * instead of nullHash due to core bug
    * @returns {string} hash - genesis hash
    */
-  async setBaseBlockHashToGenesisHash() {
+  async getGenesisHash() {
     const genesisHeight = 0;
     const node = sample(this.masternodeList);
     const ipAddress = node.service.split(':')[0];
-    this.baseBlockHash = await RPCClient.request({
+    return RPCClient.request({
       host: ipAddress,
       port: this.DAPIPort,
-    }, 'getBlockHash', { genesisHeight });
+    }, 'getBlockHash', { height: genesisHeight });
   }
 
   /**
@@ -131,6 +129,9 @@ class MasternodeListProvider {
    * @returns {Promise<void>}
    */
   async updateMNList() {
+    if (this.baseBlockHash === config.nullHash) {
+      this.baseBlockHash = await this.getGenesisHash();
+    }
     const diff = await this.getSimplifiedMNListDiff();
     if (!diff) {
       // TODO: query other dapi node

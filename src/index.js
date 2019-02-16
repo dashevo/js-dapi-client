@@ -195,9 +195,11 @@ class DAPIClient {
   /**
    * Returns UTXO for given address
    * @param {string} address
+   * @param {number} from
+   * @param {number} to
    * @returns {Promise<Array<Object>>} - array of unspent outputs
    */
-  getUTXO(address) { return this.makeRequestToRandomDAPINode('getUTXO', { address }); }
+  getUTXO(address, from, to) { return this.makeRequestToRandomDAPINode('getUTXO', { address, from, to }); }
 
   /**
    * @param {string} rawIxTransaction - hex-serialized instasend transaction

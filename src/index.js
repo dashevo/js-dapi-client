@@ -193,8 +193,8 @@ class DAPIClient {
   getTransactionById(txid) { return this.makeRequestToRandomDAPINode('getTransactionById', { txid }); }
 
   /**
-   * Returns UTXO for given address
-   * @param {string} address
+   * Returns UTXO for a given address or multiple addresses
+   * @param {string|string[]} address or array of addresses
    * @param {number} from
    * @param {number} to
    * @returns {Promise<Array<Object>>} - array of unspent outputs

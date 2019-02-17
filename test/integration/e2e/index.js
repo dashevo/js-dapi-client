@@ -121,7 +121,7 @@ describe('basic E2E tests', () => {
                 .change(faucetAddress)
                 .sign(faucetPrivateKey);
 
-            ({txid: bobRegTxId} = await dapiClient.sendRawTransaction(transaction.serialize()));
+            bobRegTxId = await dapiClient.sendRawTransaction(transaction.serialize());
 
             bobPreviousST = bobRegTxId;
 
@@ -270,7 +270,7 @@ describe('basic E2E tests', () => {
                 .change(faucetAddress)
                 .sign(faucetPrivateKey);
 
-            ({txid: aliceRegTxId} = await dapiClient.sendRawTransaction(transaction.serialize()));
+            const aliceRegTxId = await dapiClient.sendRawTransaction(transaction.serialize());
 
             alicePreviousST = aliceRegTxId;
 

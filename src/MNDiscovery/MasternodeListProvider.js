@@ -8,22 +8,24 @@
 
 const {
   SimplifiedMNList,
-  SimplifiedMNListDiff,
-  MerkleBlock,
-  BlockHeader,
+  // SimplifiedMNListDiff,
+  // MerkleBlock,
+  // BlockHeader,
 } = require('@dashevo/dashcore-lib');
+
 const sample = require('lodash/sample');
 const RPCClient = require('../RPCClient');
 const config = require('../config');
 
-const dummyHeader = '00000020306754be5d6e242258b1ab03999eaa847724718cd410c69a0a92b21300000000ba7f1c1dc4ae5c849813d36a9efa961d3b178489afd6a9bed50de43a2223246e7867335cfc64171cd152f10e';
+/* eslint max-len: ["error", { "code": 200 }] */
+// const dummyHeader = '00000020306754be5d6e242258b1ab03999eaa847724718cd410c69a0a92b21300000000ba7f1c1dc4ae5c849813d36a9efa961d3b178489afd6a9bed50de43a2223246e7867335cfc64171cd152f10e';
 
 /**
  * validates proof params of cbTxMerkleTree
  * @param {SimplifiedMNListDiff} diff - masternode list diff
  * @param {string} header - block hash of the ending block of the diff request
  * @returns {boolean}
- */
+
 function isValidDiffListProof(diff, header) {
   const objDiff = SimplifiedMNListDiff.fromObject(diff);
   const merkleBlock = new MerkleBlock({
@@ -34,13 +36,12 @@ function isValidDiffListProof(diff, header) {
   });
 
   return merkleBlock.validMerkleTree() && merkleBlock.hasTransaction(objDiff.cbTx);
-}
+} */
 
 /**
  * verifies masternode list diff against local header chain
  * @param {string} blockHash
  * @returns {Promise<BlockHeader>}
- */
 async function getHeaderFromLocalChain(blockHash) { // eslint-disable-line no-unused-vars
 // TODO: implement local headerChain with lightning fast dspv sync
 // the following commented lines just a dummy to simulate a header store
@@ -52,13 +53,13 @@ async function getHeaderFromLocalChain(blockHash) { // eslint-disable-line no-un
   }
 
   return header;
-}
+} */
 
-/**
+/*
  * validates masternode list diff against local header chain and merkle proof
  * @param {SimplifiedMNListDiff} diff - masternode list diff
  * @returns {Promise<boolean>}
- */
+
 async function validateDiff(diff) { // eslint-disable-line no-unused-vars
   // TODO: enable below once we have a local header chain
   const validHeader = await getHeaderFromLocalChain(diff.blockHash);
@@ -72,7 +73,7 @@ async function validateDiff(diff) { // eslint-disable-line no-unused-vars
   }
 
   return true;
-}
+} */
 
 /**
  * This class holds the valid deterministic masternode list

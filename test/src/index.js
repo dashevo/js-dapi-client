@@ -1,5 +1,3 @@
-const Schema = require('@dashevo/dash-schema/dash-schema-lib');
-const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 const Api = require('../../src/index');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

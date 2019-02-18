@@ -4,14 +4,18 @@ const path = require('path');
 
 const sinon = require('sinon');
 
-const Schema = require('@dashevo/dash-schema/dash-schema-lib');
-const DashPay = require('@dashevo/dash-schema/dash-core-daps');
+const DashPlatformProtocol = require('@dashevo/dpp');
+const entropy = require('@dashevo/dpp/lib/util/entropy');
+const DPObject = require('@dashevo/dpp/lib/object/DPObject');
+
+// const Schema = require('@dashevo/dash-schema/dash-schema-lib');
+// const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 const {
     Transaction,
     PrivateKey,
 } = require('@dashevo/dashcore-lib');
 
-const doubleSha256 = require('../utils/doubleSha256');
+// const doubleSha256 = require('../utils/doubleSha256');
 const wait = require('../utils/wait');
 const MNDiscovery = require('../../src/MNDiscovery/index');
 
@@ -30,6 +34,7 @@ describe("Performance", function () {
     const faucetAddress = process.env.faucetAddress;
     const privKey = process.env.privKey;
     const faucetPrivateKey = new PrivateKey(privKey);
+    let dpp;
     let dapiClient;
 
 
@@ -40,6 +45,7 @@ describe("Performance", function () {
             .returns(Promise.resolve({ip: process.env.DAPI_IP}));
         dapiClient = new DAPIClient({seeds, port: 3000});
         spy = sinon.spy(dapiClient, 'makeRequestToRandomDAPINode');
+        dpp = new DashPlatformProtocol();
     });
 
 
@@ -524,16 +530,48 @@ describe("Performance", function () {
             this.timeout(timeoutTest);
             let results = [];
             for (var i = 0; i < numLoops; i += 1) {
-                let dapSchema = Object.assign({}, DashPay);
-                dapSchema.title = `TestContacts_${bobUserNames[i]}`;
+                // let dapSchema = Object.assign({}, DashPay);
+                // dapSchema.title = `TestContacts_${bobUserNames[i]};
 
-                const dapContract = Schema.create.dapcontract(dapSchema);
+                // const dapContract = Schema.create.dapcontract(dapSchema);
+                const dpContract = dpp.contract.create(entropy.generate(), {
+                    user: {
+                        properties: {
+                            avatarUrl: {
+                                type: 'string',
+                                format: 'url',
+                            },
+                            about: {
+                                type: 'string',
+                            },
+                        },
+                        required: ['avatarUrl', 'about'],
+                        additionalProperties: false,
+                    },
+                    contact: {
+                        properties: {
+                            toUserId: {
+                                type: 'string',
+                            },
+                            publicKey: {
+                                type: 'string',
+                            },
+                        },
+                        required: ['toUserId', 'publicKey'],
+                        additionalProperties: false,
+                    },
+                });
+
+                dpp.setDPContract(dpContract);
+
+
                 const queries = new Array(1);
                 const bobPrivateKey = new PrivateKey(); // TODO?
                 for (let index = 0; index < 1; ++index) {
 
-                    let {stpacket: stPacket} = Schema.create.stpacket();
-                    stPacket = Object.assign(stPacket, dapContract);
+                    // let {stpacket: stPacket} = Schema.create.stpacket();
+                    // stPacket = Object.assign(stPacket, dapContract);
+                    const stPacket = dpp.packet.create(dpp.getDPContract());
 
                     // 2. Create State Transition
                     const transaction = new Transaction()
@@ -545,13 +583,13 @@ describe("Performance", function () {
                     transaction.extraPayload
                         .setRegTxId(bobRegTxIds[i])
                         .setHashPrevSubTx(bobRegTxIds[i])
-                        .setHashSTPacket(stPacketHash)
+                        .setHashSTPacket(stPacket.hash())
                         .setCreditFee(1000)
                         .sign(bobPrivateKeys[i]);
 
                     queries[index] = await dapiClient.sendRawTransition(
                         transaction.serialize(),
-                        serializedPacket.toString('hex'),
+                      stPacket.serialize().toString('hex'),
                     );
                 }
                 await runPromise(queries).then(function (result) {

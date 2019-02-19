@@ -193,13 +193,20 @@ class DAPIClient {
   getTransactionById(txid) { return this.makeRequestToRandomDAPINode('getTransactionById', { txid }); }
 
   /**
-   * Returns UTXO for a given address or multiple addresses
+   * Returns UTXO for a given address or multiple addresses (max result 1000)
    * @param {string|string[]} address or array of addresses
-   * @param {number} from
-   * @param {number} to
-   * @returns {Promise<Array<Object>>} - array of unspent outputs
+   * @param {number} from - start of range in the ordered list of latest UTXO (optional)
+   * @param {number} to - end of range in the ordered list of latest UTXO (optional)
+   * @param {number} fromHeight - which height to start from (optional)
+   * @param {number} toHeight - on which height to end (optional)
+   * @returns {Promise<object>} - Object with pagination info and array of unspent outputs
    */
-  getUTXO(address, from, to) { return this.makeRequestToRandomDAPINode('getUTXO', { address, from, to }); }
+  getUTXO(address, from, to, fromHeight, toHeight) {
+    return this.makeRequestToRandomDAPINode('getUTXO',
+      {
+        address, from, to, fromHeight, toHeight,
+      });
+  }
 
   /**
    * @param {string} rawIxTransaction - hex-serialized instasend transaction

@@ -197,8 +197,8 @@ class DAPIClient {
    * @param {string|string[]} address or array of addresses
    * @param {number} from - start of range in the ordered list of latest UTXO (optional)
    * @param {number} to - end of range in the ordered list of latest UTXO (optional)
-   * @param {number} fromHeight - which height to start from (optional)
-   * @param {number} toHeight - on which height to end (optional)
+   * @param {number} fromHeight - which height to start from (optional, overriding from/to)
+   * @param {number} toHeight - on which height to end (optional, overriding from/to)
    * @returns {Promise<object>} - Object with pagination info and array of unspent outputs
    */
   getUTXO(address, from, to, fromHeight, toHeight) {

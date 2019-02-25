@@ -417,7 +417,7 @@ describe('basicAPIs', () => {
                     await dapiClient.generate(1);
                 }
             }
-            expect(dpContract).to.be.deep.equal(dpp.getDPContract().getId());
+            expect(dapContractFromDAPI).to.be.deep.equal(dpp.getDPContract().getId());
             // expect(dapContractFromDAPI).to.have.property('dapname');
             // expect(dapContractFromDAPI.dapname).to.be.equal(dapSchema.title);
         });

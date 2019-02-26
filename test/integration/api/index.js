@@ -77,7 +77,7 @@ describe('basicAPIs', () => {
 
         // dapContract = Schema.create.dapcontract(dapSchema);
         // dapId = doubleSha256(Schema.serialize.encode(dapContract.dapcontract));
-        const dpContract = dpp.contract.create(entropy.generate(), {
+        const dpContract = dpp.contract.create(entropy.generate().substr(0, 24), {
             user: {
                 properties: {
                     avatarUrl: {
@@ -104,7 +104,6 @@ describe('basicAPIs', () => {
                 additionalProperties: false,
             },
         });
-
         dpp.setDPContract(dpContract);
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')

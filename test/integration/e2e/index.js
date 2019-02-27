@@ -153,8 +153,8 @@ describe('basic E2E tests', () => {
                 .sign(bobPrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-                transaction.serialize(),
                 serializedPacket.toString('hex'),
+                transaction.serialize()
             );
 
             expect(transitionHash).to.be.a('string');
@@ -204,8 +204,8 @@ describe('basic E2E tests', () => {
                 .sign(bobPrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-                transaction.serialize(),
                 serializedPacket.toString('hex'),
+                transaction.serialize()
             );
 
             expect(transitionHash).to.be.a('string');
@@ -308,8 +308,8 @@ describe('basic E2E tests', () => {
                 .sign(alicePrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-                transaction.serialize(),
                 serializedPacket.toString('hex'),
+                transaction.serialize()
             );
 
             expect(transitionHash).to.be.a('string');
@@ -368,8 +368,8 @@ describe('basic E2E tests', () => {
                 .sign(alicePrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-                transaction.serialize(),
                 serializedPacket.toString('hex'),
+                transaction.serialize()
             );
 
             expect(transitionHash).to.be.a('string');
@@ -431,8 +431,8 @@ describe('basic E2E tests', () => {
                 .sign(bobPrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-                transaction.serialize(),
                 serializedPacket.toString('hex'),
+                transaction.serialize()
             );
 
             expect(transitionHash).to.be.a('string');
@@ -493,8 +493,9 @@ describe('basic E2E tests', () => {
                 .sign(alicePrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-                transaction.serialize(),
                 serializedPacket.toString('hex'),
+                transaction.serialize()
+
             );
 
             expect(transitionHash).to.be.a('string');
@@ -555,8 +556,8 @@ describe('basic E2E tests', () => {
                 .sign(alicePrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-                transaction.serialize(),
-                serializedPacket.toString('hex'),
+                 serializedPacket.toString('hex'),
+                transaction.serialize()
             );
 
             expect(transitionHash).to.be.a('string');

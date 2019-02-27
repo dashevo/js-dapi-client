@@ -797,8 +797,9 @@ describe('api', () => {
                 .sign(new PrivateKey());
 
             const dapi = new Api();
-            const transition = await dapi.sendRawTransition(transaction.serialize(),
-                serializedPacket.toString('hex'),
+            const transition = await dapi.sendRawTransition(
+              serializedPacket.toString('hex'),
+              transaction.serialize()
             );
             expect(transition).to.be.deep.equal(transitionHash);
         });

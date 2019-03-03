@@ -35,24 +35,27 @@ class DAPIClient {
     return this.makeRequestWithRetries(method, params, this.retries);
   }
 
-  async makeRequest(method, params) {
+  async makeRequest(method, params, excludedIps = []) {
     this.makeRequest.callCount += 1;
-    const randomMasternode = await this.MNDiscovery.getRandomMasternode();
+    const randomMasternode = await this.MNDiscovery.getRandomMasternode(excludedIps);
     return rpcClient.request({
       host: randomMasternode.ip,
       port: this.DAPIPort,
     }, method, params, { timeout: this.timeout });
   }
 
-  async makeRequestWithRetries(method, params, retriesCount = 0) {
+  async makeRequestWithRetries(method, params, retriesCount = 0, excludedIps = []) {
     try {
-      return await this.makeRequest(method, params);
+      return await this.makeRequest(method, params, excludedIps);
     } catch (err) {
       if (err.code !== 'ECONNABORTED' && err.code !== 'ECONNREFUSED') {
         throw new Error(`DAPI RPC error: ${method}: ${err}`);
       }
       if (retriesCount > 0) {
-        return this.makeRequestWithRetries(method, params, retriesCount - 1);
+        if (err.address) {
+          excludedIps.push(err.address);
+        }
+        return this.makeRequestWithRetries(method, params, retriesCount - 1, excludedIps);
       }
       throw new Error('max retries to connect to DAPI node reached');
     }

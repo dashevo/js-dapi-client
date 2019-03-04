@@ -16,7 +16,7 @@ class DAPIClient {
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
-    this.timeout = options.timeout || 600;
+    this.timeout = options.timeout || 2000;
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.timeout),
       'Expect timeout to be an unsigned integer');
     this.retries = options.retries ? options.retries : 3;
@@ -193,11 +193,20 @@ class DAPIClient {
   getTransactionById(txid) { return this.makeRequestToRandomDAPINode('getTransactionById', { txid }); }
 
   /**
-   * Returns UTXO for given address
-   * @param {string} address
-   * @returns {Promise<Array<Object>>} - array of unspent outputs
+   * Returns UTXO for a given address or multiple addresses (max result 1000)
+   * @param {string|string[]} address or array of addresses
+   * @param {number} from - start of range in the ordered list of latest UTXO (optional)
+   * @param {number} to - end of range in the ordered list of latest UTXO (optional)
+   * @param {number} fromHeight - which height to start from (optional, overriding from/to)
+   * @param {number} toHeight - on which height to end (optional, overriding from/to)
+   * @returns {Promise<object>} - Object with pagination info and array of unspent outputs
    */
-  getUTXO(address) { return this.makeRequestToRandomDAPINode('getUTXO', { address }); }
+  getUTXO(address, from, to, fromHeight, toHeight) {
+    return this.makeRequestToRandomDAPINode('getUTXO',
+      {
+        address, from, to, fromHeight, toHeight,
+      });
+  }
 
   /**
    * @param {string} rawIxTransaction - hex-serialized instasend transaction
@@ -246,12 +255,12 @@ class DAPIClient {
 
   /**
    * Sends serialized state transition header and data packet
-   * @param {string} rawTransitionHeader - hex string representing state transition header
-   * @param {string} rawTransitionPacket - hex string representing state transition data
+   * @param {string} rawStateTransition - hex string representing state transition header
+   * @param {string} rawSTPacket - hex string representing state transition data
    * @returns {Promise<string>} - header id
    */
-  sendRawTransition(rawTransitionHeader, rawTransitionPacket) {
-    return this.makeRequestToRandomDAPINode('sendRawTransition', { rawTransitionHeader, rawTransitionPacket });
+  sendRawTransition(rawStateTransition, rawSTPacket) {
+    return this.makeRequestToRandomDAPINode('sendRawTransition', { rawStateTransition, rawSTPacket });
   }
 
   // Here go methods that used in VMN. Most of this methods will work only in regtest mode

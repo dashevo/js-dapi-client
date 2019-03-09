@@ -61,7 +61,7 @@ async function getHeaderFromLocalChain(blockHash) { // eslint-disable-line no-un
  * @returns {Promise<boolean>}
  */
 async function validateDiff(diff) { // eslint-disable-line no-unused-vars
-                                    // TODO: enable below once we have a local header chain
+  // TODO: enable below once we have a local header chain
   const validHeader = await getHeaderFromLocalChain(diff.blockHash);
   if (!validHeader) {
     return false;

@@ -60,7 +60,7 @@ describe('basicAPIs', () => {
 
     before(async function it() {
         dpp = new DashPlatformProtocol();
-        this.timeout(300000);
+        this.timeout(400000);
         const privKey = "cVwyvFt95dzwEqYCLd8pv9CzktajP4tWH2w9RQNPeHYA7pH35wcJ";
         faucetPrivateKey = new PrivateKey(privKey);
 
@@ -387,7 +387,7 @@ describe('basicAPIs', () => {
             // const stPacketHash = doubleSha256(serializedPacket);
 
             transaction.extraPayload
-                .setRegTxId(bobRegTxId)
+                .setRegTxId(bobPreviousST)
                 .setHashPrevSubTx(bobPreviousST)
                 .setHashSTPacket(stPacket.hash())
                 .setCreditFee(1000)

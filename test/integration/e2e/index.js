@@ -36,7 +36,7 @@ dotenvSafe.config({
 describe('basic E2E tests', () => {
     let masterNode;
 
-    const attempts = 30;
+    const attempts = 60;
 
     let dpp;
 

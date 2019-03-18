@@ -8,14 +8,11 @@ const DashPlatformProtocol = require('@dashevo/dpp');
 const entropy = require('@dashevo/dpp/lib/util/entropy');
 const DPObject = require('@dashevo/dpp/lib/object/DPObject');
 
-// const Schema = require('@dashevo/dash-schema/dash-schema-lib');
-// const DashPay = require('@dashevo/dash-schema/dash-core-daps');
 const {
     Transaction,
     PrivateKey,
 } = require('@dashevo/dashcore-lib');
 
-// const doubleSha256 = require('../utils/doubleSha256');
 const wait = require('../utils/wait');
 const MNDiscovery = require('../../src/MNDiscovery/index');
 
@@ -530,11 +527,7 @@ describe("Performance", function () {
             this.timeout(timeoutTest);
             let results = [];
             for (var i = 0; i < numLoops; i += 1) {
-                // let dapSchema = Object.assign({}, DashPay);
-                // dapSchema.title = `TestContacts_${bobUserNames[i]};
-
-                // const dapContract = Schema.create.dapcontract(dapSchema);
-                const dpContract = dpp.contract.create(entropy.generate(), {
+                const dpContract = dpp.contract.create(entropy.generate().substr(0, 24), {
                     user: {
                         properties: {
                             avatarUrl: {
@@ -569,8 +562,6 @@ describe("Performance", function () {
                 const bobPrivateKey = new PrivateKey(); // TODO?
                 for (let index = 0; index < 1; ++index) {
 
-                    // let {stpacket: stPacket} = Schema.create.stpacket();
-                    // stPacket = Object.assign(stPacket, dapContract);
                     const stPacket = dpp.packet.create(dpp.getDPContract());
 
                     // 2. Create State Transition
@@ -588,8 +579,8 @@ describe("Performance", function () {
                         .sign(bobPrivateKeys[i]);
 
                     queries[index] = await dapiClient.sendRawTransition(
-                        transaction.serialize(),
                       stPacket.serialize().toString('hex'),
+                        transaction.serialize(),
                     );
                 }
                 await runPromise(queries).then(function (result) {
@@ -607,7 +598,6 @@ describe("Performance", function () {
         });
 
         it('fetchDapContract', async function it() {
-            // https://dashpay.atlassian.net/browse/DD-493
             this.timeout(timeoutTest * 2);
 
             for (let i = 0; i <= 240; i++) {

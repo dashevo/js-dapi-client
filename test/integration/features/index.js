@@ -16,10 +16,6 @@ const {
   Address,
 } = require('@dashevo/dashcore-lib');
 
-// const Schema = require('@dashevo/dash-schema/dash-schema-lib');
-// const DashPay = require('@dashevo/dash-schema/dash-core-daps');
-
-// const doubleSha256 = require('../../utils/doubleSha256');
 const wait = require('../../utils/wait');
 
 process.env.NODE_ENV = 'test';

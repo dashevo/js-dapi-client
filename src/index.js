@@ -234,7 +234,7 @@ class DAPIClient {
 
   /* Layer 2 commands */
 
-  fetchDapContract(dapId) { return this.makeRequestToRandomDAPINode('fetchDapContract', { contractId }); }
+  fetchDapContract(contractId) { return this.makeRequestToRandomDAPINode('fetchDapContract', { contractId }); }
 
   /**
    * Fetch DAP Objects from DashDrive State View

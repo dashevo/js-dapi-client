@@ -74,7 +74,7 @@ describe('MNDiscovery', async () => {
             const discovery = new MNDiscovery();
             sinon.spy(discovery.masternodeListProvider, 'getMNList');
             discovery.reset();
-            expect(discovery.masternodeListProvider.seeds).to.be.undefined;
+            expect(discovery.masternodeListProvider.masternodeList).to.be.undefined;
         });
 
         it('Should return random node from MN list', async () => {

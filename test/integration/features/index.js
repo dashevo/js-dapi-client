@@ -62,11 +62,7 @@ describe('retry policy', () => {
     aliceUserName = Math.random()
       .toString(36)
       .substring(7);
-    // dapSchema = Object.assign({}, DashPay);
-    // dapSchema.title = `TestContacts_${bobUserName}`;
 
-    // dapContract = Schema.create.dapcontract(dapSchema);
-    // dapId = doubleSha256(Schema.serialize.encode(dapContract.dapcontract));
     const dpContract = dpp.contract.create(entropy.generate(), {
       user: {
         properties: {

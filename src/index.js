@@ -79,7 +79,12 @@ class DAPIClient {
    * @param {string|string[]} address or array of addresses
    * @returns {Promise<Object>} - an object with basic address info
    */
-  getAddressSummary(address) { return this.makeRequestToRandomDAPINode('getAddressSummary', { address }); }
+  getAddressSummary(address, noTxList, from, to) {
+    return this.makeRequestToRandomDAPINode('getAddressSummary',
+      {
+        address, noTxList, from, to,
+      });
+  }
 
   /**
    * @param {string|string[]} address or array of addresses

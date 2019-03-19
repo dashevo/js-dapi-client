@@ -76,32 +76,32 @@ class DAPIClient {
 
   /**
    * Returns a summary (balance, txs) for a given address
-   * @param {string} address
+   * @param {string|string[]} address or array of addresses
    * @returns {Promise<Object>} - an object with basic address info
    */
   getAddressSummary(address) { return this.makeRequestToRandomDAPINode('getAddressSummary', { address }); }
 
   /**
-   * @param {string} address
+   * @param {string|string[]} address or array of addresses
    * @return {Promise<number>}
    */
   getAddressTotalSent(address) { return this.makeRequestToRandomDAPINode('getAddressTotalSent', { address }); }
 
   /**
-   * @param {string} address
+   * @param {string|string[]} address or array of addresses
    * @return {Promise<number>}
    */
   getAddressUnconfirmedBalance(address) { return this.makeRequestToRandomDAPINode('getAddressUnconfirmedBalance', { address }); }
 
   /**
-   * @param {string} address
+   * @param {string|string[]} address or array of addresses
    * @return {Promise<number>}
    */
   getAddressTotalReceived(address) { return this.makeRequestToRandomDAPINode('getAddressTotalReceived', { address }); }
 
   /**
    * Returns balance for a given address
-   * @param {string} address
+   * @param {string|string[]} address or array of addresses
    * @returns {Promise<number>} - address balance
    */
   getBalance(address) { return this.makeRequestToRandomDAPINode('getBalance', { address }); }

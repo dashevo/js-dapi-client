@@ -77,6 +77,9 @@ class DAPIClient {
   /**
    * Returns a summary (balance, txs) for a given address
    * @param {string|string[]} address or array of addresses
+   * @param {boolean} [noTxList=false] - true if a list of all txs should NOT be included in result
+   * @param {number} [from] - start of range for the tx to be included in the tx list
+   * @param {number} [to] - end of range for the tx to be included in the tx list
    * @returns {Promise<Object>} - an object with basic address info
    */
   getAddressSummary(address, noTxList, from, to) {
@@ -189,10 +192,10 @@ class DAPIClient {
    * Returns Transactions for a given address or multiple addresses
    * @param address
    * @param {string|string[]} address or array of addresses
-   * @param {number} from - start of range in the ordered list of latest UTXO (optional)
-   * @param {number} to - end of range in the ordered list of latest UTXO (optional)
-   * @param {number} fromHeight - which height to start from (optional, overriding from/to)
-   * @param {number} toHeight - on which height to end (optional, overriding from/to)
+   * @param {number} [from] - start of range in the ordered list of latest UTXO (optional)
+   * @param {number} [to] - end of range in the ordered list of latest UTXO (optional)
+   * @param {number} [fromHeight] - which height to start from (optional, overriding from/to)
+   * @param {number} [toHeight] - on which height to end (optional, overriding from/to)
    * @returns {Promise<object>} - Object with pagination info and array of unspent outputs
    */
   getTransactionsByAddress(address, from, to, fromHeight, toHeight) {
@@ -211,10 +214,10 @@ class DAPIClient {
   /**
    * Returns UTXO for a given address or multiple addresses (max result 1000)
    * @param {string|string[]} address or array of addresses
-   * @param {number} from - start of range in the ordered list of latest UTXO (optional)
-   * @param {number} to - end of range in the ordered list of latest UTXO (optional)
-   * @param {number} fromHeight - which height to start from (optional, overriding from/to)
-   * @param {number} toHeight - on which height to end (optional, overriding from/to)
+   * @param {number} [from] - start of range in the ordered list of latest UTXO (optional)
+   * @param {number} [to] - end of range in the ordered list of latest UTXO (optional)
+   * @param {number} [fromHeight] - which height to start from (optional, overriding from/to)
+   * @param {number} [toHeight] - on which height to end (optional, overriding from/to)
    * @returns {Promise<object>} - Object with pagination info and array of unspent outputs
    */
   getUTXO(address, from, to, fromHeight, toHeight) {

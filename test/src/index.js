@@ -1,4 +1,4 @@
-const Api = require('../../src/index');
+const DAPIClient = require('../../src/index');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');

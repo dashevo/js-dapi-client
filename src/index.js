@@ -40,7 +40,7 @@ class DAPIClient {
     this.makeRequest.callCount += 1;
     const randomMasternode = await this.MNDiscovery.getRandomMasternode(excludedIps);
     return rpcClient.request({
-      host: randomMasternode.ip,
+      host: randomMasternode.service.split(':')[0],
       port: this.DAPIPort,
     }, method, params, { timeout: this.timeout });
   }

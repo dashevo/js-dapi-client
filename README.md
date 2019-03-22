@@ -1,6 +1,6 @@
 # DAPI Client
 
-This library is used to access Dash Decentralized API (DAPI) endpoints.
+> Client library used to access Dash DAPI endpoints
 
 ## Usage
 

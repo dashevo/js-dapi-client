@@ -28,7 +28,7 @@ class DAPIClient {
    * @private
    * @param method
    * @param params
-   * @param {string[]} excludedIps
+   * @param {[string[]]} excludedIps
    * @returns {Promise<*>}
    */
   async makeRequestToRandomDAPINode(method, params, excludedIps) {

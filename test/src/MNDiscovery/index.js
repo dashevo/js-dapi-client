@@ -60,7 +60,7 @@ describe('MNDiscovery', async () => {
                 expect(MNListItem.service).to.be.equal(validNodes[i].service);
                 expect(MNListItem.proRegTxHash).to.be.a('string');
                 expect(MNListItem.confirmedHash).to.be.a('string');
-                expect(MNListItem.keyIDVoting).to.be.a('string');
+                expect(MNListItem.votingAddress).to.be.a('string');
                 expect(MNListItem.pubKeyOperator).to.be.a('string');
                 expect(MNListItem.isValid).to.be.a('boolean');
                 expect(discovery.masternodeListProvider.getMNList.callCount).to.equal(1);
@@ -71,10 +71,20 @@ describe('MNDiscovery', async () => {
         });
 
         it('Should reset cached MNList and resets it back to initial seed', async () => {
+            const mn = {
+              proRegTxHash: 'fef106ff6420f9c6638c9676988a8fc655750caafb506c98cb5ff3d4fea99a41',
+              confirmedHash: '0000000005d5635228f113b50fb5ad66995a7476ed20374e6e159f1f9e62347b',
+              service: '127.0.0.1:19999',
+              pubKeyOperator: '842476e8d82327adfb9b617a7ac3f62868946c0c4b6b0e365747cfb8825b8b79ba0eb1fa62e8583ae7102f59bf70c7c7',
+              keyIDVoting: 'ca58159731cf7e3791958050d16bce02a64223ce',
+              isValid: true,
+            };
             const discovery = new MNDiscovery();
             sinon.spy(discovery.masternodeListProvider, 'getMNList');
+            discovery.masternodeListProvider.masternodeList.push(mn);
+            expect(discovery.masternodeListProvider.masternodeList).to.be.deep.equal([mn]);
             discovery.reset();
-            expect(discovery.masternodeListProvider.seeds).to.be.undefined;
+            expect(discovery.masternodeListProvider.masternodeList).to.be.deep.equal([]);
         });
 
         it('Should return random node from MN list', async () => {
@@ -88,7 +98,7 @@ describe('MNDiscovery', async () => {
                     expect(masternodeIps).to.contain(randomMasternode.service.split(':')[0]);
                     expect(randomMasternode.proRegTxHash).to.be.a('string');
                     expect(randomMasternode.confirmedHash).to.be.a('string');
-                    expect(randomMasternode.keyIDVoting).to.be.a('string');
+                    expect(randomMasternode.votingAddress).to.be.a('string');
                     expect(randomMasternode.pubKeyOperator).to.be.a('string');
                     expect(randomMasternode.service).to.be.a('string');
                     expect(randomMasternode.isValid).to.be.a('boolean');

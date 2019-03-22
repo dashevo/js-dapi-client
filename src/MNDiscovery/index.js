@@ -38,7 +38,7 @@ class MNDiscovery {
     let MNList = await this.masternodeListProvider.getMNList();
     if (Array.isArray(excludedIps)) {
       excludedIps.forEach((excludedIp) => {
-        MNList = MNList.filter(mn => mn.ip !== excludedIp);
+        MNList = MNList.filter(mn => mn.service.split(':')[0] !== excludedIp);
       });
     }
     return sample(MNList);

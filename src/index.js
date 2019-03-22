@@ -28,14 +28,15 @@ class DAPIClient {
    * @private
    * @param method
    * @param params
+   * @param {string[]} excludedIps
    * @returns {Promise<*>}
    */
-  async makeRequestToRandomDAPINode(method, params) {
+  async makeRequestToRandomDAPINode(method, params, excludedIps) {
     this.makeRequest.callCount = 0;
-    return this.makeRequestWithRetries(method, params, this.retries);
+    return this.makeRequestWithRetries(method, params, this.retries, excludedIps);
   }
 
-  async makeRequest(method, params, excludedIps = []) {
+  async makeRequest(method, params, excludedIps) {
     this.makeRequest.callCount += 1;
     const randomMasternode = await this.MNDiscovery.getRandomMasternode(excludedIps);
     return rpcClient.request({
@@ -44,7 +45,7 @@ class DAPIClient {
     }, method, params, { timeout: this.timeout });
   }
 
-  async makeRequestWithRetries(method, params, retriesCount = 0, excludedIps = []) {
+  async makeRequestWithRetries(method, params, retriesCount = 0, excludedIps) {
     try {
       return await this.makeRequest(method, params, excludedIps);
     } catch (err) {

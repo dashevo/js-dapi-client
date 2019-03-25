@@ -53,10 +53,12 @@ class DAPIClient {
         throw new Error(`DAPI RPC error: ${method}: ${err}`);
       }
       if (retriesCount > 0) {
+        let excludedOnNextTry = [];
         if (err.address) {
-          excludedIps.push(err.address);
+          excludedOnNextTry = excludedIps
+            ? excludedIps.slice().push(err.address) : excludedOnNextTry.push(err.address);
         }
-        return this.makeRequestWithRetries(method, params, retriesCount - 1, excludedIps);
+        return this.makeRequestWithRetries(method, params, retriesCount - 1, excludedOnNextTry);
       }
       throw new Error('max retries to connect to DAPI node reached');
     }

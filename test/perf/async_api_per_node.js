@@ -24,9 +24,9 @@ const DAPIClient = require('../../src/index');
 
 describe("Performance", function () {
     const timeoutTest = 320000;
-    const numRequests = 10;
-    const numPartRequests = 1; // for getUTXO requests
-    const numLoops = 2;
+    const numRequests = 100;
+    const numPartRequests = 30; // for getUTXO requests
+    const numLoops = 5;
     const faucetAddress = process.env.faucetAddress;
     const privKey = process.env.privKey;
     const faucetPrivateKey = new PrivateKey(privKey);

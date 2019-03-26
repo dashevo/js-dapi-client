@@ -9,8 +9,11 @@ const MNDiscovery = require('../../../src/MNDiscovery/index');
 const { startDapi } = require('@dashevo/dp-services-ctl');
 const DAPIClient = require('../../../src/index');
 
+const DashPlatformProtocol = require('@dashevo/dpp');
+const entropy = require('@dashevo/dpp/lib/util/entropy');
 
 const {
+  Transaction,
   PrivateKey,
   PublicKey,
   Address,
@@ -26,7 +29,7 @@ dotenvSafe.config({
 });
 
 
-describe('retry policy', () => {
+describe('features', () => {
   let masterNode;
   let seeds;
 
@@ -37,9 +40,7 @@ describe('retry policy', () => {
   let insightURL;
 
   let dapiClient;
-  let dapId;
-  let dapSchema;
-  let dapContract;
+  let dpp;
 
   let faucetPrivateKey;
   let faucetAddress;
@@ -47,6 +48,7 @@ describe('retry policy', () => {
   let bobUserName;
 
   before(async () => {
+    dpp = new DashPlatformProtocol();
     const privKey = 'cVwyvFt95dzwEqYCLd8pv9CzktajP4tWH2w9RQNPeHYA7pH35wcJ';
     faucetPrivateKey = new PrivateKey(privKey);
 
@@ -55,13 +57,6 @@ describe('retry policy', () => {
     faucetAddress = Address
       .fromPublicKey(faucetPublicKey, 'testnet')
       .toString();
-
-    bobUserName = Math.random()
-      .toString(36)
-      .substring(7);
-    aliceUserName = Math.random()
-      .toString(36)
-      .substring(7);
 
     const dpContract = dpp.contract.create(entropy.generate(), {
       user: {
@@ -98,7 +93,7 @@ describe('retry policy', () => {
 
     [masterNode] = await startDapi.many(1);
 
-    const seeds = [{ ip: masterNode.dapi.container.getIp() }];
+    const seeds = [{ service: masterNode.dapi.container.getIp() }];
     await masterNode.dashCore.getApi()
       .generate(1500);
 
@@ -115,12 +110,12 @@ describe('retry policy', () => {
     let result = await masterNode.dashCore.getApi()
       .getAddressUtxos({ 'addresses': ['ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh'] });
     await wait(20000);
-    spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
-    spy2 = sinon.spy(dapiClient, 'makeRequest');
+    // spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
+    // spy2 = sinon.spy(dapiClient, 'makeRequest');
 
   });
 
-  after('cleanup lone services', async () => {
+  after('cleanup alone services', async () => {
     const instances = [
       masterNode,
     ];
@@ -132,7 +127,7 @@ describe('retry policy', () => {
   });
 
 
-  describe('dapi unavailable', () => {
+  xdescribe('retry policy: dapi unavailable', () => {
     before(async () => {
       await masterNode.dapi.container.stop();
     });
@@ -416,7 +411,7 @@ describe('retry policy', () => {
         .throw(Error, 'Invalid Argument: Expect timeout to be an unsigned integer');
     });
   });
-  describe('dapi started', () => {
+  xdescribe('retry policy: dapi started', () => {
     it('should makeRequestWithRetries be called 1 times with default settings', async function it() {
       dapiClient = new DAPIClient({
         seeds,
@@ -542,5 +537,620 @@ describe('retry policy', () => {
     });
   });
 
+  describe('getUTXO', () => {
+    var spy;
+    var spyGetTransactionsByAddress;
+
+    before(async () => {
+      dapiClient = new DAPIClient({
+        seeds,
+        port: masterNode.dapi.options.getRpcPort(),
+      });
+      spy = sinon.spy(dapiClient, 'getUTXO');
+      spyGetTransactionsByAddress = sinon.spy(dapiClient, 'getTransactionsByAddress');
+    });
+
+    // beforeEach(function() {
+    //   // spy = sinon.spy(dapiClient, 'getUTXO');
+    // });
+
+    afterEach(function() {
+      spy.resetHistory();
+      spyGetTransactionsByAddress.resetHistory();
+    });
+
+    it('should throw error when call getUTXO without params', async function it() {
+      let err = '';
+      try {
+        await dapiClient.getUTXO();
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message)
+        .to
+        .equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: params should have required property \'address\'');
+      expect(spy.callCount).to.be.equal(1);
+    });
+
+    it('should throw error when call getUTXO with non-valid address', async function it() {
+      let err = '';
+      try {
+        await dapiClient.getUTXO("faucetAddress");
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: Internal error'); // TODO post ticket
+      expect(spy.callCount).to.be.equal(1);
+
+    });
+
+    it('should throw error when call getUTXO with empty address', async function it() {//TODO post ticket
+      let err = '';
+      try {
+        await dapiClient.getUTXO("");
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: Internal error');
+      expect(spy.callCount).to.be.equal(1);
+
+    });
+
+    it('should getUTXO by address', async function it() {
+      const utxo = await dapiClient.getUTXO(faucetAddress);
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(1);
+      expect(utxo).to.be.deep.equal(
+          {
+            'totalItems': 1,
+            'from': 0,
+            'to': 1,
+            'items': [
+              {
+                'address': faucetAddress,
+                'txid': utxo.items[0].txid,
+                'outputIndex': 0,
+                'script': utxo.items[0].script,
+                'satoshis': 10000000000,
+                'height': utxo.items[0].height
+              }
+            ]
+          });
+    });
+
+    it('should getUTXO by address with params: 0 1', async function it() {
+      const from = 0;
+      const to = 1;
+      //wrong behaviour: Error: DAPI RPC error: getUTXO: params.to should be >= 0
+      const utxo = await dapiClient.getUTXO(faucetAddress, from, to);
+
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(1);
+      expect(utxo).to.be.deep.equal(
+        {
+          'totalItems': 1,
+          'from': 0,
+          'to': 1,
+          'items': [
+            {
+              'address': faucetAddress,
+              'txid': utxo.items[0].txid,
+              'outputIndex': 0,
+              'script': utxo.items[0].script,
+              'satoshis': 10000000000,
+              'height': utxo.items[0].height
+            }
+          ]
+        });
+    });
+
+    it('should getUTXO by address with params: 0 0', async function it() {
+      const from = 0;
+      const to = 0;
+      const utxo = await dapiClient.getUTXO(faucetAddress, from, to);
+
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(1);
+      expect(utxo).to.be.deep.equal(
+        {
+          'totalItems': 1,
+          'from': from,
+          'to': 1,
+          'items': [
+            {
+              'address': faucetAddress,
+              'txid': utxo.items[0].txid,
+              'outputIndex': 0,
+              'script': utxo.items[0].script,
+              'satoshis': 10000000000,
+              'height': utxo.items[0].height
+            }
+          ]
+        });
+    });
+
+    it('should throw error when getUTXO with negative params: 0 -1', async function it() {
+      const from = 0;
+      const to = -1;
+      let err = '';
+      try {
+        await dapiClient.getUTXO(faucetAddress, from , to);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: params.to should be >= 0');
+      expect(spy.callCount).to.be.equal(1);
+    });
+
+    it('should getUTXO by address with params: 1 0', async function it() {
+      const from = 1;
+      const to = 0;
+      const utxo = await dapiClient.getUTXO(faucetAddress, from, to);
+
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(0);
+      expect(utxo).to.be.deep.equal({
+        "from": 1,
+        "items": [],
+        "to": 1,
+        "totalItems": 1
+      });
+    });
+
+    it('should getUTXO by address with params: 1 0 1', async function it() {
+      const from = 1;
+      const to = 0;
+      fromHeight = 1;
+      const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight);
+
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(0);
+      expect(utxo).to.be.deep.equal({
+        "from": 1,
+        "fromHeight": fromHeight,
+        "items": [],
+        "to": 1,
+        "totalItems": 1
+      });
+    });
+
+    it('should getUTXO by address with params: 1 0 100000', async function it() {
+      const from = 1;
+      const to = 0;
+      fromHeight = 100000;
+      const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight);
+
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(0);
+      expect(utxo).to.be.deep.equal({
+        "from": from,
+        "fromHeight": fromHeight,
+        "items": [],
+        "to": 1,
+        "totalItems": 1
+      });
+    });
+
+    it('should getUTXO by address with params: 1 0 100', async function it() {
+      const from = 1;
+      const to = 0;
+      fromHeight = 100;
+      const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight);
+
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(0);
+      expect(utxo).to.be.deep.equal({
+        "from": from,
+        "fromHeight": fromHeight,
+        "items": [],
+        "to": 1,
+        "totalItems": 1
+      });
+    });
+
+    it('should getUTXO by address with params: 1 0 100 99', async function it() {
+      const from = 1;
+      const to = 0;
+      fromHeight = 100;
+      toHeight = 99;
+      const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight, toHeight);
+
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(0);
+      expect(utxo).to.be.deep.equal({
+        "from": from,
+        "fromHeight": fromHeight,
+        "items": [],
+        "to": 1,
+        "totalItems": 1
+      });
+    });
+
+    it('should getUTXO by address with params: 0 0 100 2000', async function it() {
+      const from = 0;
+      const to = 0;
+      fromHeight = 100;
+      toHeight = 2000;
+      const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight, toHeight);
+
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(1);
+      expect(utxo).to.be.deep.equal(
+        {
+          'totalItems': 1,
+          'from': 0,
+          "fromHeight": fromHeight,
+          'to': 1,
+          'items': [
+            {
+              'address': faucetAddress,
+              'txid': utxo.items[0].txid,
+              'outputIndex': 0,
+              'script': utxo.items[0].script,
+              'satoshis': 10000000000,
+              'height': utxo.items[0].height
+            }
+          ]
+        });
+    });
+
+    it('should getUTXO by address 1 0 100 2000', async function it() {
+      const from = 1;
+      const to = 0;
+      fromHeight = 100;
+      toHeight = 2000;
+      const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight, toHeight);
+
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(0);
+      expect(utxo).to.be.deep.equal({
+        "from": from,
+        "fromHeight": fromHeight,
+        "items": [],
+        "to": 1,
+        "totalItems": 1
+      });
+    });
+
+
+      it('should throw error when call getTransactionsByAddress without params', async function it() {
+        let err = '';
+        try {
+          await dapiClient.getTransactionsByAddress();
+        } catch (e) {
+          err = e;
+        }
+        expect(err.message)
+          .to
+          .equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: params should have required property \'address\'');
+        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+      });
+
+      it('should throw error when call getTransactionsByAddress with non-valid address', async function it() {
+        let err = '';
+        try {
+          await dapiClient.getTransactionsByAddress("faucetAddress");
+        } catch (e) {
+          err = e;
+        }
+        expect(err.message).to.equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: Internal error'); // TODO post ticket
+        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+
+      });
+
+        it('should throw error when call getTransactionsByAddress with empty address', async function it() {//TODO post ticket
+          let err = '';
+          try {
+            await dapiClient.getTransactionsByAddress("");
+          } catch (e) {
+            err = e;
+          }
+          expect(err.message).to.equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: Internal error');
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+
+        });
+
+        it('should getTransactionsByAddress by address', async function it() {
+          const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress);
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+          expect(transactionsByAddress.items).to.have.lengthOf(1);
+          expect(transactionsByAddress.from).to.be.equal(0);
+          expect(transactionsByAddress.to).to.be.equal(1);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+
+        });
+
+        it('should getTransactionsByAddress by address with params: 0 1', async function it() {
+          const from = 0;
+          const to = 1;
+          const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to);
+
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+          expect(transactionsByAddress.items).to.have.lengthOf(1);
+          expect(transactionsByAddress.from).to.be.equal(from);
+          expect(transactionsByAddress.to).to.be.equal(to);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+        });
+
+        it('should getTransactionsByAddress with params: 0 0', async function it() {
+          const from = 0;
+          const to = 0;
+          const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to);
+
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+          expect(transactionsByAddress.items).to.have.lengthOf(1);
+          expect(transactionsByAddress.from).to.be.equal(from);
+          expect(transactionsByAddress.to).to.be.equal(1);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+        });
+
+        it('should throw exception with negative params: 0 -1', async function it() {
+          const from = 0;
+          const to = -1;
+          let err = '';
+          try {
+            await dapiClient.getTransactionsByAddress(faucetAddress, from , to);
+          } catch (e) {
+            err = e;
+          }
+          expect(err.message).to.equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: params.to should be >= 0');
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+        });
+
+        it('should getTransactionsByAddress with params: 1 0', async function it() {
+          const from = 1;
+          const to = 0;
+          const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to);
+
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+          expect(transactionsByAddress.items).to.have.lengthOf(0);
+          expect(transactionsByAddress.from).to.be.equal(from);
+          expect(transactionsByAddress.to).to.be.equal(1);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+        });
+
+        it('should getTransactionsByAddress by address with params: 1 0 1', async function it() {
+          const from = 1;
+          const to = 0;
+          fromHeight = 1;
+          const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight);
+
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+          expect(transactionsByAddress.items).to.have.lengthOf(0);
+          expect(transactionsByAddress.from).to.be.equal(from);
+          expect(transactionsByAddress.to).to.be.equal(1);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+        });
+
+        it('should getTransactionsByAddress with params: 1 0 100000', async function it() {
+          const from = 1;
+          const to = 0;
+          fromHeight = 100000;
+          const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight);
+
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+          expect(transactionsByAddress.items).to.have.lengthOf(0);
+          expect(transactionsByAddress.from).to.be.equal(from);
+          expect(transactionsByAddress.to).to.be.equal(1);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+        });
+
+        it('should getTransactionsByAddress with params: 1 0 100', async function it() {
+          const from = 1;
+          const to = 0;
+          fromHeight = 100;
+          const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight);
+
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+          expect(transactionsByAddress.items).to.have.lengthOf(0);
+          expect(transactionsByAddress.from).to.be.equal(from);
+          expect(transactionsByAddress.to).to.be.equal(1);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+        });
+
+        it('should getTransactionsByAddress with params: 1 0 100 99', async function it() {
+          const from = 1;
+          const to = 0;
+          fromHeight = 100;
+          toHeight = 99;
+          const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
+
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+          expect(transactionsByAddress.items).to.have.lengthOf(0);
+          expect(transactionsByAddress.from).to.be.equal(from);
+          expect(transactionsByAddress.to).to.be.equal(1);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+        });
+
+        it('should getTransactionsByAddress with params: 0 0 100 2000', async function it() {
+          const from = 0;
+          const to = 0;
+          fromHeight = 100;
+          toHeight = 2000;
+          const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
+
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+          expect(transactionsByAddress.items).to.have.lengthOf(0);
+          expect(transactionsByAddress.from).to.be.equal(from);
+          expect(transactionsByAddress.to).to.be.equal(1);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+        });
+
+        it('should getTransactionsByAddress with params: 1 0 100 2000', async function it() {
+          const from = 1;
+          const to = 0;
+          fromHeight = 100;
+          toHeight = 2000;
+          const transactionsByAddress = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight, toHeight);
+
+          expect(spyGetTransactionsByAddress.callCount).to.be.equal(0);
+          expect(transactionsByAddress.items).to.have.lengthOf(0);
+          expect(transactionsByAddress.from).to.be.equal(from);
+          expect(transactionsByAddress.to).to.be.equal(1);
+          expect(transactionsByAddress.totalItems).to.be.equal(1);
+        });
+
+    describe('many transactions', () => {
+      it('should makeRequestWithRetries be called 1 times with retries=true', async function it() {
+        this.timeout(1500000);
+        var privateKey = new PrivateKey("b9de6e778fe92aa7edb69395556f843f1dce0448350112e14906efc2a80fa61a", 'testnet');
+        let inputs = await dapiClient.getUTXO(faucetAddress);
+        const address = Address
+          .fromPublicKey(PublicKey.fromPrivateKey(privateKey), 'testnet')
+          .toString();
+        var transaction = new Transaction()
+          .from(inputs.items.slice(-1)[0])          // Feed information about what unspent outputs one can use
+          .to(address, 1000000000)  // Add an output with the given amount of satoshis
+          .change(faucetAddress)      // Sets up a change address where the rest of the funds will go
+          .fee(10000)
+          .sign("cVwyvFt95dzwEqYCLd8pv9CzktajP4tWH2w9RQNPeHYA7pH35wcJ");
+        const result = await dapiClient.sendRawTransaction(transaction.serialize());
+        await dapiClient.generate(20);
+
+        for (let i = 0; i < 990; i++) {
+          console.log(i);
+          let inputs = await dapiClient.getUTXO(faucetAddress);
+          let inputTo = await dapiClient.getUTXO(address);
+          // await dapiClient.generate(1);
+          var transaction = new Transaction()
+            .from(inputTo.items.slice(-1)[0])          // Feed information about what unspent outputs one can use
+            .to(faucetAddress, 1000000)  // Add an output with the given amount of satoshis
+            .change(address)      // Sets up a change address where the rest of the funds will go
+            .fee(10000)
+            .sign(privateKey.toString());
+          const result = await dapiClient.sendRawTransaction(transaction.serialize());
+          await dapiClient.generate(1);
+          await wait(1000);
+
+        }
+        const utxo = await dapiClient.getUTXO(faucetAddress);
+        expect(utxo.items).to.have.lengthOf(991);
+      });
+
+      it('should getUTXO by address 0', async function it() {
+        const from = 0;
+        const utxo = await dapiClient.getUTXO(faucetAddress, from);
+
+        expect(spy.callCount).to.be.equal(1);
+        expect(utxo.items).to.have.lengthOf(991);
+      });
+
+      it('should getUTXO by address 1000', async function it() {
+        const from = 1000;
+        const utxo = await dapiClient.getUTXO(faucetAddress, from);
+
+        expect(spy.callCount).to.be.equal(1);
+        expect(utxo.items).to.have.lengthOf(0);
+      });
+
+      it('should getUTXO with params: 1 0 2000 2000', async function it() {
+        const from = 1;
+        const to = 0;
+        fromHeight = 2000;
+        toHeight = 2000;
+        const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight, toHeight);
+
+        expect(spy.callCount).to.be.equal(1);
+        expect(utxo.items).to.have.lengthOf(530);
+      });
+
+      it('should getUTXO with params: 0 100 1 3000', async function it() {
+        const from = 0;
+        const to = 100;
+        fromHeight = 1;
+        toHeight = 3000;
+        const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight, toHeight);
+
+        expect(spy.callCount).to.be.equal(1);
+        expect(utxo.items).to.have.lengthOf(100);
+      });
+
+      it('should getUTXO with params: 500 1000 1500 3000', async function it() {
+        const from = 500;
+        const to = 1000;
+        fromHeight = 1500;
+        toHeight = 3000;
+        const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight, toHeight);
+
+        expect(spy.callCount).to.be.equal(1);
+        expect(utxo.items).to.have.lengthOf(491);
+      });
+
+      it('should getUTXO with params: 0 0 2000 3000', async function it() {
+        const from = 0;
+        const to = 0;
+        fromHeight = 2000;
+        toHeight = 3000;
+        const utxo = await dapiClient.getUTXO(faucetAddress, from, to, fromHeight, toHeight);
+
+        expect(spy.callCount).to.be.equal(1);
+        expect(utxo.items).to.have.lengthOf(531);
+      });
+
+      it('should getTransactionsByAddress with params: 0', async function it() {
+        const from = 0;
+        const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from);
+
+        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+        expect(transactionsByAddress.items).to.have.lengthOf(991);
+      });
+
+      it('should getTransactionsByAddress with params: 1000', async function it() {
+        const from = 1000;
+        const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from);
+
+        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+        expect(transactionsByAddress.items).to.have.lengthOf(0);
+      });
+
+      it('should getTransactionsByAddress with params: 1 0 2000 2000', async function it() {
+        const from = 1;
+        const to = 0;
+        fromHeight = 2000;
+        toHeight = 2000;
+        const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
+
+        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+        expect(transactionsByAddress.items).to.have.lengthOf(0);
+      });
+
+      it('should getTransactionsByAddress with params: 0 100 1 3000', async function it() {
+        const from = 0;
+        const to = 100;
+        fromHeight = 1;
+        toHeight = 3000;
+        const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
+
+        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+        expect(transactionsByAddress.items).to.have.lengthOf(100);
+      });
+
+      it('should getTransactionsByAddress with params: 500 1000 1500 3000', async function it() {
+        const from = 500;
+        const to = 1000;
+        fromHeight = 1500;
+        toHeight = 3000;
+        const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
+
+        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+        expect(transactionsByAddress.items).to.have.lengthOf(491);
+      });
+
+      it('should getTransactionsByAddress with params: 0 0 2000 3000', async function it() {
+        const from = 0;
+        const to = 0;
+        fromHeight = 2000;
+        toHeight = 3000;
+        const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
+
+        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+        expect(transactionsByAddress.items).to.have.lengthOf(0);
+      });
+
+    });
+
+  });
+
 });
+
 

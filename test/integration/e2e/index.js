@@ -103,7 +103,7 @@ describe('basic E2E tests', () => {
 
         [masterNode] = await startDapi.many(1);
 
-        const seeds = [{ip: masterNode.dapi.container.getIp()}]; //, { ip: master2.dapi.container.getIp()}];
+        const seeds = [{ip: masterNode.dapi.container.getIp()}];
         await masterNode.dashCore.getApi().generate(1500);
 
         dapiClient = new DAPIClient({
@@ -154,11 +154,11 @@ describe('basic E2E tests', () => {
 
             bobPreviousST = bobRegTxId;
 
-            await dapiClient.generate(1);
+            // await dapiClient.generate(1);
             await wait(5000);
 
-            // const userByName = await dapiClient.getUserByName(bobUserName); //TODO: client.getuser is not a function
-            // expect(userByName.uname).to.be.equal(bobUserName);
+            const userByName = await dapiClient.getUserByName(bobUserName);
+            expect(userByName.uname).to.be.equal(bobUserName);
 
         });
 
@@ -262,7 +262,7 @@ describe('basic E2E tests', () => {
         it('should register blockchain user', async function it() {
             this.timeout(50000);
 
-            const seeds = [{ip: masterNode.dapi.container.getIp()}];
+            const seeds = [{service: masterNode.dapi.container.getIp()}];
             await masterNode.dashCore.getApi().generate(500);
 
             let count = await masterNode.dashCore.getApi().getBlockCount();
@@ -291,11 +291,11 @@ describe('basic E2E tests', () => {
 
             alicePreviousST = aliceRegTxId;
 
-            await dapiClient.generate(1);
-            await wait(5000);//why we don't generate block and it works?
+            // await dapiClient.generate(1);
+            await wait(5000);
 
-            // const userByName = await dapiClient.getUserByName(aliceUserName); //TODO
-            //expect(userByName.uname).to.be.equal(aliceUserName);
+            const userByName = await dapiClient.getUserByName(aliceUserName);
+            expect(userByName.uname).to.be.equal(aliceUserName);
         });
 
         it('should create profile in "Contacts" app', async function it() {
@@ -371,7 +371,8 @@ describe('basic E2E tests', () => {
                 .setCreditFee(1000)
                 .sign(alicePrivateKey);
 
-            const transitionHash = await dapiClient.sendRawTransition(
+            const transitionHash =
+              await dapiClient.sendRawTransition(
               stPacket.serialize().toString('hex'),
                 transaction.serialize(),
             );

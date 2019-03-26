@@ -96,11 +96,11 @@ describe('basicAPIs', () => {
         dpp.setDPContract(dpContract);
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
-            .returns(Promise.resolve({ip: '127.0.0.1'}));
+            .returns(Promise.resolve({service: '127.0.0.1'}));
 
         [masterNode] = await startDapi.many(1);
 
-        const seeds = [{ip: masterNode.dapi.container.getIp()}];
+        const seeds = [{service: masterNode.dapi.container.getIp()}];
         await masterNode.dashCore.getApi().generate(1500);
 
         dapiClient = new DAPIClient({
@@ -166,10 +166,12 @@ describe('basicAPIs', () => {
                 "transactions": [
                     transactionIdSendToAddress.result,
                 ],
-                "txApperances": 1,
+                "txAppearances": 1,
+                "txApperances": 1, // will be deprecated in a future update
+                "unconfirmedAppearances": 0,
                 "unconfirmedBalance": 0,
                 "unconfirmedBalanceSat": 0,
-                "unconfirmedTxApperances": 0,
+                "unconfirmedTxApperances": 0, // will be deprecated in a future update
             });
         });
 
@@ -321,7 +323,6 @@ describe('basicAPIs', () => {
             bobRegTxId = result;
 
             bobPreviousST = result;
-
         });
 
         it('should generate', async function it() {
@@ -337,7 +338,7 @@ describe('basicAPIs', () => {
             expect(estimateFee).to.be.deep.equal(1);
         });
 
-        xit('should getUserByName & getUserById', async function it() {
+        it('should getUserByName & getUserById', async function it() {
             const userByName = await dapiClient.getUserByName(bobUserName);
             expect(userByName.uname).to.be.equal(bobUserName);
 
@@ -360,8 +361,8 @@ describe('basicAPIs', () => {
         it('should searchUsers', async function it() {
             let dapiOutput = await dapiClient.searchUsers(bobUserName);
             expect(dapiOutput).to.be.deep.equal({
-                "totalCount": 0,
-                "results": []
+                "totalCount": 1,
+                "results": [bobUserName]
             });
         });
 

@@ -66,7 +66,7 @@ describe('basicAPIs', () => {
 
         bobUserName = Math.random().toString(36).substring(7);
         aliceUserName = Math.random().toString(36).substring(7);
-        const dpContract = dpp.contract.create(entropy.generate().substr(0, 24), {
+        const contract = dpp.contract.create(entropy.generate().substr(0, 24), {
             user: {
                 properties: {
                     avatarUrl: {
@@ -93,7 +93,7 @@ describe('basicAPIs', () => {
                 additionalProperties: false,
             },
         });
-        dpp.setDPContract(dpContract);
+        dpp.setDPContract(contract);
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
             .returns(Promise.resolve({ip: '127.0.0.1'}));
@@ -393,13 +393,13 @@ describe('basicAPIs', () => {
             bobPreviousST = transitionHash;
         });
 
-        it('should fetchDapContract', async function it() {
+        it('should fetchContract', async function it() {
             let dapContractFromDAPI;
 
             for (let i = 0; i <= attempts; i++) {
                 try {
                     // waiting for Contacts to be added
-                    dapContractFromDAPI = await dapiClient.fetchDapContract(dpp.getDPContract().getId());
+                    dapContractFromDAPI = await dapiClient.fetchContract(dpp.getDPContract().getId());
                     break;
                 } catch (e) {
                     await dapiClient.generate(1);
@@ -412,7 +412,7 @@ describe('basicAPIs', () => {
             expect(dapContractFromDAPI).to.be.deep.equal(expectedContract);
         });
 
-        it('should fetchDapObjects', async function it() {
+        it('should fetchDocuments', async function it() {
             dpp.setUserId(bobRegTxId);
 
             const user = dpp.object.create('user', {
@@ -447,7 +447,7 @@ describe('basicAPIs', () => {
 
             let users;
             for (let i = 0; i <= attempts; i++) {
-                users = await dapiClient.fetchDapObjects(
+                users = await dapiClient.fetchDocuments(
                   dpp.getDPContract().getId(),
                   'user',
                   {},

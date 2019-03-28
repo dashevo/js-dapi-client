@@ -68,7 +68,7 @@ describe('basic E2E tests', () => {
         bobUserName = Math.random().toString(36).substring(7);
         aliceUserName = Math.random().toString(36).substring(7);
 
-        const dpContract = dpp.contract.create(entropy.generate().substr(0, 24), {
+        const contract = dpp.contract.create(entropy.generate().substr(0, 24), {
             user: {
                 properties: {
                     avatarUrl: {
@@ -96,7 +96,7 @@ describe('basic E2E tests', () => {
             },
         });
 
-        dpp.setDPContract(dpContract);
+        dpp.setDPContract(contract);
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
             .returns(Promise.resolve({ip: '127.0.0.1'}));
@@ -187,12 +187,12 @@ describe('basic E2E tests', () => {
 
             bobPreviousST = transitionHash;
 
-            let dpContract;
+            let contract;
             await wait(5000);
             for (let i = 0; i <= attempts; i++) {
                 try {
                     // waiting for Contacts to be added
-                    dpContract = await dapiClient.fetchDapContract(dpp.getDPContract().getId());
+                    contract = await dapiClient.fetchContract(dpp.getDPContract().getId());
                     break;
                 } catch (e) {
                     await dapiClient.generate(1);
@@ -203,7 +203,7 @@ describe('basic E2E tests', () => {
             delete expectedContract['definitions'];
             delete expectedContract['schema'];
             expectedContract.$schema = 'https://schema.dash.org/dpp-0-4-0/meta/dp-contract';
-            expect(dpContract).to.be.deep.equal(expectedContract);
+            expect(contract).to.be.deep.equal(expectedContract);
         });
 
         it('should create profile in "Contacts" app', async function it() {
@@ -240,8 +240,8 @@ describe('basic E2E tests', () => {
 
             let users;
             for (let i = 0; i <= attempts; i++) {
-                // bobSpace = await dapiClient.fetchDapObjects(dapId, 'user', {});
-                users = await dapiClient.fetchDapObjects(
+                // bobSpace = await dapiClient.fetchDocuments(dapId, 'user', {});
+                users = await dapiClient.fetchDocuments(
                   dpp.getDPContract().getId(),
                   'user',
                   {},
@@ -333,8 +333,8 @@ describe('basic E2E tests', () => {
 
             let users;
             for (let i = 0; i <= attempts; i++) {
-                // aliceSpace = await dapiClient.fetchDapObjects(dapId, 'user', {});
-                users = await dapiClient.fetchDapObjects(
+                // aliceSpace = await dapiClient.fetchDocuments(dapId, 'user', {});
+                users = await dapiClient.fetchDocuments(
                   dpp.getDPContract().getId(),
                   'user',
                   {},
@@ -383,8 +383,8 @@ describe('basic E2E tests', () => {
 
             let users;
             for (let i = 0; i <= attempts; i++) {
-                // aliceSpace = await dapiClient.fetchDapObjects(dapId, 'user', {});
-                users = await dapiClient.fetchDapObjects(
+                // aliceSpace = await dapiClient.fetchDocuments(dapId, 'user', {});
+                users = await dapiClient.fetchDocuments(
                   dpp.getDPContract().getId(),
                   'user',
                   {},
@@ -438,7 +438,7 @@ describe('basic E2E tests', () => {
 
             let contacts;
             for (let i = 0; i <= attempts; i++) {
-                contacts = await dapiClient.fetchDapObjects(
+                contacts = await dapiClient.fetchDocuments(
                   dpp.getDPContract().getId(),
                   'contact',
                   {},
@@ -491,8 +491,8 @@ describe('basic E2E tests', () => {
 
             let contacts;
             for (let i = 0; i <= attempts; i++) {
-                // aliceContact = await dapiClient.fetchDapObjects(dapId, 'contact', {});
-                contacts = await dapiClient.fetchDapObjects(
+                // aliceContact = await dapiClient.fetchDocuments(dapId, 'contact', {});
+                contacts = await dapiClient.fetchDocuments(
                   dpp.getDPContract().getId(),
                   'contact',
                   {},
@@ -541,8 +541,8 @@ describe('basic E2E tests', () => {
             let contacts;
             for (let i = 0; i <= attempts; i++) {
                 // waiting for Bob's contact to be deleted from Alice
-                // aliceContact = await dapiClient.fetchDapObjects(dapId, 'contact', {});
-                contacts = await dapiClient.fetchDapObjects(
+                // aliceContact = await dapiClient.fetchDocuments(dapId, 'contact', {});
+                contacts = await dapiClient.fetchDocuments(
                   dpp.getDPContract().getId(),
                   'contact',
                   {},

@@ -486,10 +486,10 @@ describe('api', () => {
           if (method === 'getRawBlock') {
             return rawBlock;
           }
-          if (method === 'fetchDapContract') {
+          if (method === 'fetchContract') {
             return dapContract;
           }
-          if (method === 'fetchDapObjects') {
+          if (method === 'fetchDocuments') {
             return dapObjects;
           }
           if (method === 'sendRawIxTransaction') {
@@ -852,18 +852,18 @@ describe('api', () => {
     });
   });
 
-  describe('.tx.fetchDapContract', () => {
+  describe('.tx.fetchContract', () => {
     it('Should fetch dap contract', async () => {
       const dapi = new DAPIClient();
-      const dapContract = await dapi.fetchDapContract(contractId);
+      const dapContract = await dapi.fetchContract(contractId);
       expect(dapContract).to.be.deep.equal(dapContract);
     });
   });
 
-  describe('.tx.fetchDapObjects', () => {
+  describe('.tx.fetchDocuments', () => {
     it('Should fetch dap objects', async () => {
       const dapi = new DAPIClient();
-      const dapContract = await dapi.fetchDapObjects(contractId, 'user', {});
+      const dapContract = await dapi.fetchDocuments(contractId, 'user', {});
       expect(dapContract).to.be.deep.equal(dapObjects);
     });
   });

@@ -597,13 +597,13 @@ describe("Performance", function () {
             console.log("average:", result);
         });
 
-        it('fetchDapContract', async function it() {
+        it('fetchContract', async function it() {
             this.timeout(timeoutTest * 2);
 
             for (let i = 0; i <= 240; i++) {
                 try {
                     // waiting for Contacts to be added
-                    await dapiClient.fetchDapContract(dapIds[0]);
+                    await dapiClient.fetchContract(dapIds[0]);
                     break;
                 } catch (e) {
                     await wait(1000);
@@ -614,7 +614,7 @@ describe("Performance", function () {
             for (var i = 0; i < numLoops; i += 1) {
                 const queries = new Array(numRequests);
                 for (let index = 0; index < numRequests; ++index) {
-                    queries[index] = dapiClient.fetchDapContract(dapIds[Math.floor(Math.random() * dapIds.length)]);
+                    queries[index] = dapiClient.fetchContract(dapIds[Math.floor(Math.random() * dapIds.length)]);
 
                 }
                 await runPromise(queries).then(function (result) {
@@ -631,13 +631,13 @@ describe("Performance", function () {
 
         });
 
-        it('fetchDapObjects', async function it() {
+        it('fetchDocuments', async function it() {
             this.timeout(timeoutTest);
             let results = [];
             for (var i = 0; i < numLoops; i += 1) {
                 const queries = new Array(numRequests);
                 for (let index = 0; index < numRequests; ++index) {
-                    queries[index] = dapiClient.fetchDapObjects(dapIds[Math.floor(Math.random() * dapIds.length)], 'user', {});
+                    queries[index] = dapiClient.fetchDocuments(dapIds[Math.floor(Math.random() * dapIds.length)], 'user', {});
                 }
                 await runPromise(queries).then(function (result) {
                     results.push(result.time);

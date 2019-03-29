@@ -19,7 +19,6 @@ const {
 
 const DashPlatformProtocol = require('@dashevo/dpp');
 const entropy = require('@dashevo/dpp/lib/util/entropy');
-const DPObject = require('@dashevo/dpp/lib/object/DPObject');
 
 const wait = require('../../utils/wait');
 
@@ -93,7 +92,7 @@ describe('basicAPIs', () => {
                 additionalProperties: false,
             },
         });
-        dpp.setDPContract(contract);
+        dpp.setContract(contract);
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
             .returns(Promise.resolve({ip: '127.0.0.1'}));
@@ -368,7 +367,7 @@ describe('basicAPIs', () => {
         it('should sendRawTransition', async function it() {
 
             // 1. Create ST packet
-            const stPacket = dpp.packet.create(dpp.getDPContract());
+            const stPacket = dpp.packet.create(dpp.getContract());
 
             // 2. Create State Transition
             const transaction = new Transaction()
@@ -394,22 +393,22 @@ describe('basicAPIs', () => {
         });
 
         it('should fetchContract', async function it() {
-            let dapContractFromDAPI;
+            let contractFromDAPI;
 
             for (let i = 0; i <= attempts; i++) {
                 try {
                     // waiting for Contacts to be added
-                    dapContractFromDAPI = await dapiClient.fetchContract(dpp.getDPContract().getId());
+                    contractFromDAPI = await dapiClient.fetchContract(dpp.getContract().getId());
                     break;
                 } catch (e) {
                     await dapiClient.generate(1);
                 }
             }
-            let expectedContract = JSON.parse(JSON.stringify(dpp.getDPContract()));
+            let expectedContract = JSON.parse(JSON.stringify(dpp.getContract()));
             delete expectedContract['definitions'];
             delete expectedContract['schema'];
             expectedContract.$schema = 'https://schema.dash.org/dpp-0-4-0/meta/dp-contract';
-            expect(dapContractFromDAPI).to.be.deep.equal(expectedContract);
+            expect(contractFromDAPI).to.be.deep.equal(expectedContract);
         });
 
         it('should fetchDocuments', async function it() {
@@ -448,7 +447,7 @@ describe('basicAPIs', () => {
             let users;
             for (let i = 0; i <= attempts; i++) {
                 users = await dapiClient.fetchDocuments(
-                  dpp.getDPContract().getId(),
+                  dpp.getContract().getId(),
                   'user',
                   {},
                 );

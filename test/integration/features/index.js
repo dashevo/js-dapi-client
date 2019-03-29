@@ -88,7 +88,7 @@ describe('retry policy', () => {
       },
     });
 
-    dpp.setDPContract(contract);
+    dpp.setContract(contract);
 
     sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
       .returns(Promise.resolve({ ip: '127.0.0.1' }));
@@ -540,4 +540,3 @@ describe('retry policy', () => {
   });
 
 });
-

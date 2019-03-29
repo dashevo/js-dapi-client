@@ -6,7 +6,6 @@ const sinon = require('sinon');
 
 const DashPlatformProtocol = require('@dashevo/dpp');
 const entropy = require('@dashevo/dpp/lib/util/entropy');
-const DPObject = require('@dashevo/dpp/lib/object/DPObject');
 
 const {
     Transaction,
@@ -527,7 +526,7 @@ describe("Performance", function () {
             this.timeout(timeoutTest);
             let results = [];
             for (var i = 0; i < numLoops; i += 1) {
-                const dpContract = dpp.contract.create(entropy.generate().substr(0, 24), {
+                const contract = dpp.contract.create(entropy.generate().substr(0, 24), {
                     user: {
                         properties: {
                             avatarUrl: {
@@ -555,14 +554,13 @@ describe("Performance", function () {
                     },
                 });
 
-                dpp.setDPContract(dpContract);
-
+                dpp.setContract(contract);
 
                 const queries = new Array(1);
                 const bobPrivateKey = new PrivateKey(); // TODO?
                 for (let index = 0; index < 1; ++index) {
 
-                    const stPacket = dpp.packet.create(dpp.getDPContract());
+                    const stPacket = dpp.packet.create(dpp.getContract());
 
                     // 2. Create State Transition
                     const transaction = new Transaction()
@@ -585,7 +583,7 @@ describe("Performance", function () {
                 }
                 await runPromise(queries).then(function (result) {
                     results.push(result.time);
-                    dapIds.push(doubleSha256(Schema.serialize.encode(dapContract.dapcontract)));
+                    dapIds.push(doubleSha256(Schema.serialize.encode(contract.dapcontract)));
                 }, function (failure) {
                     expect(failure, 'Errors found').to.be.undefined;
                 });

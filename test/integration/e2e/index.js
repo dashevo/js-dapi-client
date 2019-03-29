@@ -11,7 +11,7 @@ const DAPIClient = require('../../../src/index');
 
 const DashPlatformProtocol = require('@dashevo/dpp');
 const entropy = require('@dashevo/dpp/lib/util/entropy');
-const DPObject = require('@dashevo/dpp/lib/object/DPObject');
+const Document = require('@dashevo/dpp/lib/document/Document');
 
 const {
     Transaction,
@@ -96,7 +96,7 @@ describe('basic E2E tests', () => {
             },
         });
 
-        dpp.setDPContract(contract);
+        dpp.setContract(contract);
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
             .returns(Promise.resolve({ip: '127.0.0.1'}));
@@ -164,7 +164,7 @@ describe('basic E2E tests', () => {
 
         it('should publish "Contacts" contract', async function it() {
             // 1. Create ST packet
-            const stPacket = dpp.packet.create(dpp.getDPContract());
+            const stPacket = dpp.packet.create(dpp.getContract());
 
             // 2. Create State Transition
             const transaction = new Transaction()
@@ -192,14 +192,14 @@ describe('basic E2E tests', () => {
             for (let i = 0; i <= attempts; i++) {
                 try {
                     // waiting for Contacts to be added
-                    contract = await dapiClient.fetchContract(dpp.getDPContract().getId());
+                    contract = await dapiClient.fetchContract(dpp.getContract().getId());
                     break;
                 } catch (e) {
                     await dapiClient.generate(1);
                 }
             }
 
-            let expectedContract = JSON.parse(JSON.stringify(dpp.getDPContract()));
+            let expectedContract = JSON.parse(JSON.stringify(dpp.getContract()));
             delete expectedContract['definitions'];
             delete expectedContract['schema'];
             expectedContract.$schema = 'https://schema.dash.org/dpp-0-4-0/meta/dp-contract';
@@ -242,7 +242,7 @@ describe('basic E2E tests', () => {
             for (let i = 0; i <= attempts; i++) {
                 // bobSpace = await dapiClient.fetchDocuments(dapId, 'user', {});
                 users = await dapiClient.fetchDocuments(
-                  dpp.getDPContract().getId(),
+                  dpp.getContract().getId(),
                   'user',
                   {},
                 );
@@ -335,7 +335,7 @@ describe('basic E2E tests', () => {
             for (let i = 0; i <= attempts; i++) {
                 // aliceSpace = await dapiClient.fetchDocuments(dapId, 'user', {});
                 users = await dapiClient.fetchDocuments(
-                  dpp.getDPContract().getId(),
+                  dpp.getContract().getId(),
                   'user',
                   {},
                 );
@@ -354,7 +354,7 @@ describe('basic E2E tests', () => {
         it('should be able to update her profile', async function it() {
             dpp.setUserId(aliceRegTxId);
 
-            aliceUser.setAction(DPObject.ACTIONS.UPDATE);
+            aliceUser.setAction(Document.ACTIONS.UPDATE);
             aliceUser.set('avatarUrl', 'http://test.com/alice2.jpg');
 
             // 1. Create ST update profile packet
@@ -385,7 +385,7 @@ describe('basic E2E tests', () => {
             for (let i = 0; i <= attempts; i++) {
                 // aliceSpace = await dapiClient.fetchDocuments(dapId, 'user', {});
                 users = await dapiClient.fetchDocuments(
-                  dpp.getDPContract().getId(),
+                  dpp.getContract().getId(),
                   'user',
                   {},
                 );
@@ -439,7 +439,7 @@ describe('basic E2E tests', () => {
             let contacts;
             for (let i = 0; i <= attempts; i++) {
                 contacts = await dapiClient.fetchDocuments(
-                  dpp.getDPContract().getId(),
+                  dpp.getContract().getId(),
                   'contact',
                   {},
                 );
@@ -493,7 +493,7 @@ describe('basic E2E tests', () => {
             for (let i = 0; i <= attempts; i++) {
                 // aliceContact = await dapiClient.fetchDocuments(dapId, 'contact', {});
                 contacts = await dapiClient.fetchDocuments(
-                  dpp.getDPContract().getId(),
+                  dpp.getContract().getId(),
                   'contact',
                   {},
                 );
@@ -512,7 +512,7 @@ describe('basic E2E tests', () => {
         it('should be able to remove contact approvement', async function it() {
             dpp.setUserId(aliceRegTxId);
 
-            aliceContactAcceptance.setAction(DPObject.ACTIONS.DELETE);
+            aliceContactAcceptance.setAction(Document.ACTIONS.DELETE);
 
             // 1. Create ST contact delete packet
             const stPacket = dpp.packet.create([aliceContactAcceptance]);
@@ -543,7 +543,7 @@ describe('basic E2E tests', () => {
                 // waiting for Bob's contact to be deleted from Alice
                 // aliceContact = await dapiClient.fetchDocuments(dapId, 'contact', {});
                 contacts = await dapiClient.fetchDocuments(
-                  dpp.getDPContract().getId(),
+                  dpp.getContract().getId(),
                   'contact',
                   {},
                 );

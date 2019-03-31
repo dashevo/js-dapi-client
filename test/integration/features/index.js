@@ -58,7 +58,14 @@ describe('features', () => {
       .fromPublicKey(faucetPublicKey, 'testnet')
       .toString();
 
-    const dpContract = dpp.contract.create(entropy.generate(), {
+    bobUserName = Math.random()
+      .toString(36)
+      .substring(7);
+    aliceUserName = Math.random()
+      .toString(36)
+      .substring(7);
+
+    const contract = dpp.contract.create(entropy.generate(), {
       user: {
         properties: {
           avatarUrl: {
@@ -86,7 +93,7 @@ describe('features', () => {
       },
     });
 
-    dpp.setDPContract(dpContract);
+    dpp.setContract(contract);
 
     sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
       .returns(Promise.resolve({ ip: '127.0.0.1' }));
@@ -1152,5 +1159,3 @@ describe('features', () => {
   });
 
 });
-
-

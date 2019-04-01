@@ -96,7 +96,7 @@ describe('features', () => {
     dpp.setContract(contract);
 
     sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
-      .returns(Promise.resolve({ ip: '127.0.0.1' }));
+      .returns(Promise.resolve({ service: '127.0.0.1' }));
 
     [masterNode] = await startDapi.many(1);
 
@@ -628,7 +628,6 @@ describe('features', () => {
     it('should getUTXO by address with params: 0 1', async function it() {
       const from = 0;
       const to = 1;
-      //wrong behaviour: Error: DAPI RPC error: getUTXO: params.to should be >= 0
       const utxo = await dapiClient.getUTXO(faucetAddress, from, to);
 
       expect(spy.callCount).to.be.equal(1);
@@ -681,11 +680,25 @@ describe('features', () => {
       const to = -1;
       let err = '';
       try {
-        await dapiClient.getUTXO(faucetAddress, from , to);
+        await dapiClient.getUTXO(faucetAddress, from, to);
       } catch (e) {
         err = e;
       }
       expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: params.to should be >= 0');
+      expect(spy.callCount).to.be.equal(1);
+    });
+
+
+    it('should throw error for getUTXO with range > 1000: 0 1002', async function it() {
+      const from = 0;
+      const to = 1002;
+      let err = '';
+      try {
+        await dapiClient.getUTXO(faucetAddress, from, to);
+      } catch (e) {
+        err = e;
+      }
+      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: Internal error'); //TODO: post ticket
       expect(spy.callCount).to.be.equal(1);
     });
 
@@ -998,7 +1011,7 @@ describe('features', () => {
         });
 
     describe('many transactions', () => {
-      it('should makeRequestWithRetries be called 1 times with retries=true', async function it() {
+      it('should generate many inputs', async function it() {
         this.timeout(1500000);
         var privateKey = new PrivateKey("b9de6e778fe92aa7edb69395556f843f1dce0448350112e14906efc2a80fa61a", 'testnet');
         let inputs = await dapiClient.getUTXO(faucetAddress);

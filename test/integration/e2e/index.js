@@ -99,11 +99,11 @@ describe('basic E2E tests', () => {
         dpp.setContract(contract);
 
         sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
-            .returns(Promise.resolve({ip: '127.0.0.1'}));
+            .returns(Promise.resolve({service: '127.0.0.1'}));
 
         [masterNode] = await startDapi.many(1);
 
-        const seeds = [{ip: masterNode.dapi.container.getIp()}];
+        const seeds = [{service: masterNode.dapi.container.getIp()}];
         await masterNode.dashCore.getApi().generate(1500);
 
         dapiClient = new DAPIClient({
@@ -202,14 +202,14 @@ describe('basic E2E tests', () => {
             let expectedContract = JSON.parse(JSON.stringify(dpp.getContract()));
             delete expectedContract['definitions'];
             delete expectedContract['schema'];
-            expectedContract.$schema = 'https://schema.dash.org/dpp-0-4-0/meta/dp-contract';
+            expectedContract.$schema = 'https://schema.dash.org/dpp-0-4-0/meta/contract';
             expect(contract).to.be.deep.equal(expectedContract);
         });
 
         it('should create profile in "Contacts" app', async function it() {
             dpp.setUserId(bobRegTxId);
 
-            const user = dpp.object.create('user', {
+            const user = dpp.document.create('user', {
                 avatarUrl: 'http://test.com/bob.jpg',
                 about: 'This is story about me',
             });
@@ -262,12 +262,8 @@ describe('basic E2E tests', () => {
         it('should register blockchain user', async function it() {
             this.timeout(50000);
 
-            const seeds = [{service: masterNode.dapi.container.getIp()}];
+            // const seeds = [{service: masterNode.dapi.container.getIp()}];
             await masterNode.dashCore.getApi().generate(500);
-
-            let count = await masterNode.dashCore.getApi().getBlockCount();
-
-            let result = await masterNode.dashCore.getApi().sendToAddress(faucetAddress, 100);
 
             await dapiClient.generate(20);
 
@@ -277,7 +273,7 @@ describe('basic E2E tests', () => {
                 .setPubKeyIdFromPrivateKey(alicePrivateKey).sign(alicePrivateKey);
 
             let inputs = await dapiClient.getUTXO(faucetAddress);
-            expect(inputs.items).to.have.lengthOf(2);
+            expect(inputs.items).to.have.lengthOf(1);
 
             const transaction = Transaction()
                 .setType(Transaction.TYPES.TRANSACTION_SUBTX_REGISTER)
@@ -302,7 +298,7 @@ describe('basic E2E tests', () => {
 
             dpp.setUserId(aliceRegTxId);
 
-            aliceUser = dpp.object.create('user', {
+            aliceUser = dpp.document.create('user', {
                 avatarUrl: 'http://test.com/alice.jpg',
                 about: 'I am Alice',
             });
@@ -408,7 +404,7 @@ describe('basic E2E tests', () => {
 
             dpp.setUserId(bobRegTxId);
 
-            const contactRequest = dpp.object.create('contact', {
+            const contactRequest = dpp.document.create('contact', {
                 toUserId: aliceRegTxId,
                 publicKey: bobPrivateKey.toPublicKey().toString('hex'),
             });
@@ -461,7 +457,7 @@ describe('basic E2E tests', () => {
         it('should be able to approve contact request', async function it() {
             dpp.setUserId(aliceRegTxId);
 
-            aliceContactAcceptance = dpp.object.create('contact', {
+            aliceContactAcceptance = dpp.document.create('contact', {
                 toUserId: bobRegTxId,
                 publicKey: alicePrivateKey.toPublicKey().toString('hex'),
             });

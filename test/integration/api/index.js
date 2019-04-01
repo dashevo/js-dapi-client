@@ -408,14 +408,14 @@ describe('basicAPIs', () => {
             let expectedContract = JSON.parse(JSON.stringify(dpp.getContract()));
             delete expectedContract['definitions'];
             delete expectedContract['schema'];
-            expectedContract.$schema = 'https://schema.dash.org/dpp-0-4-0/meta/dp-contract';
+            expectedContract.$schema = 'https://schema.dash.org/dpp-0-4-0/meta/contract';
             expect(contractFromDAPI).to.be.deep.equal(expectedContract);
         });
 
         it('should fetchDocuments', async function it() {
             dpp.setUserId(bobRegTxId);
 
-            const user = dpp.object.create('user', {
+            const user = dpp.document.create('user', {
                 avatarUrl: 'http://test.com/bob.jpg',
                 about: 'This is story about me',
             });

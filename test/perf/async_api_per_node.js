@@ -592,8 +592,8 @@ describe("Performance", function () {
                         .sign(bobPrivateKeys[i]);
 
                     queries[index] = await dapiClient.sendRawTransition(
-                      stPacket.serialize().toString('hex'),
-                        transaction.serialize(),
+                      transaction.serialize(),
+                      stPacket.serialize().toString('hex')
                     );
                 }
                 await runPromise(queries).then(function (result) {

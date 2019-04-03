@@ -1112,7 +1112,7 @@ describe('features', () => {
         const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from);
 
         expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
-        expect(transactionsByAddress.items).to.have.lengthOf(991);
+        expect(transactionsByAddress.items).to.have.lengthOf(10);
       });
 
       it('should getTransactionsByAddress with params: 1000', async function it() {
@@ -1134,7 +1134,7 @@ describe('features', () => {
         expect(transactionsByAddress.items).to.have.lengthOf(0);
       });
 
-      it('should getTransactionsByAddress with params: 0 100 1 3000', async function it() {
+      it('should getTransactionsByAddress with params: 0 100 1 3000', async function it() {//TODO: internal error
         const from = 0;
         const to = 100;
         fromHeight = 1;
@@ -1145,7 +1145,7 @@ describe('features', () => {
         expect(transactionsByAddress.items).to.have.lengthOf(100);
       });
 
-      it('should getTransactionsByAddress with params: 500 1000 1500 3000', async function it() {
+      it('should getTransactionsByAddress with params: 500 1000 1500 3000', async function it() {//TODO: internal error
         const from = 500;
         const to = 1000;
         fromHeight = 1500;

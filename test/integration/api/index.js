@@ -382,9 +382,8 @@ describe('basicAPIs', () => {
                 .sign(bobPrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-              stPacket.serialize().toString('hex'),
-                transaction.serialize()
-              ,
+              transaction.serialize(),
+              stPacket.serialize().toString('hex')
             );
 
             expect(transitionHash).to.be.a('string');
@@ -435,8 +434,8 @@ describe('basicAPIs', () => {
                 .sign(bobPrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-              stPacket.serialize().toString('hex'),
-              transaction.serialize()
+              transaction.serialize(),
+              stPacket.serialize().toString('hex')
               ,
             );
 

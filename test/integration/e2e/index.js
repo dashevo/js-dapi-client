@@ -178,8 +178,8 @@ describe('basic E2E tests', () => {
                 .sign(bobPrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-              stPacket.serialize().toString('hex'),
               transaction.serialize(),
+              stPacket.serialize().toString('hex')
             );
 
             expect(transitionHash).to.be.a('string');
@@ -229,8 +229,8 @@ describe('basic E2E tests', () => {
                 .sign(bobPrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-              stPacket.serialize().toString('hex'),
-                transaction.serialize(),
+              transaction.serialize(),
+              stPacket.serialize().toString('hex')
             );
 
             expect(transitionHash).to.be.a('string');
@@ -318,8 +318,8 @@ describe('basic E2E tests', () => {
                 .sign(alicePrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-              stPacket.serialize().toString('hex'),
-                transaction.serialize(),
+              transaction.serialize(),
+              stPacket.serialize().toString('hex')
             );
 
             expect(transitionHash).to.be.a('string');
@@ -369,8 +369,8 @@ describe('basic E2E tests', () => {
 
             const transitionHash =
               await dapiClient.sendRawTransition(
-              stPacket.serialize().toString('hex'),
                 transaction.serialize(),
+                stPacket.serialize().toString('hex')
             );
 
             expect(transitionHash).to.be.a('string');
@@ -424,8 +424,8 @@ describe('basic E2E tests', () => {
                 .sign(bobPrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-              stPacket.serialize().toString('hex'),
-                transaction.serialize(),
+              transaction.serialize(),
+              stPacket.serialize().toString('hex')
             );
 
             expect(transitionHash).to.be.a('string');
@@ -477,8 +477,8 @@ describe('basic E2E tests', () => {
                 .sign(alicePrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-              stPacket.serialize().toString('hex'),
-                transaction.serialize(),
+              transaction.serialize(),
+              stPacket.serialize().toString('hex')
             );
 
             expect(transitionHash).to.be.a('string');
@@ -526,8 +526,8 @@ describe('basic E2E tests', () => {
                 .sign(alicePrivateKey);
 
             const transitionHash = await dapiClient.sendRawTransition(
-              stPacket.serialize().toString('hex'),
-                transaction.serialize(),
+              transaction.serialize(),
+              stPacket.serialize().toString('hex')
             );
 
             expect(transitionHash).to.be.a('string');

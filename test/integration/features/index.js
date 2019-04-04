@@ -1047,6 +1047,43 @@ describe('features', () => {
         expect(utxo.items).to.have.lengthOf(991);
       });
 
+      it('should sendRawTransaction with array of inputs', async function it() {
+        this.timeout(50000);
+        const bobUserName = Math.random().toString(36).substring(7);
+        const bobPrivateKey = new PrivateKey();
+        const validPayload = new Transaction.Payload.SubTxRegisterPayload()
+          .setUserName(bobUserName)
+          .setPubKeyIdFromPrivateKey(bobPrivateKey).sign(bobPrivateKey);
+
+        let inputs = await dapiClient.getUTXO(faucetAddress);
+
+        var transaction = Transaction()
+          .setType(Transaction.TYPES.TRANSACTION_SUBTX_REGISTER)
+          .setExtraPayload(validPayload)
+          .from(inputs.items.slice(-15))
+          .addFundingOutput(1000000)
+          .change(faucetAddress)
+          .sign(faucetPrivateKey);
+        // we can't send trxs with last 15 inputs
+        await expect(dapiClient.sendRawTransaction(transaction.serialize())).to.be.rejectedWith('rate limited free transaction');
+
+        var transaction = Transaction()
+          .setType(Transaction.TYPES.TRANSACTION_SUBTX_REGISTER)
+          .setExtraPayload(validPayload)
+          .from(inputs.items.slice(-10))
+          .addFundingOutput(1000000)
+          .change(faucetAddress)
+          .sign(faucetPrivateKey);
+        // and everything is fine with 10 last trxs
+        const result = await dapiClient.sendRawTransaction(transaction.serialize());
+
+        expect(result).to.be.a('string');
+        expect(result).to.be.not.empty();
+        bobRegTxId = result;
+
+        bobPreviousST = result;
+      });
+
       it('should getUTXO by address 0', async function it() {
         const from = 0;
         const utxo = await dapiClient.getUTXO(faucetAddress, from);

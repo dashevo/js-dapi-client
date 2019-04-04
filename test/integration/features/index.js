@@ -1019,7 +1019,7 @@ describe('features', () => {
           .fromPublicKey(PublicKey.fromPrivateKey(privateKey), 'testnet')
           .toString();
         var transaction = new Transaction()
-          .from(inputs.items.slice(-1)[0])          // Feed information about what unspent outputs one can use
+          .from(inputs.items)          // Feed information about what unspent outputs one can use
           .to(address, 1000000000)  // Add an output with the given amount of satoshis
           .change(faucetAddress)      // Sets up a change address where the rest of the funds will go
           .fee(10000)

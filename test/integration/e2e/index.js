@@ -145,7 +145,7 @@ describe('basic E2E tests', () => {
             const transaction = Transaction()
                 .setType(Transaction.TYPES.TRANSACTION_SUBTX_REGISTER)
                 .setExtraPayload(validPayload)
-                .from(inputs.items.slice(-1)[0])
+                .from(inputs.items)
                 .addFundingOutput(10000)
                 .change(faucetAddress)
                 .sign(faucetPrivateKey);
@@ -154,7 +154,7 @@ describe('basic E2E tests', () => {
 
             bobPreviousST = bobRegTxId;
 
-            // await dapiClient.generate(1);
+            await dapiClient.generate(1);
             await wait(5000);
 
             const userByName = await dapiClient.getUserByName(bobUserName);
@@ -262,7 +262,6 @@ describe('basic E2E tests', () => {
         it('should register blockchain user', async function it() {
             this.timeout(50000);
 
-            // const seeds = [{service: masterNode.dapi.container.getIp()}];
             await masterNode.dashCore.getApi().generate(500);
 
             await dapiClient.generate(20);
@@ -278,7 +277,7 @@ describe('basic E2E tests', () => {
             const transaction = Transaction()
                 .setType(Transaction.TYPES.TRANSACTION_SUBTX_REGISTER)
                 .setExtraPayload(validPayload)
-                .from(inputs.items.slice(-1)[0])
+                .from(inputs.items)
                 .addFundingOutput(10000)
                 .change(faucetAddress)
                 .sign(faucetPrivateKey);
@@ -351,7 +350,11 @@ describe('basic E2E tests', () => {
             dpp.setUserId(aliceRegTxId);
 
             aliceUser.setAction(Document.ACTIONS.UPDATE);
+            aliceUser.setRevision(aliceUser.revision + 1);
             aliceUser.set('avatarUrl', 'http://test.com/alice2.jpg');
+
+            const result = dpp.document.validate(aliceUser);
+            expect(result.isValid(), 'Profile must be valid').to.be.true();
 
             // 1. Create ST update profile packet
             const stPacket = dpp.packet.create([aliceUser]);
@@ -367,8 +370,7 @@ describe('basic E2E tests', () => {
                 .setCreditFee(1000)
                 .sign(alicePrivateKey);
 
-            const transitionHash =
-              await dapiClient.sendRawTransition(
+            const transitionHash = await dapiClient.sendRawTransition(
                 transaction.serialize(),
                 stPacket.serialize().toString('hex')
             );
@@ -380,7 +382,6 @@ describe('basic E2E tests', () => {
 
             let users;
             for (let i = 0; i <= attempts; i++) {
-                // aliceSpace = await dapiClient.fetchDocuments(dapId, 'user', {});
                 users = await dapiClient.fetchDocuments(
                   dpp.getContract().getId(),
                   'user',
@@ -488,7 +489,6 @@ describe('basic E2E tests', () => {
 
             let contacts;
             for (let i = 0; i <= attempts; i++) {
-                // aliceContact = await dapiClient.fetchDocuments(dapId, 'contact', {});
                 contacts = await dapiClient.fetchDocuments(
                   dpp.getContract().getId(),
                   'contact',
@@ -499,6 +499,7 @@ describe('basic E2E tests', () => {
                     break;
                 } else {
                     await dapiClient.generate(1);
+                    await wait(1000);
                 }
             }
 
@@ -509,7 +510,12 @@ describe('basic E2E tests', () => {
         it('should be able to remove contact approvement', async function it() {
             dpp.setUserId(aliceRegTxId);
 
+            aliceContactAcceptance.setData({});
             aliceContactAcceptance.setAction(Document.ACTIONS.DELETE);
+            aliceContactAcceptance.setRevision(aliceContactAcceptance.revision + 1);
+
+            const result = dpp.document.validate(aliceContactAcceptance);
+            expect(result.isValid(), 'Contact acceptance must be valid').to.be.true();
 
             // 1. Create ST contact delete packet
             const stPacket = dpp.packet.create([aliceContactAcceptance]);
@@ -535,10 +541,12 @@ describe('basic E2E tests', () => {
 
             alicePreviousST = transitionHash;
 
+            // 3. Mine block with ST
+            await dapiClient.generate(1);
+
             let contacts;
             for (let i = 0; i <= attempts; i++) {
                 // waiting for Bob's contact to be deleted from Alice
-                // aliceContact = await dapiClient.fetchDocuments(dapId, 'contact', {});
                 contacts = await dapiClient.fetchDocuments(
                   dpp.getContract().getId(),
                   'contact',
@@ -547,7 +555,7 @@ describe('basic E2E tests', () => {
                 if (contacts.length === 1) {
                     break;
                 } else {
-                    await dapiClient.generate(1);
+                    await wait(1000);
                 }
             }
 

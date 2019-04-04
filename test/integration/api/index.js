@@ -311,7 +311,7 @@ describe('basicAPIs', () => {
             const transaction = Transaction()
                 .setType(Transaction.TYPES.TRANSACTION_SUBTX_REGISTER)
                 .setExtraPayload(validPayload)
-                .from(inputs.items.slice(-1)[0])
+                .from(inputs.items)
                 .addFundingOutput(10000)
                 .change(faucetAddress)
                 .sign(faucetPrivateKey);

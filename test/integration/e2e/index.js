@@ -49,6 +49,7 @@ describe('basic E2E tests', () => {
     let aliceRegTxId;
 
     let aliceUser;
+    let bobContactRequest;
     let aliceContactAcceptance;
 
     let bobPreviousST;
@@ -405,13 +406,13 @@ describe('basic E2E tests', () => {
 
             dpp.setUserId(bobRegTxId);
 
-            const contactRequest = dpp.document.create('contact', {
+            bobContactRequest = dpp.document.create('contact', {
                 toUserId: aliceRegTxId,
                 publicKey: bobPrivateKey.toPublicKey().toString('hex'),
             });
 
             // 1. Create ST contact request packet
-            const stPacket = dpp.packet.create([contactRequest]);
+            const stPacket = dpp.packet.create([bobContactRequest]);
 
             // 2. Create State Transition
             const transaction = new Transaction()
@@ -450,7 +451,7 @@ describe('basic E2E tests', () => {
             }
 
             expect(contacts).to.have.lengthOf(1);
-            expect(contacts[0]).to.be.deep.equal(contactRequest.toJSON());
+            expect(contacts[0]).to.be.deep.equal(bobContactRequest.toJSON());
         });
     });
 
@@ -560,7 +561,7 @@ describe('basic E2E tests', () => {
             }
 
             expect(contacts).to.have.lengthOf(1);
-            expect(contacts[0]).to.be.deep.equal(aliceContactAcceptance.toJSON());
+            expect(contacts[0]).to.be.deep.equal(bobContactRequest.toJSON());
         });
     });
 

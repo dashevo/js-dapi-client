@@ -1082,13 +1082,23 @@ describe('features', () => {
         bobRegTxId = result;
 
         bobPreviousST = result;
+
+        //now we verify that getUTXO.items not empty when no new block generated
+        const utxo = await dapiClient.getUTXO(faucetAddress);
+        console.log(utxo);
+        expect(utxo).to.have.property('items');
+        expect(utxo.items).to.have.lengthOf(991);
+
       });
 
       it('should getUTXO by address 0', async function it() {
+        // when we generate new block getUTXO is not empty again!
+        await dapiClient.generate(1);
         const from = 0;
         const utxo = await dapiClient.getUTXO(faucetAddress, from);
 
         expect(spy.callCount).to.be.equal(1);
+
         expect(utxo.items).to.have.lengthOf(991);
       });
 

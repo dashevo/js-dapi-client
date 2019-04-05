@@ -152,11 +152,11 @@ class DAPIClient {
   /**
    * Returns block headers from [offset] with length [limit], where limit is <= 2000
    * @param {number} offset
-   * @param {number} limit
-   * @param {boolean} [verbose]
+   * @param {number} [limit] - default = 1
+   * @param {boolean} [verbose] - default = false
    * @returns {Promise<[objects]>} - array of header objects
    */
-  getBlockHeaders(offset, limit, verbose = false) { return this.makeRequestToRandomDAPINode('getBlockHeaders', { offset, limit, verbose }); }
+  getBlockHeaders(offset, limit = 1, verbose = false) { return this.makeRequestToRandomDAPINode('getBlockHeaders', { offset, limit, verbose }); }
 
   // TODO: Do we really need it this way?
   /**

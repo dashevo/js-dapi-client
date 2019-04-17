@@ -1,11 +1,12 @@
 /**
- * This module responsibility is to obtain masternode IPs in order to
+ * This module's responsibility is to obtain masternode IPs in order to
  * provide those IPs for DAPIService, which provides an interface for making
  * requests to DAPI.
  *  @module MNDiscoveryService
  */
 
 const sample = require('lodash/sample');
+const sampleSize = require('lodash/sampleSize');
 const MasternodeListProvider = require('./MasternodeListProvider');
 
 class MNDiscovery {
@@ -40,6 +41,19 @@ class MNDiscovery {
       MNList = MNList.filter(mn => excludedIps.indexOf(mn.service.split(':')[0]) < 0);
     }
     return sample(MNList);
+  }
+
+  /**
+   * @param {number} count
+   * @param {[string[]]} [excludedIps]
+   * @returns {Promise<SimplifiedMNListEntry[]>}
+   */
+  async getRandomMasternodes(count, excludedIps) {
+    let MNList = await this.masternodeListProvider.getMNList();
+    if (Array.isArray(excludedIps)) {
+      MNList = MNList.filter(mn => excludedIps.indexOf(mn.service.split(':')[0]) < 0);
+    }
+    return sampleSize(MNList, count);
   }
 
   /**

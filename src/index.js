@@ -3,6 +3,7 @@ const preconditionsUtil = require('@dashevo/dashcore-lib').util.preconditions;
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
+const TxFilterGrpcClient = require('@dashevo/dapi-grpc');
 
 class DAPIClient {
   /**
@@ -308,6 +309,19 @@ class DAPIClient {
   clearBloomFilter(filter) { return this.makeRequestToRandomDAPINode('clearBloomFilter', { filter }); }
 
   getSpvData(filter) { return this.makeRequestToRandomDAPINode('getSpvData', { filter }); }
+
+  /**
+   * @param {Uint8Array} filter
+   * @returns {Promise<EventEmitter>}
+   */
+  async subsribeToTransactions(filter) {
+    const { BloomFilter } = TxFilterGrpcClient;
+    const bloomFilter = new BloomFilter();
+    bloomFilter.setBytes(filter);
+    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+    this.txFilterGrpcClient = new TxFilterGrpcClient(`${nodeToConnect.getIp()}:${this.DAPIPort}`);
+    return this.txFilterGrpcClient.getTransactionsByFilter(bloomFilter);
+  }
 }
 
 module.exports = DAPIClient;

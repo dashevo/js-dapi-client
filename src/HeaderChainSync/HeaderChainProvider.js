@@ -24,8 +24,7 @@ async function logOutput(msg, delay = 50) {
  * @return {Promise<DAPIClient>}
  */
 async function initApi(seeds) {
-  const tnodes = testNodes.getTestNodes();
-  const services = seeds.length !== 0 ? seeds.map(seed => new Object({ service: seed })) : tnodes;
+  const services = seeds.map(seed => Object.create({ service: seed }));
   return new Api({
     seeds: services,
     port: 3000,
@@ -38,9 +37,9 @@ async function getHeaderStoreFromChunks(chunks) {
   const store = [];
 
   // fill up store
-  chunks.forEach(function (chunk) {
+  chunks.forEach((chunk) => {
     const baseHeight = chunk.from;
-    chunk.items.forEach(function (h, i) {
+    chunk.items.forEach((h, i) => {
       store.push({ height: (baseHeight + i), header: h });
     });
   });
@@ -48,7 +47,7 @@ async function getHeaderStoreFromChunks(chunks) {
 }
 
 async function printHeaderStore(store) {
-  store.forEach(async function (h) {
+  store.forEach(async (h) => {
     await logOutput(`Height ${h.height}: ${h.header} `);
   });
 }
@@ -63,30 +62,35 @@ async function printHeaderStore(store) {
  * @param {int} toHeight
  * @param {int} step
  * @param {int} offset
- * @param {string[]|undefined} excludedIps
  * @param {int} [extraHeight=0]
  *
  * @returns {Promise<array>}
  */
 async function populateHeaderChain(
   api, headerChunks, headerChain, fromHeight, toHeight,
-  step, offset, excludedIps = undefined, extraHeight = 0) {
+  step, offset, extraHeight = 0,
+) {
   for (let height = fromHeight; height < toHeight - extraHeight; height += step) {
     /* eslint-disable-next-line no-await-in-loop */
     const newHeaders = await api.getBlockHeaders(height, step);
+    /* eslint-disable-next-line no-await-in-loop */
     await logOutput(`newHeaders ${newHeaders}`);
     headerChain.addHeaders(newHeaders);
-    headerChunks.push(
-      { from: (height - offset),
-        to: ((height - offset) + step), items: newHeaders });
+    headerChunks.push({
+      from: (height - offset),
+      to: ((height - offset) + step),
+      items: newHeaders,
+    });
   }
 
   if (extraHeight > 0) {
     const extraHeaders = await api.getBlockHeaders(toHeight, extraHeight);
     headerChain.addHeaders(extraHeaders);
-    headerChunks.push(
-      { from: (toHeight - offset),
-        to: ((toHeight - offset) + extraHeight), items: extraHeaders });
+    headerChunks.push({
+      from: (toHeight - offset),
+      to: ((toHeight - offset) + extraHeight),
+      items: extraHeaders,
+    });
   }
 }
 
@@ -128,6 +132,7 @@ class HeaderChainProvider {
 
    * @return {Promise<SpvChain>}
    */
+  /* eslint-disable-next-line class-methods-use-this */
   async buildHeaderChain(api, seeds, fromHeight) {
     // Start time to check method call time
     const hrStartTime = process.hrtime();
@@ -148,7 +153,7 @@ class HeaderChainProvider {
     // temporary header store array. Can be used to attach to main header store later
     const headerChunks = [];
 
-    const heightDelta = parseInt(heightDiff / seeds.length);
+    const heightDelta = Math.floor(heightDiff / seeds.length);
     const step = Math.min(heightDelta, 2000);
 
     /**
@@ -158,12 +163,11 @@ class HeaderChainProvider {
      *   /    \   /    \   /       \
      *  |  |  |  |  |  |  |  |  |  |
      *  1  2  3  1  2  3  1  2  3  4
-     * [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] - header chain
+     * [1, 2, 3, 4, 5, 6, 7,height 8, 9, 10] - header chain
      *
      */
 
     const promises = seeds.map(async (seed, index) => {
-      const excludedSeeds = seeds.filter(s => s !== seed);
       const localFromHeight = fromHeight + (heightDelta * index);
       const localToHeight = localFromHeight + heightDelta;
 
@@ -173,7 +177,7 @@ class HeaderChainProvider {
 
       await populateHeaderChain(
         api, headerChunks, headerChain, localFromHeight,
-        localToHeight, step, fromHeight, excludedSeeds, heightExtra,
+        localToHeight, step, fromHeight, heightExtra,
       );
     });
 
@@ -202,12 +206,12 @@ class HeaderChainProvider {
    * @returns {Promise<Array<Object>>}
    */
   async sync(lastChainTipHeight) {
-    const api = await initApi(seeds);
     const randomNodeCount = Math.min(
       Math.floor(this.MNDiscovery.getMNList().length / 100),
       constants.headerChainSync.MAX_SYNC_NODES,
     );
     const randomNodes = await this.MNDiscovery.getRandomMasternodes(randomNodeCount);
+    const api = await initApi(randomNodes);
     return this.buildHeaderChain(api, randomNodes, lastChainTipHeight);
   }
 }

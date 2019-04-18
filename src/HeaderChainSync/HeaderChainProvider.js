@@ -19,12 +19,12 @@ async function logOutput(msg, delay = 50) {
 /**
  * Create and setup DAPI client instance
  *
- * @param {string[]} seeds
+ * @param {SimplifiedMNListEntry[]} mnListEntries
  *
  * @return {Promise<DAPIClient>}
  */
-async function initApi(seeds) {
-  const services = seeds.map(seed => Object.create({ service: seed }));
+async function initApi(mnListEntries) {
+  const services = mnListEntries.map(entry => Object.create({ service: entry.service }));
   return new Api({
     seeds: services,
     port: 3000,
@@ -126,14 +126,14 @@ class HeaderChainProvider {
   /**
    * @private
    * Build the header chain for a specified slice
-   * @param {DAPIClient} api
-   * @param {string[]} seeds
+   * @param {DAPIClient} api1
+   * @param {SimplifiedMNListEntry[]} mnListEntries
    * @param {int} fromHeight
 
    * @return {Promise<SpvChain>}
    */
   /* eslint-disable-next-line class-methods-use-this */
-  async buildHeaderChain(api, seeds, fromHeight) {
+  async buildHeaderChain(api, mnListEntries, fromHeight) {
     // Start time to check method call time
     const hrStartTime = process.hrtime();
 
@@ -153,7 +153,7 @@ class HeaderChainProvider {
     // temporary header store array. Can be used to attach to main header store later
     const headerChunks = [];
 
-    const heightDelta = Math.floor(heightDiff / seeds.length);
+    const heightDelta = Math.floor(heightDiff / mnListEntries.length);
     const step = Math.min(heightDelta, 2000);
 
     /**
@@ -167,13 +167,13 @@ class HeaderChainProvider {
      *
      */
 
-    const promises = seeds.map(async (seed, index) => {
+    const promises = mnListEntries.map(async (mnListEntry, index) => {
       const localFromHeight = fromHeight + (heightDelta * index);
       const localToHeight = localFromHeight + heightDelta;
 
       // Ask last node a few extra headers
-      const heightExtra = (index === seeds.length - 1)
-        ? heightDiff % Math.min(seeds.length, step) : 0;
+      const heightExtra = (index === mnListEntries.length - 1)
+        ? heightDiff % Math.min(mnListEntries.length, step) : 0;
 
       await populateHeaderChain(
         api, headerChunks, headerChain, localFromHeight,

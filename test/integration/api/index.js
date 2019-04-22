@@ -329,7 +329,6 @@ describe('basicAPIs', () => {
             await dapiClient.generate(1);
             const heightAfter = await dapiClient.getBestBlockHeight();
             expect(height).to.be.equal(heightAfter - 1);
-            await wait(5000);
         });
 
         it('should estimateFee', async function it() {
@@ -338,12 +337,13 @@ describe('basicAPIs', () => {
         });
 
         it('should getUserByName & getUserById', async function it() {
+            await wait(10000);
             const userByName = await dapiClient.getUserByName(bobUserName);
             expect(userByName.uname).to.be.equal(bobUserName);
 
-            const userByid = await dapiClient.getUserById(userByName.regtxid);
-            expect(userByid).to.be.deep.equal(userByName);
-            expect(userByid).to.be.deep.equal({
+            const userById = await dapiClient.getUserById(userByName.regtxid);
+            expect(userById).to.be.deep.equal(userByName);
+            expect(userById).to.be.deep.equal({
                 "uname": bobUserName,
                 "regtxid": bobRegTxId,
                 "pubkeyid": userByName.pubkeyid,
@@ -354,10 +354,11 @@ describe('basicAPIs', () => {
                     bobRegTxId
                 ]
             });
-
         });
 
         it('should searchUsers', async function it() {
+            dapiClient.generate(2);// User index update finished with an error: Error: Block height out of range
+            await wait(10000);
             let dapiOutput = await dapiClient.searchUsers(bobUserName);
             expect(dapiOutput).to.be.deep.equal({
                 "totalCount": 1,

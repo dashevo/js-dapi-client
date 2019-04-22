@@ -48,7 +48,7 @@ describe('basic E2E tests', () => {
     let aliceUserName;
     let aliceRegTxId;
 
-    let aliceUser;
+    let aliceProfile;
     let bobContactRequest;
     let aliceContactAcceptance;
 
@@ -70,7 +70,10 @@ describe('basic E2E tests', () => {
         aliceUserName = Math.random().toString(36).substring(7);
 
         const contract = dpp.contract.create(entropy.generate().substr(0, 24), {
-            user: {
+            profile: {
+                indices: [
+                    { properties: [{ $userId: 'asc' }], unique: true },
+                ],
                 properties: {
                     avatarUrl: {
                         type: 'string',
@@ -84,6 +87,9 @@ describe('basic E2E tests', () => {
                 additionalProperties: false,
             },
             contact: {
+                indices: [
+                    { properties: [{ $userId: 'asc' }, { toUserId: 'asc' }], unique: true },
+                ],
                 properties: {
                     toUserId: {
                         type: 'string',
@@ -178,7 +184,7 @@ describe('basic E2E tests', () => {
                 .setCreditFee(1000)
                 .sign(bobPrivateKey);
 
-            const transitionHash = await dapiClient.sendRawTransition(
+            const transitionHash =  await dapiClient.sendRawTransition(
               transaction.serialize(),
               stPacket.serialize().toString('hex')
             );
@@ -210,13 +216,16 @@ describe('basic E2E tests', () => {
         it('should create profile in "Contacts" app', async function it() {
             dpp.setUserId(bobRegTxId);
 
-            const user = dpp.document.create('user', {
+            const profile = dpp.document.create('profile', {
                 avatarUrl: 'http://test.com/bob.jpg',
                 about: 'This is story about me',
             });
 
+            const result = dpp.document.validate(profile);
+            expect(result.isValid(), 'Profile must be valid').to.be.true();
+
             // 1. Create ST profile packet
-            const stPacket = dpp.packet.create([user]);
+            const stPacket = dpp.packet.create([profile]);
 
             // 2. Create State Transition
             const transaction = new Transaction()
@@ -239,31 +248,28 @@ describe('basic E2E tests', () => {
 
             bobPreviousST = transitionHash;
 
-            let users;
+            let profiles;
             for (let i = 0; i <= attempts; i++) {
-                // bobSpace = await dapiClient.fetchDocuments(dapId, 'user', {});
-                users = await dapiClient.fetchDocuments(
+                profiles = await dapiClient.fetchDocuments(
                   dpp.getContract().getId(),
-                  'user',
+                  'profile',
                   {},
                 );
                 // waiting for Bob's profile to be added
-                if (users.length > 0) {
+                if (profiles.length > 0) {
                     break;
                 } else {
                     await dapiClient.generate(1);
                 }
             }
-            expect(users).to.have.lengthOf(1);
-            expect(users[0]).to.be.deep.equal(user.toJSON());
+            expect(profiles).to.have.lengthOf(1);
+            expect(profiles[0]).to.be.deep.equal(profile.toJSON());
         });
     });
 
     describe('Alice', () => {
         it('should register blockchain user', async function it() {
             this.timeout(50000);
-
-            await masterNode.dashCore.getApi().generate(500);
 
             await dapiClient.generate(20);
 
@@ -287,9 +293,6 @@ describe('basic E2E tests', () => {
 
             alicePreviousST = aliceRegTxId;
 
-            // await dapiClient.generate(1);
-            await wait(5000);
-
             const userByName = await dapiClient.getUserByName(aliceUserName);
             expect(userByName.uname).to.be.equal(aliceUserName);
         });
@@ -298,13 +301,13 @@ describe('basic E2E tests', () => {
 
             dpp.setUserId(aliceRegTxId);
 
-            aliceUser = dpp.document.create('user', {
+            aliceProfile = dpp.document.create('profile', {
                 avatarUrl: 'http://test.com/alice.jpg',
                 about: 'I am Alice',
             });
 
             // 1. Create ST user packet
-            const stPacket = dpp.packet.create([aliceUser]);
+            const stPacket = dpp.packet.create([aliceProfile]);
 
             // 2. Create State Transition
             const transaction = new Transaction()
@@ -327,38 +330,37 @@ describe('basic E2E tests', () => {
 
             alicePreviousST = transitionHash;
 
-            let users;
+            let profiles;
             for (let i = 0; i <= attempts; i++) {
-                // aliceSpace = await dapiClient.fetchDocuments(dapId, 'user', {});
-                users = await dapiClient.fetchDocuments(
+                profiles = await dapiClient.fetchDocuments(
                   dpp.getContract().getId(),
-                  'user',
+                  'profile',
                   {},
                 );
                 // waiting for Alice's profile to be added
-                if (users.length > 1) {
+                if (profiles.length > 1) {
                     break;
                 } else {
                     await dapiClient.generate(1);
                 }
             }
 
-            expect(users).to.have.lengthOf(2);
-            expect(users[1]).to.be.deep.equal(aliceUser.toJSON());
+            expect(profiles).to.have.lengthOf(2);
+            expect(profiles[1]).to.be.deep.equal(aliceProfile.toJSON());
         });
 
         it('should be able to update her profile', async function it() {
             dpp.setUserId(aliceRegTxId);
 
-            aliceUser.setAction(Document.ACTIONS.UPDATE);
-            aliceUser.setRevision(aliceUser.revision + 1);
-            aliceUser.set('avatarUrl', 'http://test.com/alice2.jpg');
+            aliceProfile.setAction(Document.ACTIONS.UPDATE);
+            aliceProfile.setRevision(aliceProfile.revision + 1);
+            aliceProfile.set('avatarUrl', 'http://test.com/alice2.jpg');
 
-            const result = dpp.document.validate(aliceUser);
+            const result = dpp.document.validate(aliceProfile);
             expect(result.isValid(), 'Profile must be valid').to.be.true();
 
             // 1. Create ST update profile packet
-            const stPacket = dpp.packet.create([aliceUser]);
+            const stPacket = dpp.packet.create([aliceProfile]);
 
             // 2. Create State Transition
             const transaction = new Transaction()
@@ -381,23 +383,23 @@ describe('basic E2E tests', () => {
 
             alicePreviousST = transitionHash;
 
-            let users;
+            let profiles;
             for (let i = 0; i <= attempts; i++) {
-                users = await dapiClient.fetchDocuments(
+                profiles = await dapiClient.fetchDocuments(
                   dpp.getContract().getId(),
-                  'user',
+                  'profile',
                   {},
                 );
                 // waiting for Alice's profile modified
-                if (users.length === 2 && users[1].act === 1) {
+                if (profiles.length === 2 && profiles[1].act === 1) {
                     break;
                 } else {
                     await dapiClient.generate(1);
                 }
             }
 
-            expect(users).to.have.lengthOf(2);
-            expect(users[1]).to.be.deep.equal(aliceUser.toJSON());
+            expect(profiles).to.have.lengthOf(2);
+            expect(profiles[1]).to.be.deep.equal(aliceProfile.toJSON());
         });
     });
 

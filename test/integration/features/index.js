@@ -586,19 +586,19 @@ describe('features', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: Internal error'); // TODO post ticket
+      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: params.address should NOT be shorter than 26 characters');
       expect(spy.callCount).to.be.equal(1);
 
     });
 
-    it('should throw error when call getUTXO with empty address', async function it() {//TODO post ticket
+    it('should throw error when call getUTXO with empty address', async function it() {
       let err = '';
       try {
         await dapiClient.getUTXO("");
       } catch (e) {
         err = e;
       }
-      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: Internal error');
+      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: params.address should NOT be shorter than 26 characters');
       expect(spy.callCount).to.be.equal(1);
 
     });
@@ -623,6 +623,29 @@ describe('features', () => {
               }
             ]
           });
+    });
+
+
+    it('should getUTXO by array of addresses', async function it() {
+      const utxo = await dapiClient.getUTXO([faucetAddress]);
+      expect(spy.callCount).to.be.equal(1);
+      expect(utxo.items).to.have.lengthOf(1);
+      expect(utxo).to.be.deep.equal(
+        {
+          'totalItems': 1,
+          'from': 0,
+          'to': 1,
+          'items': [
+            {
+              'address': faucetAddress,
+              'txid': utxo.items[0].txid,
+              'outputIndex': 0,
+              'script': utxo.items[0].script,
+              'satoshis': 10000000000,
+              'height': utxo.items[0].height
+            }
+          ]
+        });
     });
 
     it('should getUTXO by address with params: 0 1', async function it() {
@@ -853,19 +876,19 @@ describe('features', () => {
         } catch (e) {
           err = e;
         }
-        expect(err.message).to.equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: Internal error'); // TODO post ticket
+        expect(err.message).to.equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: params.address should NOT be shorter than 26 characters');
         expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
 
       });
 
-        it('should throw error when call getTransactionsByAddress with empty address', async function it() {//TODO post ticket
+        it('should throw error when call getTransactionsByAddress with empty address', async function it() {
           let err = '';
           try {
             await dapiClient.getTransactionsByAddress("");
           } catch (e) {
             err = e;
           }
-          expect(err.message).to.equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: Internal error');
+          expect(err.message).to.equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: params.address should NOT be shorter than 26 characters');
           expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
 
         });
@@ -879,6 +902,16 @@ describe('features', () => {
           expect(transactionsByAddress.totalItems).to.be.equal(1);
 
         });
+
+    it('should getTransactionsByAddress by addresses as array', async function it() {
+      const transactionsByAddress = await dapiClient.getTransactionsByAddress([faucetAddress]);
+      expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
+      expect(transactionsByAddress.items).to.have.lengthOf(1);
+      expect(transactionsByAddress.from).to.be.equal(0);
+      expect(transactionsByAddress.to).to.be.equal(1);
+      expect(transactionsByAddress.totalItems).to.be.equal(1);
+
+    });
 
         it('should getTransactionsByAddress by address with params: 0 1', async function it() {
           const from = 0;
@@ -1012,7 +1045,7 @@ describe('features', () => {
 
     describe('many transactions', () => {
       it('should generate many inputs', async function it() {
-        this.timeout(1500000);
+        this.timeout(1600000);
         var privateKey = new PrivateKey("b9de6e778fe92aa7edb69395556f843f1dce0448350112e14906efc2a80fa61a", 'testnet');
         let inputs = await dapiClient.getUTXO(faucetAddress);
         const address = Address

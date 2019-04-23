@@ -1,9 +1,9 @@
 const jsutil = require('@dashevo/dashcore-lib').util.js;
 const preconditionsUtil = require('@dashevo/dashcore-lib').util.preconditions;
+const TxFilterGrpcClient = require('@dashevo/dapi-grpc');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
-const TxFilterGrpcClient = require('@dashevo/dapi-grpc');
 
 class DAPIClient {
   /**

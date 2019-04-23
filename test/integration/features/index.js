@@ -134,7 +134,7 @@ describe('features', () => {
   });
 
 
-  xdescribe('retry policy: dapi unavailable', () => {
+  describe('retry policy: dapi unavailable', () => {
     before(async () => {
       await masterNode.dapi.container.stop();
     });
@@ -418,7 +418,8 @@ describe('features', () => {
         .throw(Error, 'Invalid Argument: Expect timeout to be an unsigned integer');
     });
   });
-  xdescribe('retry policy: dapi started', () => {
+
+  describe('retry policy: dapi started', () => {
     it('should makeRequestWithRetries be called 1 times with default settings', async function it() {
       dapiClient = new DAPIClient({
         seeds,
@@ -1061,7 +1062,6 @@ describe('features', () => {
         await dapiClient.generate(20);
 
         for (let i = 0; i < 990; i++) {
-          console.log(i);
           let inputs = await dapiClient.getUTXO(faucetAddress);
           let inputTo = await dapiClient.getUTXO(address);
           // await dapiClient.generate(1);
@@ -1118,7 +1118,6 @@ describe('features', () => {
 
         //now we verify that getUTXO.items not empty when no new block generated
         const utxo = await dapiClient.getUTXO(faucetAddress);
-        console.log(utxo);
         expect(utxo).to.have.property('items');
         expect(utxo.items).to.have.lengthOf(991);
 

@@ -941,4 +941,16 @@ describe('api', () => {
       expect(res).to.be.deep.equal([]);
     });
   });
+
+  describe('.subscribeToTransactions', () => {
+    it('Should return a stream', async () => {
+      const dapi = new DAPIClient();
+      const filter = new Uint8Array([1]);
+      const stream = await dapi.subsribeToTransactions(filter);
+
+      expect(stream.on).to.be.a('function');
+      stream.cancel();
+      return;
+    });
+  });
 });

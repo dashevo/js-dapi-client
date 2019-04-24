@@ -316,11 +316,11 @@ class DAPIClient {
    * @returns {Promise<EventEmitter>}
    */
   async subsribeToTransactions(filter) {
-    const { BloomFilter } = TxFilterGrpcClient;
+    const { BloomFilter, TransactionsFilterStreamClient } = TxFilterGrpcClient;
     const bloomFilter = new BloomFilter();
     bloomFilter.setBytes(filter);
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
-    this.txFilterGrpcClient = new TxFilterGrpcClient(`${nodeToConnect.getIp()}:${this.DAPIPort}`);
+    this.txFilterGrpcClient = new TransactionsFilterStreamClient(`${nodeToConnect.getIp()}:${this.DAPIPort}`);
     return this.txFilterGrpcClient.getTransactionsByFilter(bloomFilter);
   }
 }

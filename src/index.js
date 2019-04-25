@@ -1,6 +1,6 @@
 const jsutil = require('@dashevo/dashcore-lib').util.js;
 const preconditionsUtil = require('@dashevo/dashcore-lib').util.preconditions;
-const TxFilterGrpcClient = require('@dashevo/dapi-grpc');
+const { BloomFilter, TransactionsFilterStreamClient } = require('@dashevo/dapi-grpc');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
@@ -313,15 +313,17 @@ class DAPIClient {
 
   /**
    * @param {Uint8Array} filter
-   * @returns {Promise<EventEmitter>}
+   * @returns {Promise<EventEmitter>|!grpc.web.ClientReadableStream<!RawTransaction>|undefined}
    */
-  async subsribeToTransactions(filter) {
-    const { BloomFilter, TransactionsFilterStreamClient } = TxFilterGrpcClient;
+  async subsribeToTransactionsByFilter(filter) {
     const bloomFilter = new BloomFilter();
     bloomFilter.setBytes(filter);
+
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
-    this.txFilterGrpcClient = new TransactionsFilterStreamClient(`${nodeToConnect.getIp()}:${this.DAPIPort}`);
-    return this.txFilterGrpcClient.getTransactionsByFilter(bloomFilter);
+
+    const client = new TransactionsFilterStreamClient(`${nodeToConnect.getIp()}:${this.DAPIPort}`);
+
+    return client.getTransactionsByFilter(bloomFilter);
   }
 }
 

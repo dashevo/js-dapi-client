@@ -1,7 +1,8 @@
-const DAPIClient = require('../../src/index');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
+const TxFilterGrpcClient = require('@dashevo/dapi-grpc');
+const chai = require('chai');
+const DAPIClient = require('../../src/index');
+const chaiAsPromised = require('chai-as-promised');
 const rpcClient = require('../../src/RPCClient');
 const config = require('../../src/config');
 const SMNListFixture = require('../fixtures/mnList');
@@ -943,14 +944,20 @@ describe('api', () => {
   });
 
   describe('.subscribeToTransactions', () => {
+    before(() => {
+      sinon
+        .stub(TxFilterGrpcClient.TransactionsFilterStreamClient.prototype, 'getTransactionsByFilter')
+        .returns({ on: function () {} });
+    });
+    after(() => {
+      TxFilterGrpcClient.TransactionsFilterStreamClient.prototype.getTransactionsByFilter.restore();
+    });
     it('Should return a stream', async () => {
       const dapi = new DAPIClient();
       const filter = new Uint8Array([1]);
       const stream = await dapi.subsribeToTransactions(filter);
 
       expect(stream.on).to.be.a('function');
-      stream.cancel();
-      return;
     });
   });
 });

@@ -110,12 +110,12 @@ describe('basic E2E tests', () => {
 
         [masterNode] = await startDapi.many(1);
 
-        const seeds = [{service: masterNode.dapi.container.getIp()}];
+        const seeds = [{service: masterNode.dapiCore.container.getIp()}];
         await masterNode.dashCore.getApi().generate(1500);
 
         dapiClient = new DAPIClient({
             seeds,
-            port: masterNode.dapi.options.getRpcPort(),
+            port: masterNode.dapiCore.options.getRpcPort(),
         });
 
         // dash-cli -regtest -rpcuser=dashrpc -rpcpassword=password -rpcport=21456 sendtoaddress ygPcCwVy7Fxg7ruxZzqVYdPLtvw7auHAFh 1

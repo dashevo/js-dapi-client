@@ -100,16 +100,16 @@ describe('features', () => {
 
     [masterNode] = await startDapi.many(1);
 
-    const seeds = [{ service: masterNode.dapi.container.getIp() }];
+    const seeds = [{ service: masterNode.dapiCore.container.getIp() }];
     await masterNode.dashCore.getApi()
       .generate(1500);
 
     dapiClient = new DAPIClient({
       seeds,
-      port: masterNode.dapi.options.getRpcPort(),
+      port: masterNode.dapiCore.options.getRpcPort(),
     });
 
-    insightURL = `http://127.0.0.1:${masterNode.insight.options.getApiPort()}/insight-api-dash`;
+    insightURL = `http://127.0.0.1:${masterNode.insightApi.options.getApiPort()}/insight-api-dash`;
 
     transactionIdSendToAddress = await masterNode.dashCore.getApi()
       .sendToAddress(faucetAddress, 100);
@@ -136,11 +136,11 @@ describe('features', () => {
 
   describe('retry policy: dapi unavailable', () => {
     before(async () => {
-      await masterNode.dapi.container.stop();
+      await masterNode.dapiCore.container.stop();
     });
 
     after(async () => {
-      await masterNode.dapi.container.start();
+      await masterNode.dapiCore.container.start();
       await wait(20000);
     });
 
@@ -148,7 +148,7 @@ describe('features', () => {
       let err = '';
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
       try {
@@ -170,7 +170,7 @@ describe('features', () => {
       let err = '';
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
       });
       let spy = sinon.spy(dapiClient, 'makeRequestToRandomDAPINode');
       try {
@@ -192,7 +192,7 @@ describe('features', () => {
       let err = '';
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
       });
       let spy = sinon.spy(dapiClient, 'getBestBlockHeight');
       try {
@@ -215,7 +215,7 @@ describe('features', () => {
       const retries = 10;
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         retries: retries
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -239,7 +239,7 @@ describe('features', () => {
       const retries = 0;
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         retries: retries
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -262,7 +262,7 @@ describe('features', () => {
       const retries = true;
       return expect(() => new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         retries: retries
       }))
         .to
@@ -274,7 +274,7 @@ describe('features', () => {
       const retries = 1;
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         retries: retries
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -297,7 +297,7 @@ describe('features', () => {
       const retries = -10;
       return expect(() => new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         retries: retries
       }))
         .to
@@ -308,7 +308,7 @@ describe('features', () => {
       const retries = 'str';
       return expect(() => new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         retries: retries
       }))
         .to
@@ -319,7 +319,7 @@ describe('features', () => {
       const timeout = 'str';
       return expect(() => new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         timeout: timeout
       }))
         .to
@@ -330,7 +330,7 @@ describe('features', () => {
       const timeout = '100';
       return expect(() => new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         timeout: timeout
       }))
         .to
@@ -342,7 +342,7 @@ describe('features', () => {
       const timeout = 100000;
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         timeout: timeout
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -366,7 +366,7 @@ describe('features', () => {
       const timeout = 1;
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         timeout: timeout
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -389,7 +389,7 @@ describe('features', () => {
       const timeout = -1;
       return expect(() => new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         timeout: timeout
       }))
         .to
@@ -400,7 +400,7 @@ describe('features', () => {
       const timeout = true;
       return expect(() => new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         timeout: timeout
       }))
         .to
@@ -411,7 +411,7 @@ describe('features', () => {
       const timeout = '100';
       return expect(() => new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         timeout: timeout
       }))
         .to
@@ -423,7 +423,7 @@ describe('features', () => {
     it('should makeRequestWithRetries be called 1 times with default settings', async function it() {
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
       await dapiClient.getBestBlockHeight();
@@ -436,7 +436,7 @@ describe('features', () => {
     it('should makeRequestToRandomDAPINode be called 0 times with default settings', async function it() {
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
       });
       let spy = sinon.spy(dapiClient, 'makeRequestToRandomDAPINode');
       expect(spy.callCount)
@@ -448,7 +448,7 @@ describe('features', () => {
     it('should getBestBlockHeight be called 1 times with default settings', async function it() {
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
       });
       let spy = sinon.spy(dapiClient, 'getBestBlockHeight');
       await dapiClient.getBestBlockHeight();
@@ -462,7 +462,7 @@ describe('features', () => {
       const retries = 10;
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         retries: retries
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -477,7 +477,7 @@ describe('features', () => {
       const retries = 0;
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         retries: retries
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -493,7 +493,7 @@ describe('features', () => {
       const retries = 1;
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         retries: retries
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -508,7 +508,7 @@ describe('features', () => {
       const timeout = 10000;
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         timeout: timeout
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -525,7 +525,7 @@ describe('features', () => {
       let err = '';
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
         timeout: timeout
       });
       let spy = sinon.spy(dapiClient, 'makeRequestWithRetries');
@@ -552,7 +552,7 @@ describe('features', () => {
     before(async () => {
       dapiClient = new DAPIClient({
         seeds,
-        port: masterNode.dapi.options.getRpcPort(),
+        port: masterNode.dapiCore.options.getRpcPort(),
       });
       spy = sinon.spy(dapiClient, 'getUTXO');
       spyGetTransactionsByAddress = sinon.spy(dapiClient, 'getTransactionsByAddress');

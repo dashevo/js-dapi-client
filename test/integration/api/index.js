@@ -99,15 +99,15 @@ describe('basicAPIs', () => {
 
         [masterNode] = await startDapi.many(1);
 
-        const seeds = [{service: masterNode.dapi.container.getIp()}];
+        const seeds = [{service: masterNode.dapiCore.container.getIp()}];
         await masterNode.dashCore.getApi().generate(1500);
 
         dapiClient = new DAPIClient({
             seeds,
-            port: masterNode.dapi.options.getRpcPort(),
+            port: masterNode.dapiCore.options.getRpcPort(),
         });
 
-        insightURL = `http://127.0.0.1:${masterNode.insight.options.getApiPort()}/insight-api`;
+        insightURL = `http://127.0.0.1:${masterNode.insightApi.options.getApiPort()}/insight-api`;
 
         transactionIdSendToAddress = await masterNode.dashCore.getApi().sendToAddress(faucetAddress, 100);
         await dapiClient.generate(20);

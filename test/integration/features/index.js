@@ -722,7 +722,7 @@ describe('features', () => {
       } catch (e) {
         err = e;
       }
-      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: Internal error'); //TODO: post ticket
+      expect(err.message).to.equal('DAPI RPC error: getUTXO: Error: DAPI RPC error: getUTXO: "from" (0) and "to" (1002) range should be less than or equal to 1000');
       expect(spy.callCount).to.be.equal(1);
     });
 
@@ -1062,9 +1062,7 @@ describe('features', () => {
         await dapiClient.generate(20);
 
         for (let i = 0; i < 990; i++) {
-          let inputs = await dapiClient.getUTXO(faucetAddress);
           let inputTo = await dapiClient.getUTXO(address);
-          // await dapiClient.generate(1);
           var transaction = new Transaction()
             .from(inputTo.items.slice(-1)[0])          // Feed information about what unspent outputs one can use
             .to(faucetAddress, 1000000)  // Add an output with the given amount of satoshis
@@ -1076,6 +1074,7 @@ describe('features', () => {
           await wait(1000);
 
         }
+        await dapiClient.generate(11);
         const utxo = await dapiClient.getUTXO(faucetAddress);
         expect(utxo.items).to.have.lengthOf(991);
       });
@@ -1119,7 +1118,7 @@ describe('features', () => {
         //now we verify that getUTXO.items not empty when no new block generated
         const utxo = await dapiClient.getUTXO(faucetAddress);
         expect(utxo).to.have.property('items');
-        expect(utxo.items).to.have.lengthOf(991);
+        expect(utxo.items).to.have.lengthOf(982);
 
       });
 
@@ -1218,21 +1217,31 @@ describe('features', () => {
         const to = 100;
         fromHeight = 1;
         toHeight = 3000;
-        const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
 
-        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
-        expect(transactionsByAddress.items).to.have.lengthOf(100);
+        let err = '';
+        try {
+          await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
+        } catch (e) {
+          err = e;
+        }
+        expect(err.message).to.equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: "from" (0) and "to" (100) range should be less than or equal to 50'); // range exceeds max of 1000. Code:3
+        expect(spy.callCount).to.be.equal(0);
       });
 
       it('should getTransactionsByAddress with params: 500 1000 1500 3000', async function it() {//TODO: internal error
-        const from = 500;
-        const to = 1000;
+        const from = 950;
+        const to = 1001;
         fromHeight = 1500;
         toHeight = 3000;
-        const transactionsByAddress = await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
 
-        expect(spyGetTransactionsByAddress.callCount).to.be.equal(1);
-        expect(transactionsByAddress.items).to.have.lengthOf(491);
+        let err = '';
+        try {
+          await dapiClient.getTransactionsByAddress(faucetAddress, from, to, fromHeight, toHeight);
+        } catch (e) {
+          err = e;
+        }
+        expect(err.message).to.equal('DAPI RPC error: getTransactionsByAddress: Error: DAPI RPC error: getTransactionsByAddress: "from" (950) and "to" (1001) range should be less than or equal to 50'); // range exceeds max of 1000. Code:3
+        expect(spy.callCount).to.be.equal(0);
       });
 
       it('should getTransactionsByAddress with params: 0 0 2000 3000', async function it() {

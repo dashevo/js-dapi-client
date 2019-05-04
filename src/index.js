@@ -305,11 +305,11 @@ class DAPIClient {
    * @param {Object} bloomFilter
    * @param {Array} bloomFilter.vData - The filter itself is simply a bit field of arbitrary
    * byte-aligned size. The maximum size is 36,000 bytes.
-   * @param {Number} bloomFilter.nHashFuncs - The number of hash functions to use in this filter.
+   * @param {number} bloomFilter.nHashFuncs - The number of hash functions to use in this filter.
    * The maximum value allowed in this field is 50.
-   * @param {Number} bloomFilter.nTweak - A random value to add to the seed value in the
+   * @param {number} bloomFilter.nTweak - A random value to add to the seed value in the
    * hash function used by the bloom filter.
-   * @param {Number} bloomFilter.nFlags - A set of flags that control how matched items
+   * @param {number} bloomFilter.nFlags - A set of flags that control how matched items
    * are added to the filter.
    * @returns {Promise<EventEmitter>|!grpc.web.ClientReadableStream<!RawTransaction>|undefined}
    */

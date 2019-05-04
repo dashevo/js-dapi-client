@@ -919,10 +919,11 @@ describe('api', () => {
 
     it('should return a stream', async () => {
       const client = new DAPIClient();
+
       const bloomFilter = {
         vData: new Array([1]),
         nHashFuncs: 10,
-        nTweak: Math.rand() * 10,
+        nTweak: Math.floor(Math.random() * 1000),
         nFlags: 1,
       };
 

@@ -303,7 +303,7 @@ class DAPIClient {
 
   /**
    * @param {Object} bloomFilter
-   * @param {Array} bloomFilter.filter - The filter itself is simply a bit field of arbitrary
+   * @param {Array} bloomFilter.vData - The filter itself is simply a bit field of arbitrary
    * byte-aligned size. The maximum size is 36,000 bytes.
    * @param {Number} bloomFilter.nHashFuncs - The number of hash functions to use in this filter.
    * The maximum value allowed in this field is 50.
@@ -315,7 +315,7 @@ class DAPIClient {
    */
   async subscribeToTransactionsByFilter(bloomFilter) {
     const filter = new BloomFilter();
-    filter.setFilter(bloomFilter.filter);
+    filter.setFilter(bloomFilter.vData);
     filter.setHashFunctionsCount(bloomFilter.nHashFuncs);
     filter.setTweak(bloomFilter.nTweak);
     filter.setFlags(bloomFilter.nFlags);

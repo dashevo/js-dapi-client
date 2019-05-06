@@ -42,21 +42,38 @@ class HeaderChainProvider {
    * @param {int} offset
    * @param {int} [extraHeight=0]
    *
-   * @returns {Promise<array>}
+   * @returns {Promise<void>}
    */
   async populateHeaderChain(
     api, headerChain, fromHeight, toHeight,
-    step, offset, extraHeight = 0,
+    step, offset, retryCount = 0, extraHeight = 0,
   ) {
     for (let height = fromHeight; height < toHeight - extraHeight; height += step) {
       /* eslint-disable-next-line no-await-in-loop */
       const newHeaders = await api.getBlockHeaders(height, step);
-      headerChain.addHeaders(newHeaders);
+      try {
+        headerChain.addHeaders(newHeaders);
+      } catch (e) {
+        if (retryCount > 0) {
+          /* eslint-disable-next-line no-await-in-loop */
+          await this.populateHeaderChain(
+            api, headerChain, fromHeight, toHeight, step, offset, retryCount - 1,
+          );
+        }
+      }
     }
 
     if (extraHeight > 0) {
       const extraHeaders = await api.getBlockHeaders(toHeight, extraHeight);
-      headerChain.addHeaders(extraHeaders);
+      try {
+        headerChain.addHeaders(extraHeaders);
+      } catch (e) {
+        if (retryCount > 0) {
+          await this.populateHeaderChain(
+            api, headerChain, fromHeight, toHeight, step, offset, retryCount - 1, extraHeight,
+          );
+        }
+      }
     }
   }
 
@@ -109,7 +126,7 @@ class HeaderChainProvider {
 
       await this.populateHeaderChain(
         api, headerChain, localFromHeight,
-        localToHeight, step, fromHeight, heightExtra,
+        localToHeight, step, fromHeight, 5, heightExtra,
       );
     });
 

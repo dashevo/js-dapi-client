@@ -12,7 +12,12 @@ const {expect} = chai;
 
 const MockedMNList = SMNListFixture.getFirstDiff();
 
-const masternodeIps = SMNListFixture.getFirstDiff().mnList.map(masternode => masternode.service.substring(0, masternode.service.lastIndexOf(":")).replace("[", "").replace("]", ""));
+const masternodeIps = SMNListFixture.getFirstDiff().mnList.map(masternode => {
+      let ip = masternode.service.substring(0, masternode.service.lastIndexOf(':'));
+      // parse ipv6 address
+      return ip.replace('[', '')
+        .replace(']', '');
+  });
 
 describe('MNDiscovery', async () => {
 
@@ -91,62 +96,54 @@ describe('MNDiscovery', async () => {
             const discovery = new MNDiscovery();
             sinon.spy(discovery.masternodeListProvider, 'getMNList');
 
-            var ips = [];
-            async function verifyRandomf(array) {
-                for (const item of array) {
-                    let randomMasternode = await discovery.getRandomMasternode();
-                    expect(masternodeIps).to.contain(randomMasternode.service.split(':')[0]);
-                    expect(randomMasternode.proRegTxHash).to.be.a('string');
-                    expect(randomMasternode.confirmedHash).to.be.a('string');
-                    expect(randomMasternode.votingAddress).to.be.a('string');
-                    expect(randomMasternode.pubKeyOperator).to.be.a('string');
-                    expect(randomMasternode.service).to.be.a('string');
-                    expect(randomMasternode.isValid).to.be.a('boolean');
-                    ips.push(randomMasternode.service.split(':')[0]);
-                }
-                expect(discovery.masternodeListProvider.getMNList.callCount).to.equal(array.length);
-                let uniqueIps = ips.filter(function (elem, pos) {
-                    return ips.indexOf(elem) == pos;
-                });
-                expect(uniqueIps.length > 1).to.be.true;
-                discovery.masternodeListProvider.getMNList.restore();
+            let ips = [];
+            const numRequests = 3;
+            for (let i = 0; i < numRequests; i++) {
+                let randomMasternode = await discovery.getRandomMasternode();
+                expect(masternodeIps).to.contain(randomMasternode.service.split(':')[0]);
+                expect(randomMasternode.proRegTxHash).to.be.a('string');
+                expect(randomMasternode.confirmedHash).to.be.a('string');
+                expect(randomMasternode.votingAddress).to.be.a('string');
+                expect(randomMasternode.pubKeyOperator).to.be.a('string');
+                expect(randomMasternode.service).to.be.a('string');
+                expect(randomMasternode.isValid).to.be.a('boolean');
+                ips.push(randomMasternode.service.split(':')[0]);
             }
-
-            await verifyRandomf([0, 1, 2, 3]);
+            expect(discovery.masternodeListProvider.getMNList.callCount).to.equal(numRequests);
+            let uniqueIps = ips.filter(function (elem, pos) {
+                return ips.indexOf(elem) == pos;
+            });
+            expect(uniqueIps.length > 1).to.be.true;
+            discovery.masternodeListProvider.getMNList.restore();
         });
-
 
         it('Should excludedIps from MN list', async () => {
             const discovery = new MNDiscovery();
             sinon.spy(discovery.masternodeListProvider, 'getMNList');
 
-            var ips = [];
-            async function verifyRandomf(array) {
-                //we add first third of ips in excluded list
-                const excludeIps = masternodeIps.slice(0, masternodeIps.length/3);
-                for (const item of array) {
-                    let randomMasternode = await discovery.getRandomMasternode(excludeIps);
-                    expect(masternodeIps).to.contain(randomMasternode.service.split(':')[0]);
-                    expect(randomMasternode.proRegTxHash).to.be.a('string');
-                    expect(randomMasternode.confirmedHash).to.be.a('string');
-                    expect(randomMasternode.votingAddress).to.be.a('string');
-                    expect(randomMasternode.pubKeyOperator).to.be.a('string');
-                    expect(randomMasternode.service).to.be.a('string');
-                    expect(randomMasternode.isValid).to.be.a('boolean');
-                    ips.push(randomMasternode.service.split(':')[0]);
-                }
-                expect(discovery.masternodeListProvider.getMNList.callCount).to.equal(array.length);
-                let uniqueIps = ips.filter(function (elem, pos) {
-                    return ips.indexOf(elem) == pos;
-                });
-                for (const ip of uniqueIps) {
-                    //excludeIps should not contain random master nodes
-                    expect(excludeIps.indexOf(ip)).to.equal(-1);
-                }
-                discovery.masternodeListProvider.getMNList.restore();
+            let ips = [];
+            const excludeIps = masternodeIps.slice(0, masternodeIps.length/3);
+            const numRequests = 3;
+            for (let i = 0; i < numRequests; i++) {
+                let randomMasternode = await discovery.getRandomMasternode(excludeIps);
+                expect(masternodeIps).to.contain(randomMasternode.service.split(':')[0]);
+                expect(randomMasternode.proRegTxHash).to.be.a('string');
+                expect(randomMasternode.confirmedHash).to.be.a('string');
+                expect(randomMasternode.votingAddress).to.be.a('string');
+                expect(randomMasternode.pubKeyOperator).to.be.a('string');
+                expect(randomMasternode.service).to.be.a('string');
+                expect(randomMasternode.isValid).to.be.a('boolean');
+                ips.push(randomMasternode.service.split(':')[0]);
             }
-
-            await verifyRandomf([0, 1, 2, 3]);
+            expect(discovery.masternodeListProvider.getMNList.callCount).to.equal(numRequests);
+            let uniqueIps = ips.filter(function (elem, pos) {
+                return ips.indexOf(elem) == pos;
+            });
+            for (const ip of uniqueIps) {
+                //excludeIps should not contain random master nodes
+                expect(excludeIps.indexOf(ip)).to.equal(-1);
+            }
+            discovery.masternodeListProvider.getMNList.restore();
         });
     });
 

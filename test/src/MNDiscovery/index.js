@@ -12,7 +12,7 @@ const {expect} = chai;
 
 const MockedMNList = SMNListFixture.getFirstDiff();
 
-const masternodeIps = SMNListFixture.getFirstDiff().mnList.map(masternode => {
+const masternodeIps = MockedMNList.mnList.map(masternode => {
       let ip = masternode.service.substring(0, masternode.service.lastIndexOf(':'));
       // parse ipv6 address
       return ip.replace('[', '')
@@ -33,7 +33,7 @@ describe('MNDiscovery', async () => {
             RPCClientStub
                 .withArgs({host: '127.0.0.1', port: config.Api.port}, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
                 .returns(new Promise((resolve) => {
-                    resolve(SMNListFixture.getFirstDiff());
+                    resolve(MockedMNList);
                 }));
             RPCClientStub
               .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getBlockHash', { height: genesisHeight })
@@ -116,6 +116,49 @@ describe('MNDiscovery', async () => {
             expect(uniqueIps.length > 1).to.be.true;
             discovery.masternodeListProvider.getMNList.restore();
         });
+
+        it('Should excludedIps remain even needsUpdate is called', async () => {
+            const discovery = new MNDiscovery();
+            sinon.spy(discovery.masternodeListProvider, 'getMNList');
+            sinon.spy(discovery.masternodeListProvider, 'updateMNList');
+
+            let ips = [];
+            const excludeIps = masternodeIps.slice(0, masternodeIps.length/3);
+
+            // for every request we update MNList
+            const needsUpdateStub = sinon.stub(discovery.masternodeListProvider, 'needsUpdate');
+            needsUpdateStub.returns(true);
+
+            //inside updateMNList we stub getSimplifiedMNListDiff to get _updated mnList
+            const getSimplifiedMNListDiffStub = sinon.stub(discovery.masternodeListProvider, 'getSimplifiedMNListDiff');
+            getSimplifiedMNListDiffStub.returns(await new Promise((resolve) => {
+                resolve(MockedMNList)}));
+
+            const numRequests = 10;
+            for (let i = 0; i < numRequests; i++) {
+                // await new Promise(resolve => setTimeout(resolve, 110));
+                let randomMasternode = await discovery.getRandomMasternode(excludeIps);
+                expect(masternodeIps).to.contain(randomMasternode.service.split(':')[0]);
+                expect(randomMasternode.proRegTxHash).to.be.a('string');
+                expect(randomMasternode.confirmedHash).to.be.a('string');
+                expect(randomMasternode.votingAddress).to.be.a('string');
+                expect(randomMasternode.pubKeyOperator).to.be.a('string');
+                expect(randomMasternode.service).to.be.a('string');
+                expect(randomMasternode.isValid).to.be.a('boolean');
+                ips.push(randomMasternode.service.split(':')[0]);
+            }
+            expect(discovery.masternodeListProvider.getMNList.callCount).to.equal(numRequests);
+            expect(discovery.masternodeListProvider.updateMNList.callCount).to.equal(numRequests);
+            let uniqueIps = ips.filter(function (elem, pos) {
+                return ips.indexOf(elem) == pos;
+            });
+            for (const ip of uniqueIps) {
+                //excludeIps should not contain random master nodes even when updateMNList returns nodes with excludeIps
+                expect(excludeIps.indexOf(ip)).to.equal(-1);
+            }
+            discovery.masternodeListProvider.getMNList.restore();
+        });
+
 
         it('Should excludedIps from MN list', async () => {
             const discovery = new MNDiscovery();

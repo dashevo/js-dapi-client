@@ -19,18 +19,21 @@ const HeaderChainProvider = require('./HeaderChainProvider');
 class HeaderChainSync {
   /**
    * @class
+   * @param {string} network - required. Specifies Dash network type
    * @param {Array} [seeds] - optional. Seeds to use. If nothing passed, default seeds will be used.
    * Default will be fine in most of situations.
    * @param {number} [port] - optional. Default port for connection to the DAPI
    */
-  constructor(seeds, port) {
+  constructor(network, seeds, port) {
+    this.network = network;
+
     /**
      * @private
      * @protected
      * For test purposes only: tests wraps .getMNList() method of that object to ensure
      * it was called.
      */
-    this.headerChainProvider = new HeaderChainProvider(seeds, port);
+    this.headerChainProvider = new HeaderChainProvider(network, seeds, port);
     /**
      * @private
      * @protected
@@ -54,7 +57,7 @@ class HeaderChainSync {
    * @return void
    */
   reset() {
-    this.headerChainProvider = new HeaderChainProvider(this.seeds);
+    this.headerChainProvider = new HeaderChainProvider(this.network, this.seeds);
   }
 }
 

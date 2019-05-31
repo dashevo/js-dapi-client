@@ -14,10 +14,13 @@ const constants = require('../constants');
  */
 class HeaderChainProvider {
   /**
+   * @param {string} network
    * @param {SimplifiedMNListEntry[]} seeds
    * @param {number} DAPIPort
    */
-  constructor(seeds, DAPIPort = config.Api.port) {
+  constructor(network, seeds, DAPIPort = config.Api.port) {
+    this.network = network;
+
     const seedsIsArray = Array.isArray(seeds);
 
     if (seeds && !seedsIsArray) {
@@ -108,7 +111,7 @@ class HeaderChainProvider {
 
     const numConfirms = 10000;
 
-    const headerChain = new SpvChain('custom_genesis', numConfirms, fromBlockHeader);
+    const headerChain = new SpvChain(this.network, numConfirms, fromBlockHeader);
 
     const heightDiff = toHeight - fromHeight;
 

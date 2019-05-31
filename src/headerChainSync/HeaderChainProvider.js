@@ -36,18 +36,23 @@ class HeaderChainProvider {
    *
    * @param {DAPIClient} api
    * @param {SpvChain} headerChain
-   * @param {int} fromHeight
-   * @param {int} toHeight
-   * @param {int} step
-   * @param {int} offset
-   * @param {int} [extraHeight=0]
+   * @param {object} options
+   * @param {int} options.fromHeight
+   * @param {int} options.toHeight
+   * @param {int} options.step
+   * @param {int} options.offset
+   * @param {int} [options.retryCount=0]
+   * @param {int} [options.extraHeight=0]
    *
    * @returns {Promise<void>}
    */
   async populateHeaderChain(
-    api, headerChain, fromHeight, toHeight,
-    step, offset, retryCount = 0, extraHeight = 0,
+    api, headerChain, options,
   ) {
+    const {
+      fromHeight, toHeight, step, offset, retryCount = 0, extraHeight = 0,
+    } = options;
+
     for (let height = fromHeight; height < toHeight - extraHeight; height += step) {
       /* eslint-disable-next-line no-await-in-loop */
       const newHeaders = await api.getBlockHeaders(height, step);
@@ -57,7 +62,9 @@ class HeaderChainProvider {
         if (retryCount > 0) {
           /* eslint-disable-next-line no-await-in-loop */
           await this.populateHeaderChain(
-            api, headerChain, fromHeight, toHeight, step, offset, retryCount - 1,
+            api, headerChain, {
+              fromHeight, toHeight, step, offset, retryCount: retryCount - 1,
+            },
           );
         }
       }
@@ -70,7 +77,10 @@ class HeaderChainProvider {
       } catch (e) {
         if (retryCount > 0) {
           await this.populateHeaderChain(
-            api, headerChain, fromHeight, toHeight, step, offset, retryCount - 1, extraHeight,
+            api, headerChain,
+            {
+              fromHeight, toHeight, step, offset, retryCount: retryCount - 1, extraHeight,
+            },
           );
         }
       }
@@ -125,8 +135,14 @@ class HeaderChainProvider {
         ? heightDiff % Math.min(mnListEntries.length, step) : 0;
 
       await this.populateHeaderChain(
-        api, headerChain, localFromHeight,
-        localToHeight, step, fromHeight, 5, heightExtra,
+        api, headerChain, {
+          fromHeight: localFromHeight,
+          toHeight: localToHeight,
+          step,
+          offset: fromHeight,
+          retryCount: 5,
+          extraHeight: heightExtra,
+        },
       );
     });
 

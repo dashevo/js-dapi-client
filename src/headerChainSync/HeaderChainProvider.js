@@ -106,9 +106,6 @@ class HeaderChainProvider {
     const fromBlockHeader = await api.getBlockHeader(fromBlockHash);
     const toHeight = await api.getBestBlockHeight();
 
-    fromBlockHeader.prevHash = '0000000000000000000000000000000000000000000000000000000000000000';
-    fromBlockHeader.bits = +(`0x${fromBlockHeader.bits}`);
-
     const numConfirms = 10000;
 
     const headerChain = new SpvChain(this.network, numConfirms, fromBlockHeader);

@@ -1,5 +1,6 @@
 const jsutil = require('@dashevo/dashcore-lib').util.js;
 const preconditionsUtil = require('@dashevo/dashcore-lib').util.preconditions;
+const { BloomFilter, TransactionsFilterStreamClient } = require('@dashevo/dapi-grpc');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
@@ -9,13 +10,15 @@ class DAPIClient {
    * @param options
    * @param {Array<Object>} [options.seeds] - seeds. If no seeds provided
    * default seed will be used.
-   * @param {number} [options.port] - default port for connection to the DAPI
-   * @param {number} [options.timeout] - timeout for connection to the DAPI
-   * @param {number} [options.retries] - num of retries if there is no response from DAPI node
+   * @param {number} [options.port=3000] - default port for connection to the DAPI
+   * @param {number} [options.nativeGrpcPort=3010] - Native GRPC port for connection to the DAPI
+   * @param {number} [options.timeout=2000] - timeout for connection to the DAPI
+   * @param {number} [options.retries=3] - num of retries if there is no response from DAPI node
    */
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
+    this.nativeGrpcPort = options.nativeGrpcPort || config.grpc.nativePort;
     this.timeout = options.timeout || 2000;
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.timeout),
       'Expect timeout to be an unsigned integer');
@@ -150,12 +153,13 @@ class DAPIClient {
   getBlockHeader(blockHash) { return this.makeRequestToRandomDAPINode('getBlockHeader', { blockHash }); }
 
   /**
-   * Returns block headers from [offset] with length [limit], where limit is <= 25
+   * Returns block headers from [offset] with length [limit], where limit is <= 2000
    * @param {number} offset
-   * @param {number} limit
+   * @param {number} [limit=1]
+   * @param {boolean} [verbose=false]
    * @returns {Promise<[objects]>} - array of header objects
    */
-  getBlockHeaders(offset, limit) { return this.makeRequestToRandomDAPINode('getBlockHeaders', { offset, limit }); }
+  getBlockHeaders(offset, limit = 1, verbose = false) { return this.makeRequestToRandomDAPINode('getBlockHeaders', { offset, limit, verbose }); }
 
   // TODO: Do we really need it this way?
   /**
@@ -297,17 +301,45 @@ class DAPIClient {
   // Here go methods that used in VMN. Most of this methods will work only in regtest mode
   searchUsers(pattern, limit = 10, offset = 0) { return this.makeRequestToRandomDAPINode('searchUsers', { pattern, limit, offset }); }
 
+  /**
+   * @param {Object} bloomFilter
+   * @param {Array} bloomFilter.vData - The filter itself is simply a bit field of arbitrary
+   * byte-aligned size. The maximum size is 36,000 bytes.
+   * @param {number} bloomFilter.nHashFuncs - The number of hash functions to use in this filter.
+   * The maximum value allowed in this field is 50.
+   * @param {number} bloomFilter.nTweak - A random value to add to the seed value in the
+   * hash function used by the bloom filter.
+   * @param {number} bloomFilter.nFlags - A set of flags that control how matched items
+   * are added to the filter.
+   * @returns {Promise<EventEmitter>|!grpc.web.ClientReadableStream<!RawTransaction>|undefined}
+   */
+  async subscribeToTransactionsByFilter(bloomFilter) {
+    const filter = new BloomFilter();
+    filter.setFilter(bloomFilter.vData);
+    filter.setHashFunctionsCount(bloomFilter.nHashFuncs);
+    filter.setTweak(bloomFilter.nTweak);
+    filter.setFlags(bloomFilter.nFlags);
 
-  // Temp methods for SPV testing/POC
-  // In future SPV will choose a specific node and stick with
-  // the node for as long as possible for SPV interaction (to prevent dapi chain rescans)
-  loadBloomFilter(filter) { return this.makeRequestToRandomDAPINode('loadBloomFilter', { filter }); }
+    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-  addToBloomFilter(originalFilter, element) { return this.makeRequestToRandomDAPINode('addToBloomFilter', { originalFilter, element }); }
+    const client = new TransactionsFilterStreamClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
 
-  clearBloomFilter(filter) { return this.makeRequestToRandomDAPINode('clearBloomFilter', { filter }); }
+    return client.getTransactionsByFilter(filter);
+  }
 
-  getSpvData(filter) { return this.makeRequestToRandomDAPINode('getSpvData', { filter }); }
+  /**
+   * @private
+   * @return {number}
+   */
+  getGrpcPort() {
+    if (typeof process !== 'undefined'
+      && process.versions != null
+      && process.versions.node != null) {
+      return this.nativeGrpcPort;
+    }
+
+    return this.DAPIPort;
+  }
 }
 
 module.exports = DAPIClient;

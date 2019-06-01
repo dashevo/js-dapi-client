@@ -1,7 +1,9 @@
-const DAPIClient = require('../../src/index');
-const chai = require('chai');
-const chaiAsPromised = require('chai-as-promised');
 const sinon = require('sinon');
+const TxFilterGrpcClient = require('@dashevo/dapi-grpc');
+const chai = require('chai');
+const { EventEmitter } = require('events');
+const DAPIClient = require('../../src/index');
+const chaiAsPromised = require('chai-as-promised');
 const rpcClient = require('../../src/RPCClient');
 const config = require('../../src/config');
 const SMNListFixture = require('../fixtures/mnList');
@@ -702,16 +704,6 @@ describe('api', () => {
         });
     });
   });
-  describe('.getSpvData', () => {
-    it('Should return getSpvData', async () => {
-      const dapi = new DAPIClient();
-      const filter = '';
-      const res = await dapi.getSpvData(filter);
-      expect(res).to.be.deep.equal({
-          "hash": validBlockHash
-        });
-    });
-  });
   describe('.block.getBestBlockHash', () => {
     it('Should return chaintip hash', async () => {
       const dapi = new DAPIClient();
@@ -912,33 +904,32 @@ describe('api', () => {
     });
   });
 
-  describe('.spv.loadBloomFilter', () => {
-    it('Should return loadBloomFilter', async () => {
-      const dapi = new DAPIClient();
-      const filter = '';
-      const res = await dapi.loadBloomFilter(filter);
-      // TODO: implement real unit test
-      expect(res).to.be.deep.equal([]);
+  describe('.subscribeToTransactionsByFilter', () => {
+    let stream;
+    beforeEach(() => {
+      stream = new EventEmitter();
+      sinon
+        .stub(TxFilterGrpcClient.TransactionsFilterStreamClient.prototype, 'getTransactionsByFilter')
+        .returns(stream);
     });
-  });
 
-  describe('.spv.addToBloomFilter', () => {
-    it('Should return addToBloomFilter', async () => {
-      const dapi = new DAPIClient();
-      const filter = '';
-      const res = await dapi.addToBloomFilter(filter);
-      // TODO: implement real unit test
-      expect(res).to.be.deep.equal([]);
+    afterEach(() => {
+      TxFilterGrpcClient.TransactionsFilterStreamClient.prototype.getTransactionsByFilter.restore();
     });
-  });
 
-  describe('.spv.clearBloomFilter', () => {
-    it('Should return clearBloomFilter', async () => {
-      const dapi = new DAPIClient();
-      const filter = '';
-      const res = await dapi.clearBloomFilter(filter);
-      // TODO: implement real unit test
-      expect(res).to.be.deep.equal([]);
+    it('should return a stream', async () => {
+      const client = new DAPIClient();
+
+      const bloomFilter = {
+        vData: new Array([1]),
+        nHashFuncs: 10,
+        nTweak: Math.floor(Math.random() * 1000),
+        nFlags: 1,
+      };
+
+      const actualStream = await client.subscribeToTransactionsByFilter(bloomFilter);
+
+      expect(actualStream).to.be.equal(stream);
     });
   });
 });

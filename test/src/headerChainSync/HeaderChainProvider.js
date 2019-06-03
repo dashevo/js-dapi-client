@@ -1,36 +1,18 @@
 const sinon = require('sinon');
-const proxyquire = require('proxyquire');
 const dashcoreLib = require('@dashevo/dashcore-lib')
+
+const HeaderChainProvider = require('../../../src/headerChainSync/HeaderChainProvider');
+const DAPIClient = require('../../../src/index');
+const MNDiscovery = require('../../../src/MNDiscovery/index');
 
 const RPCClient = require('../../../src/RPCClient');
 
 const MNListFixture = require('../../fixtures/mnList');
 const { testnet2: testnetHeaders } = require('../../fixtures/headers');
 
-class MNDiscoveryMock {
-  async getRandomMasternodes() {
-    return [
-      MNListFixture.getFirstDiff().mnList[0],
-      MNListFixture.getFirstDiff().mnList[1],
-      MNListFixture.getFirstDiff().mnList[2],
-      MNListFixture.getFirstDiff().mnList[3],
-      MNListFixture.getFirstDiff().mnList[4],
-    ];
-  }
-
-  async getRandomMasternode() {
-    return MNListFixture.getFirstDiff()
-      .mnList[0];
-  }
-
-  async getMNList() {
-    return [];
-  }
-}
-
 describe('HeaderChainProvider', () => {
   let requestStub;
-  let HeaderChainProvider;
+  let getRandomMasternodeStub;
 
   before(() => {
     requestStub = sinon.stub(RPCClient, 'request');
@@ -47,15 +29,8 @@ describe('HeaderChainProvider', () => {
       .withArgs({ host: sinon.match.any, port: sinon.match.any }, 'getBestBlockHeight', sinon.match.any)
       .resolves(25);
 
-    const API = proxyquire('../../../src/index', {
-      './MNDiscovery/index': MNDiscoveryMock,
-      './RPCClient': RPCClient,
-    });
-
-    HeaderChainProvider = proxyquire('../../../src/headerChainSync/HeaderChainProvider', {
-      '../MNDiscovery/index': MNDiscoveryMock,
-      '../': API,
-    });
+    getRandomMasternodeStub = sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
+      .resolves(MNListFixture.getFirstDiff().mnList[0]);
   });
 
   describe('#sync', () => {
@@ -64,7 +39,7 @@ describe('HeaderChainProvider', () => {
         .withArgs({ host: sinon.match.any, port: sinon.match.any }, 'getBlockHeaders', sinon.match.any)
         .resolves(testnetHeaders.slice(1, 500));
 
-      const provider = new HeaderChainProvider('testnet', []);
+      const provider = new HeaderChainProvider('testnet', new DAPIClient({}), 5);
       const longestChain = await provider.sync(0);
 
       expect(longestChain.length).to.equal(500);
@@ -73,5 +48,6 @@ describe('HeaderChainProvider', () => {
 
   after(() => {
     RPCClient.request.restore();
+    getRandomMasternodeStub.restore();
   });
 });

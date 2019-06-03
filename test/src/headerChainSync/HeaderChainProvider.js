@@ -9,7 +9,13 @@ const { testnet2: testnetHeaders } = require('../../fixtures/headers');
 
 class MNDiscoveryMock {
   async getRandomMasternodes() {
-    return [MNListFixture.getFirstDiff().mnList[0]];
+    return [
+      MNListFixture.getFirstDiff().mnList[0],
+      MNListFixture.getFirstDiff().mnList[1],
+      MNListFixture.getFirstDiff().mnList[2],
+      MNListFixture.getFirstDiff().mnList[3],
+      MNListFixture.getFirstDiff().mnList[4],
+    ];
   }
 
   async getRandomMasternode() {

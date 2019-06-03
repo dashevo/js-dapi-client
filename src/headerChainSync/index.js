@@ -20,12 +20,12 @@ class HeaderChainSync {
   /**
    * @class
    * @param {string} network - required. Specifies Dash network type
-   * @param {Array} [seeds] - optional. Seeds to use. If nothing passed, default seeds will be used.
-   * Default will be fine in most of situations.
-   * @param {number} [port] - optional. Default port for connection to the DAPI
+   * @param {DAPIClient} api - required. Specifies DAPI client instance
+   * @param {int} mnListLength - required. Specifies the length of masternode list
    */
-  constructor(network, seeds, port) {
+  constructor(network, api, mnListLength) {
     this.network = network;
+    this.mnListLength = mnListLength;
 
     /**
      * @private
@@ -33,13 +33,13 @@ class HeaderChainSync {
      * For test purposes only: tests wraps .getMNList() method of that object to ensure
      * it was called.
      */
-    this.headerChainProvider = new HeaderChainProvider(network, seeds, port);
+    this.headerChainProvider = new HeaderChainProvider(network, api, mnListLength);
     /**
      * @private
      * @protected
-     * @type {Array}
+     * @type {DAPIClient}
      */
-    this.seeds = seeds;
+    this.api = api;
   }
 
   /**
@@ -57,7 +57,7 @@ class HeaderChainSync {
    * @return void
    */
   reset() {
-    this.headerChainProvider = new HeaderChainProvider(this.network, this.seeds);
+    this.headerChainProvider = new HeaderChainProvider(this.network, this.api, this.mnListLength);
   }
 }
 

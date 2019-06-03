@@ -4,10 +4,7 @@
  * @module HeaderChainProvider
  */
 const { SpvChain } = require('@dashevo/dash-spv');
-const Api = require('../');
-const MNDiscovery = require('../MNDiscovery/index');
-const config = require('../config');
-const constants = require('../constants');
+const range = require('lodash/range');
 
 /**
  * This class syncs the header chain in a parallel manner across masternodes
@@ -15,21 +12,13 @@ const constants = require('../constants');
 class HeaderChainProvider {
   /**
    * @param {string} network
-   * @param {SimplifiedMNListEntry[]} seeds
-   * @param {number} DAPIPort
+   * @param {DAPIClient} api
+   * @param {int} mnListLength
    */
-  constructor(network, seeds, DAPIPort = config.Api.port) {
+  constructor(network, api, mnListLength) {
     this.network = network;
-
-    const seedsIsArray = Array.isArray(seeds);
-
-    if (seeds && !seedsIsArray) {
-      throw new Error('seed is not an array');
-    }
-
-    this.seeds = seedsIsArray ? seeds.slice() : config.DAPIDNSSeeds.slice();
-    this.DAPIPort = DAPIPort;
-    this.MNDiscovery = new MNDiscovery(this.seeds, this.DAPIPort);
+    this.api = api;
+    this.mnListLength = mnListLength;
   }
 
   /**
@@ -37,7 +26,6 @@ class HeaderChainProvider {
    *
    * Retrieve headers for a slice and populate header chain
    *
-   * @param {DAPIClient} api
    * @param {SpvChain} headerChain
    * @param {object} options
    * @param {int} options.fromHeight
@@ -49,23 +37,21 @@ class HeaderChainProvider {
    *
    * @returns {Promise<void>}
    */
-  async populateHeaderChain(
-    api, headerChain, options,
-  ) {
+  async populateHeaderChain(headerChain, options) {
     const {
       fromHeight, toHeight, step, offset, retryCount = 0, extraHeight = 0,
     } = options;
 
     for (let height = fromHeight; height < toHeight - extraHeight; height += step) {
       /* eslint-disable-next-line no-await-in-loop */
-      const newHeaders = await api.getBlockHeaders(height, step);
+      const newHeaders = await this.api.getBlockHeaders(height, step);
       try {
         headerChain.addHeaders(newHeaders);
       } catch (e) {
         if (retryCount > 0) {
           /* eslint-disable-next-line no-await-in-loop */
           await this.populateHeaderChain(
-            api, headerChain, {
+            headerChain, {
               fromHeight, toHeight, step, offset, retryCount: retryCount - 1,
             },
           );
@@ -74,13 +60,13 @@ class HeaderChainProvider {
     }
 
     if (extraHeight > 0) {
-      const extraHeaders = await api.getBlockHeaders(toHeight, extraHeight);
+      const extraHeaders = await this.api.getBlockHeaders(toHeight, extraHeight);
       try {
         headerChain.addHeaders(extraHeaders);
       } catch (e) {
         if (retryCount > 0) {
           await this.populateHeaderChain(
-            api, headerChain,
+            headerChain,
             {
               fromHeight, toHeight, step, offset, retryCount: retryCount - 1, extraHeight,
             },
@@ -95,16 +81,14 @@ class HeaderChainProvider {
    *
    * Build the header chain for a specified slice
    *
-   * @param {DAPIClient} api
-   * @param {SimplifiedMNListEntry[]} mnListEntries
    * @param {int} fromHeight
 
    * @return {Promise<SpvChain>}
    */
-  async buildHeaderChain(api, mnListEntries, fromHeight) {
-    const fromBlockHash = await api.getBlockHash(fromHeight);
-    const fromBlockHeader = await api.getBlockHeader(fromBlockHash);
-    const toHeight = await api.getBestBlockHeight();
+  async buildHeaderChain(fromHeight) {
+    const fromBlockHash = await this.api.getBlockHash(fromHeight);
+    const fromBlockHeader = await this.api.getBlockHeader(fromBlockHash);
+    const toHeight = await this.api.getBestBlockHeight();
 
     const numConfirms = 10000;
 
@@ -112,7 +96,7 @@ class HeaderChainProvider {
 
     const heightDiff = toHeight - fromHeight;
 
-    const heightDelta = Math.floor(heightDiff / mnListEntries.length);
+    const heightDelta = Math.floor(heightDiff / this.mnListLength);
     const step = Math.min(heightDelta, 2000);
 
     /**
@@ -122,20 +106,20 @@ class HeaderChainProvider {
      *   /    \   /    \   /       \
      *  |  |  |  |  |  |  |  |  |  |
      *  1  2  3  1  2  3  1  2  3  4
-     * [1, 2, 3, 4, 5, 6, 7,height 8, 9, 10] - header chain
+     * [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] - header chain
      *
      */
 
-    const promises = mnListEntries.map(async (mnListEntry, index) => {
+    const promises = range(this.mnListLength).map(async (index) => {
       const localFromHeight = fromHeight + (heightDelta * index);
       const localToHeight = localFromHeight + heightDelta;
 
       // Ask last node a few extra headers
-      const heightExtra = (index === mnListEntries.length - 1)
-        ? heightDiff % Math.min(mnListEntries.length, step) : 0;
+      const heightExtra = (index === this.mnListLength - 1)
+        ? heightDiff % Math.min(this.mnListLength, step) : 0;
 
       await this.populateHeaderChain(
-        api, headerChain, {
+        headerChain, {
           fromHeight: localFromHeight,
           toHeight: localToHeight,
           step,
@@ -152,51 +136,12 @@ class HeaderChainProvider {
   }
 
   /**
-   * @private
-   *
-   * Get random SimplifiedMNList entries
-   *
-   * @returns {Promise<SimplifiedMNListEntry[]>}
-   */
-  async getRandomMasternodes() {
-    const randomNodeCount = Math.min(
-      Math.floor(this.MNDiscovery.getMNList().length / 100),
-      constants.headerChainSync.MAX_SYNC_NODES,
-    );
-
-    return this.MNDiscovery.getRandomMasternodes(randomNodeCount);
-  }
-
-  /**
-   * @private
-   *
-   * Create and setup DAPI client instance
-   *
-   * @param {SimplifiedMNListEntry[]}
-   *
-   * @return {Promise<DAPIClient>}
-   */
-  /* eslint-disable-next-line class-methods-use-this */
-  async initApi(mnListEntries) {
-    const services = mnListEntries.map(entry => Object.create({ service: entry.service }));
-
-    return new Api({
-      seeds: services,
-      port: 3000,
-    });
-  }
-
-  /**
    * Returns simplified header chain from lastChainTipHeight to current chain tip
    * @param {number} lastChainTipHeight - height of the last header stored
    * @returns {Promise<Array<Object>>}
    */
   async sync(lastChainTipHeight) {
-    const randomNodes = await this.getRandomMasternodes();
-
-    const api = await this.initApi(randomNodes);
-
-    const headerChain = await this.buildHeaderChain(api, randomNodes, lastChainTipHeight);
+    const headerChain = await this.buildHeaderChain(lastChainTipHeight);
 
     return headerChain.getLongestChain();
   }

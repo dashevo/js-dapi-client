@@ -10,9 +10,11 @@ const RPCClient = require('../../../src/RPCClient');
 const MNListFixture = require('../../fixtures/mnList');
 const { testnet2: testnetHeaders } = require('../../fixtures/headers');
 
-describe('HeaderChainProvider', () => {
+describe('HeaderChainProvider', function main() {
   let requestStub;
   let getRandomMasternodeStub;
+
+  this.timeout(10000);
 
   before(() => {
     requestStub = sinon.stub(RPCClient, 'request');

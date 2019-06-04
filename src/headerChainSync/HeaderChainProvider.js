@@ -37,27 +37,29 @@ class HeaderChainProvider {
    *
    * @returns {Promise<void>}
    */
-  async populateHeaderChain(headerChain, options) {
-    const {
+  async populateHeaderChain(
+    headerChain,
+    {
       fromHeight, toHeight, step, offset, retryCount = 0, extraHeight = 0,
-    } = options;
-
-    for (let height = fromHeight; height < toHeight - extraHeight; height += step) {
-      /* eslint-disable-next-line no-await-in-loop */
-      const newHeaders = await this.api.getBlockHeaders(height, step);
-      try {
-        headerChain.addHeaders(newHeaders);
-      } catch (e) {
-        if (retryCount > 0) {
-          /* eslint-disable-next-line no-await-in-loop */
-          await this.populateHeaderChain(
-            headerChain, {
-              fromHeight, toHeight, step, offset, retryCount: retryCount - 1,
-            },
-          );
+    },
+  ) {
+    const addHeadersPromises = range(fromHeight, toHeight - extraHeight, step)
+      .map(async (height) => {
+        const newHeaders = await this.api.getBlockHeaders(height, step);
+        try {
+          headerChain.addHeaders(newHeaders);
+        } catch (e) {
+          if (retryCount > 0) {
+            await this.populateHeaderChain(
+              headerChain, {
+                fromHeight, toHeight, step, offset, retryCount: retryCount - 1,
+              },
+            );
+          }
         }
-      }
-    }
+      });
+
+    await Promise.all(addHeadersPromises);
 
     if (extraHeight > 0) {
       const extraHeaders = await this.api.getBlockHeaders(toHeight, extraHeight);

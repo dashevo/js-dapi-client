@@ -6,6 +6,8 @@
 const { SpvChain } = require('@dashevo/dash-spv');
 const range = require('lodash/range');
 
+const HeaderChainChunk = require('./HeaderChainChunk');
+
 /**
  * This class syncs the header chain in a parallel manner across masternodes
  */
@@ -28,55 +30,46 @@ class HeaderChainProvider {
    * Retrieve headers for a slice and populate header chain
    *
    * @param {SpvChain} headerChain
-   * @param {object} options
-   * @param {int} options.fromHeight
-   * @param {int} options.toHeight
-   * @param {int} options.step
-   * @param {int} options.offset
-   * @param {int} [options.retryCount=0]
-   * @param {int} [options.extraHeight=0]
+   * @param {HeaderChainChunk} headerChainChunk
+   * @param {int} [retryCount = 5]
    *
    * @returns {Promise<void>}
    */
   async populateHeaderChain(
-    headerChain,
-    {
-      fromHeight, toHeight, step, offset, retryCount = 0, extraHeight = 0,
-    },
+    headerChain, headerChainChunk, retryCount = 5,
   ) {
-    const addHeadersPromises = range(fromHeight, toHeight - extraHeight, step)
+    const addHeadersPromises = range(
+      headerChainChunk.getFromHeight(),
+      headerChainChunk.getToHeight(),
+      headerChainChunk.getStep(),
+    )
       .map(async (height) => {
-        const newHeaders = await this.api.getBlockHeaders(height, step);
+        const newHeaders = await this.api.getBlockHeaders(height, headerChainChunk.getStep());
+
+        let extraHeaders;
+        if (headerChainChunk.getExtraSize() > 0) {
+          extraHeaders = await this.api.getBlockHeaders(
+            height + headerChainChunk.getStep(),
+            headerChainChunk.getExtraSize(),
+          );
+        }
+
         try {
           headerChain.addHeaders(newHeaders);
+
+          if (extraHeaders) {
+            headerChain.addHeaders(extraHeaders);
+          }
         } catch (e) {
           if (retryCount > 0) {
             await this.populateHeaderChain(
-              headerChain, {
-                fromHeight, toHeight, step, offset, retryCount: retryCount - 1,
-              },
+              headerChain, headerChainChunk, retryCount - 1,
             );
           }
         }
       });
 
     await Promise.all(addHeadersPromises);
-
-    if (extraHeight > 0) {
-      const extraHeaders = await this.api.getBlockHeaders(toHeight, extraHeight);
-      try {
-        headerChain.addHeaders(extraHeaders);
-      } catch (e) {
-        if (retryCount > 0) {
-          await this.populateHeaderChain(
-            headerChain,
-            {
-              fromHeight, toHeight, step, offset, retryCount: retryCount - 1, extraHeight,
-            },
-          );
-        }
-      }
-    }
   }
 
   /**
@@ -99,8 +92,8 @@ class HeaderChainProvider {
 
     const heightDiff = toHeight - fromHeight;
 
-    const heightDelta = Math.floor(heightDiff / this.mnListLength);
-    const step = Math.min(heightDelta, 2000);
+    const chunkSize = Math.floor(heightDiff / this.mnListLength);
+    const step = Math.min(chunkSize, 2000);
 
     /**
      * Naive worker-like implementation of a parallel calls
@@ -114,23 +107,19 @@ class HeaderChainProvider {
      */
 
     const promises = range(this.mnListLength).map(async (index) => {
-      const localFromHeight = fromHeight + (heightDelta * index);
-      const localToHeight = localFromHeight + heightDelta;
+      const chunkStartingHeight = fromHeight + (chunkSize * index);
 
       // Ask last node a few extra headers
       const heightExtra = (index === this.mnListLength - 1)
         ? heightDiff % Math.min(this.mnListLength, step) : 0;
 
-      await this.populateHeaderChain(
-        headerChain, {
-          fromHeight: localFromHeight,
-          toHeight: localToHeight,
-          step,
-          offset: fromHeight,
-          retryCount: 5,
-          extraHeight: heightExtra,
-        },
+      const headerChainChunk = new HeaderChainChunk(
+        chunkStartingHeight,
+        chunkSize + heightExtra, // last node will download a few more headers
+        step,
       );
+
+      await this.populateHeaderChain(headerChain, headerChainChunk);
     });
 
     await Promise.all(promises);

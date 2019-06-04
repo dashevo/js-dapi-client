@@ -13,10 +13,15 @@ const { testnet2: testnetHeaders } = require('../../fixtures/headers');
 describe('HeaderChainProvider', function main() {
   let requestStub;
   let getRandomMasternodeStub;
+  let mnListLength;
+  let bestBlockHeight;
 
   this.timeout(10000);
 
   before(() => {
+    mnListLength = 5;
+    bestBlockHeight = 100;
+
     requestStub = sinon.stub(RPCClient, 'request');
 
     requestStub
@@ -29,7 +34,7 @@ describe('HeaderChainProvider', function main() {
 
     requestStub
       .withArgs({ host: sinon.match.any, port: sinon.match.any }, 'getBestBlockHeight', sinon.match.any)
-      .resolves(25);
+      .resolves(bestBlockHeight);
 
     getRandomMasternodeStub = sinon.stub(MNDiscovery.prototype, 'getRandomMasternode')
       .resolves(MNListFixture.getFirstDiff().mnList[0]);
@@ -37,17 +42,27 @@ describe('HeaderChainProvider', function main() {
 
   describe('#sync', () => {
     it('should successfully sync headers', async () => {
-      requestStub
-        .withArgs({ host: sinon.match.any, port: sinon.match.any }, 'getBlockHeaders', sinon.match.any)
-        .resolves(testnetHeaders.slice(1, 500));
+      for (let i = 0; i < 100; i += 20) {
+        requestStub
+          .withArgs(
+            { host: sinon.match.any, port: sinon.match.any },
+            'getBlockHeaders',
+            {
+              offset: i,
+              limit: 20,
+              verbose: sinon.match.any,
+            }
+          )
+          .resolves(testnetHeaders.slice(i + 1, i + 1 + 20));
+      }
 
       const provider = new HeaderChainProvider(
         new DAPIClient({}),
-        { mnListLength: 5, network: 'testnet'},
+        { mnListLength, network: 'testnet' },
       );
       const longestChain = await provider.sync(0);
 
-      expect(longestChain.length).to.equal(500);
+      expect(longestChain.length).to.equal(101);
     });
   });
 

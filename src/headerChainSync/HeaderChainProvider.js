@@ -11,14 +11,15 @@ const range = require('lodash/range');
  */
 class HeaderChainProvider {
   /**
-   * @param {string} network
    * @param {DAPIClient} api
-   * @param {int} mnListLength
+   * @param {object} options
+   * @param {int} options.mnListLength
+   * @param {string} [options.network="mainnet"]
    */
-  constructor(network, api, mnListLength) {
-    this.network = network;
+  constructor(api, { mnListLength, network = 'mainnet' }) {
     this.api = api;
     this.mnListLength = mnListLength;
+    this.network = network;
   }
 
   /**

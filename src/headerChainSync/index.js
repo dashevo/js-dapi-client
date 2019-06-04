@@ -19,13 +19,14 @@ const HeaderChainProvider = require('./HeaderChainProvider');
 class HeaderChainSync {
   /**
    * @class
-   * @param {string} network - required. Specifies Dash network type
    * @param {DAPIClient} api - required. Specifies DAPI client instance
-   * @param {int} mnListLength - required. Specifies the length of masternode list
+   * @param {object} options
+   * @param {int} options.mnListLength - required. Specifies the length of masternode list
+   * @param {string} [options.network="mainnet"] - optional. Specifies Dash network type
    */
-  constructor(network, api, mnListLength) {
-    this.network = network;
+  constructor(api, { mnListLength, network = 'mainnet' }) {
     this.mnListLength = mnListLength;
+    this.network = network;
 
     /**
      * @private
@@ -33,7 +34,7 @@ class HeaderChainSync {
      * For test purposes only: tests wraps .getMNList() method of that object to ensure
      * it was called.
      */
-    this.headerChainProvider = new HeaderChainProvider(network, api, mnListLength);
+    this.headerChainProvider = new HeaderChainProvider(api, { mnListLength, network });
     /**
      * @private
      * @protected
@@ -57,7 +58,13 @@ class HeaderChainSync {
    * @return void
    */
   reset() {
-    this.headerChainProvider = new HeaderChainProvider(this.network, this.api, this.mnListLength);
+    this.headerChainProvider = new HeaderChainProvider(
+      this.api,
+      {
+        mnListLength: this.mnListLength,
+        network: this.network,
+      },
+    );
   }
 }
 

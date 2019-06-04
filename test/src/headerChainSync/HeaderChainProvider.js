@@ -41,7 +41,10 @@ describe('HeaderChainProvider', function main() {
         .withArgs({ host: sinon.match.any, port: sinon.match.any }, 'getBlockHeaders', sinon.match.any)
         .resolves(testnetHeaders.slice(1, 500));
 
-      const provider = new HeaderChainProvider('testnet', new DAPIClient({}), 5);
+      const provider = new HeaderChainProvider(
+        new DAPIClient({}),
+        { mnListLength: 5, network: 'testnet'},
+      );
       const longestChain = await provider.sync(0);
 
       expect(longestChain.length).to.equal(500);

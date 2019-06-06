@@ -14,11 +14,11 @@ const HeaderChainChunk = require('./HeaderChainChunk');
 class HeaderChainProvider {
   /**
    * @param {DAPIClient} api
+   * @param {int} mnListLength
    * @param {object} options
-   * @param {int} options.mnListLength
    * @param {string} [options.network="mainnet"]
    */
-  constructor(api, { mnListLength, network = 'mainnet' }) {
+  constructor(api, mnListLength, { network = 'mainnet' }) {
     this.api = api;
     this.mnListLength = mnListLength;
     this.network = network;

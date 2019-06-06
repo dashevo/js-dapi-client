@@ -58,9 +58,10 @@ describe('HeaderChainProvider', function main() {
 
       const provider = new HeaderChainProvider(
         new DAPIClient({}),
-        { mnListLength, network: 'testnet' },
+        mnListLength,
+        { network: 'testnet' },
       );
-      const longestChain = await provider.sync(0);
+      const longestChain = await provider.fetch(0);
 
       expect(longestChain.length).to.equal(101);
     });

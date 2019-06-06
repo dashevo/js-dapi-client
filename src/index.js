@@ -315,7 +315,9 @@ class DAPIClient {
    * hash function used by the bloom filter.
    * @param {number} bloomFilter.nFlags - A set of flags that control how matched items
    * are added to the filter.
-   * @returns {Promise<EventEmitter>|!grpc.web.ClientReadableStream<!TransactionsWithProofsResponse>|undefined}
+   * @returns {
+   *    Promise<EventEmitter>|!grpc.web.ClientReadableStream<!TransactionsWithProofsResponse>
+   * }
    */
   async subscribeToTransactionsWithProofs(bloomFilter) {
     const filter = new BloomFilter();

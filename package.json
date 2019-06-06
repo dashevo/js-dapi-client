@@ -7,7 +7,7 @@
     "@babel/polyfill": "^7.2.5",
     "@dashevo/dapi-grpc": "^0.3.0",
     "@dashevo/dashcore-lib": "^0.17.1",
-    "@dashevo/dash-spv": "^1.1.4",
+    "@dashevo/dash-spv": "^1.1.5",
     "@dashevo/quorums": "^1.0.2",
     "axios": "^0.18.0",
     "lodash": "^4.17.11",

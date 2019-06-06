@@ -132,7 +132,7 @@ class HeaderChainProvider {
    * @param {number} lastChainTipHeight - height of the last header stored
    * @returns {Promise<Array<Object>>}
    */
-  async sync(lastChainTipHeight) {
+  async fetch(lastChainTipHeight) {
     const headerChain = await this.buildHeaderChain(lastChainTipHeight);
 
     return headerChain.getLongestChain();

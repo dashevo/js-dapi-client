@@ -1,5 +1,5 @@
 const sinon = require('sinon');
-const TxFilterGrpcClient = require('@dashevo/dapi-grpc');
+const { TransactionsFilterStreamPromiseClient } = require('@dashevo/dapi-grpc');
 const chai = require('chai');
 const { EventEmitter } = require('events');
 const DAPIClient = require('../../src/index');
@@ -904,17 +904,17 @@ describe('api', () => {
     });
   });
 
-  describe('.subscribeToTransactionsByFilter', () => {
+  describe('#subscribeToTransactionsWithProofs', () => {
     let stream;
     beforeEach(() => {
       stream = new EventEmitter();
       sinon
-        .stub(TxFilterGrpcClient.TransactionsFilterStreamClient.prototype, 'getTransactionsByFilter')
+        .stub(TransactionsFilterStreamPromiseClient.prototype, 'subscribeToTransactionsWithProofs')
         .returns(stream);
     });
 
     afterEach(() => {
-      TxFilterGrpcClient.TransactionsFilterStreamClient.prototype.getTransactionsByFilter.restore();
+      TransactionsFilterStreamPromiseClient.prototype.subscribeToTransactionsWithProofs.restore();
     });
 
     it('should return a stream', async () => {
@@ -927,7 +927,7 @@ describe('api', () => {
         nFlags: 1,
       };
 
-      const actualStream = await client.subscribeToTransactionsByFilter(bloomFilter);
+      const actualStream = await client.subscribeToTransactionsWithProofs(bloomFilter);
 
       expect(actualStream).to.be.equal(stream);
     });

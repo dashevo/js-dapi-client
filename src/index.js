@@ -1,6 +1,8 @@
 const jsutil = require('@dashevo/dashcore-lib').util.js;
 const preconditionsUtil = require('@dashevo/dashcore-lib').util.preconditions;
 const {
+  CorePromiseClient,
+  LastUserStateTransitionHashRequest,
   TransactionsFilterStreamPromiseClient,
   TransactionsWithProofsRequest,
   BloomFilter,
@@ -178,6 +180,23 @@ class DAPIClient {
    * @return {Promise<object>}
    */
   getHistoricBlockchainDataSyncStatus() { return this.makeRequestToRandomDAPINode('getHistoricBlockchainDataSyncStatus', {}); }
+
+  /**
+   * Retrieve user's last state transition hash
+   * or regTxId in case no state transitions present
+   * @param {string} userId
+   * @returns {Promise<!LastUserStateTransitionHashResponse>}
+   */
+  async getLastUserStateTransitionHash(userId) {
+    const request = new LastUserStateTransitionHashRequest();
+    request.setUserId(userId);
+
+    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+
+    const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+
+    return client.getLastUserStateTransitionHash(request);
+  }
 
   /**
    * Returns mempool usage info

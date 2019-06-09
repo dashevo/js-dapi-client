@@ -1,5 +1,9 @@
 const sinon = require('sinon');
-const { TransactionsFilterStreamPromiseClient } = require('@dashevo/dapi-grpc');
+const {
+  CorePromiseClient,
+  LastUserStateTransitionHashResponse,
+  TransactionsFilterStreamPromiseClient,
+} = require('@dashevo/dapi-grpc');
 const chai = require('chai');
 const { EventEmitter } = require('events');
 const DAPIClient = require('../../src/index');
@@ -920,6 +924,51 @@ describe('api', () => {
       const actualStream = await client.subscribeToTransactionsWithProofs(bloomFilter);
 
       expect(actualStream).to.be.equal(stream);
+    });
+  });
+
+  describe('#getLastUserStateTransitionHash', () => {
+    let userId;
+    let subTx;
+
+    beforeEach(() => {
+      userId = 'SomeUserId';
+      subTx = 'SomeSubTxHash';
+
+      const stub = sinon
+        .stub(CorePromiseClient.prototype, 'getLastUserStateTransitionHash');
+
+      const responseOne = new LastUserStateTransitionHashResponse();
+      responseOne.setRegTxId(userId);
+
+      const responseTwo = new LastUserStateTransitionHashResponse();
+      responseTwo.setLastStateTransitionHash(subTx);
+
+      stub.onCall(0).returns(
+        responseOne,
+      );
+
+      stub.onCall(1).returns(
+        responseTwo,
+      );
+    });
+
+    afterEach(() => {
+      CorePromiseClient.prototype.getLastUserStateTransitionHash.restore();
+    });
+
+    it('should return a proper response', async () => {
+      const client = new DAPIClient();
+
+      const responseOne = await client.getLastUserStateTransitionHash(userId);
+
+      expect(responseOne.getRegTxId()).to.equal(userId);
+      expect(responseOne.getLastStateTransitionHash()).to.equal('');
+
+      const responseTwo = await client.getLastUserStateTransitionHash(userId);
+
+      expect(responseTwo.getRegTxId()).to.equal('');
+      expect(responseTwo.getLastStateTransitionHash()).to.equal(subTx);
     });
   });
 });

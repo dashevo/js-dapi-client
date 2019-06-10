@@ -932,14 +932,14 @@ describe('api', () => {
     let subTx;
 
     beforeEach(() => {
-      userId = 'SomeUserId';
-      subTx = 'SomeSubTxHash';
+      userId = Buffer.alloc(256);
+      subTx = Buffer.from('536f6d65537562547848617368', 'hex');
 
       const stub = sinon
         .stub(CorePromiseClient.prototype, 'getLastUserStateTransitionHash');
 
       const responseOne = new LastUserStateTransitionHashResponse();
-      responseOne.setRegTxId(userId);
+      responseOne.setLastStateTransitionHash(null);
 
       const responseTwo = new LastUserStateTransitionHashResponse();
       responseTwo.setLastStateTransitionHash(subTx);
@@ -962,12 +962,10 @@ describe('api', () => {
 
       const responseOne = await client.getLastUserStateTransitionHash(userId);
 
-      expect(responseOne.getRegTxId()).to.equal(userId);
-      expect(responseOne.getLastStateTransitionHash()).to.equal('');
+      expect(responseOne.getLastStateTransitionHash()).to.equal(null);
 
       const responseTwo = await client.getLastUserStateTransitionHash(userId);
 
-      expect(responseTwo.getRegTxId()).to.equal('');
       expect(responseTwo.getLastStateTransitionHash()).to.equal(subTx);
     });
   });

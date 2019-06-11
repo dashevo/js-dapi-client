@@ -183,9 +183,8 @@ class DAPIClient {
 
   /**
    * Retrieve user's last state transition hash
-   * or regTxId in case no state transitions present
    * @param {string} userId
-   * @returns {Promise<!LastUserStateTransitionHashResponse>}
+   * @returns {Promise<string|null>}
    */
   async getLastUserStateTransitionHash(userId) {
     const request = new LastUserStateTransitionHashRequest();
@@ -195,7 +194,15 @@ class DAPIClient {
 
     const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
 
-    return client.getLastUserStateTransitionHash(request);
+    const response = client.getLastUserStateTransitionHash(request);
+
+    const hashBuffer = response.getStateTransitionHash();
+
+    if (hashBuffer) {
+      return hashBuffer.toString('hex');
+    }
+
+    return hashBuffer;
   }
 
   /**

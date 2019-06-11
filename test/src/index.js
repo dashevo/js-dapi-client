@@ -939,10 +939,10 @@ describe('api', () => {
         .stub(CorePromiseClient.prototype, 'getLastUserStateTransitionHash');
 
       const responseOne = new LastUserStateTransitionHashResponse();
-      responseOne.setLastStateTransitionHash(null);
+      responseOne.setStateTransitionHash(null);
 
       const responseTwo = new LastUserStateTransitionHashResponse();
-      responseTwo.setLastStateTransitionHash(subTx);
+      responseTwo.setStateTransitionHash(subTx);
 
       stub.onCall(0).returns(
         responseOne,
@@ -962,11 +962,11 @@ describe('api', () => {
 
       const responseOne = await client.getLastUserStateTransitionHash(userId);
 
-      expect(responseOne.getLastStateTransitionHash()).to.equal(null);
+      expect(responseOne.getStateTransitionHash()).to.equal(null);
 
       const responseTwo = await client.getLastUserStateTransitionHash(userId);
 
-      expect(responseTwo.getLastStateTransitionHash()).to.equal(subTx);
+      expect(responseTwo.getStateTransitionHash()).to.equal(subTx);
     });
   });
 });

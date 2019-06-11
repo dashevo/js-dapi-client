@@ -944,11 +944,11 @@ describe('api', () => {
       const responseTwo = new LastUserStateTransitionHashResponse();
       responseTwo.setStateTransitionHash(subTx);
 
-      stub.onCall(0).returns(
+      stub.onCall(0).resolves(
         responseOne,
       );
 
-      stub.onCall(1).returns(
+      stub.onCall(1).resolves(
         responseTwo,
       );
     });

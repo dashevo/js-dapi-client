@@ -194,7 +194,7 @@ class DAPIClient {
 
     const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
 
-    const response = client.getLastUserStateTransitionHash(request);
+    const response = await client.getLastUserStateTransitionHash(request);
 
     const hashBuffer = response.getStateTransitionHash();
 

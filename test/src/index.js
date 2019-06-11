@@ -962,11 +962,11 @@ describe('api', () => {
 
       const responseOne = await client.getLastUserStateTransitionHash(userId);
 
-      expect(responseOne.getStateTransitionHash()).to.equal(null);
+      expect(responseOne).to.equal('');
 
       const responseTwo = await client.getLastUserStateTransitionHash(userId);
 
-      expect(responseTwo.getStateTransitionHash()).to.equal(subTx);
+      expect(responseTwo).to.equal(subTx.toString('hex'));
     });
   });
 });

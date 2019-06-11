@@ -184,7 +184,7 @@ class DAPIClient {
   /**
    * Retrieve user's last state transition hash
    * @param {string} userId
-   * @returns {Promise<string|null>}
+   * @returns {Promise<string>}
    */
   async getLastUserStateTransitionHash(userId) {
     const request = new LastUserStateTransitionHashRequest();
@@ -198,7 +198,7 @@ class DAPIClient {
 
     const hashBuffer = response.getStateTransitionHash();
 
-    if (hashBuffer) {
+    if (Buffer.isBuffer(hashBuffer)) {
       return hashBuffer.toString('hex');
     }
 

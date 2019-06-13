@@ -1,5 +1,8 @@
 const axios = require('axios');
 
+const DriveError = require('./errors/DriveError');
+const CoreError = require('./errors/CoreError');
+
 const defaultHost = '127.0.0.1';
 
 /**
@@ -29,7 +32,11 @@ async function request(url, method, params, options = {}) {
   }
   const { data } = res;
   if (data.error) {
-    throw new Error(`DAPI RPC error: ${method}: ${data.error.message}`);
+    if (data.error.data) {
+      throw new DriveError(`DAPI RPC error: ${method}: ${data.error.message}: ${JSON.stringify(data.error.data)}`);
+    } else {
+      throw new CoreError(`DAPI RPC error: ${method}: ${data.error.message}`);
+    }
   }
   return data.result;
 }

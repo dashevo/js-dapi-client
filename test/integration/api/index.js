@@ -19,8 +19,7 @@ const DashPlatformProtocol = require('@dashevo/dpp');
 const entropy = require('@dashevo/dpp/lib/util/entropy');
 const DAPIClient = require('../../../src/index');
 const MNDiscovery = require('../../../src/MNDiscovery/index');
-const CoreError = require("../../../src/errors/CoreError");
-const DriveError = require("../../../src/errors/DriveError");
+const RPCError = require("../../../src/errors/RPCError");
 
 const wait = require('../../utils/wait');
 
@@ -504,7 +503,7 @@ describe('basicAPIs', () => {
         .change(faucetAddress)
         .sign(faucetPrivateKey);
 
-      await expect(dapiClient.sendRawTransaction(transaction.serialize())).to.be.rejectedWith(CoreError, 'DAPI RPC error: sendRawTransaction: 16: bad-subtx-dupusername');
+      await expect(dapiClient.sendRawTransaction(transaction.serialize())).to.be.rejectedWith(RPCError, 'DAPI RPC error: sendRawTransaction: 16: bad-subtx-dupusername');
     });
 
     it('should fetch errors from drive' , async () => {
@@ -526,7 +525,8 @@ describe('basicAPIs', () => {
         transaction.serialize(),
         stPacket.serialize().toString('hex'),
       );
-      await expect(transitionHash).to.be.rejectedWith(DriveError, 'DAPI RPC error: sendRawTransition: Invalid "stPacket" and "stateTransition" params: Invalid ST Packet data: [{"name":"ContractAlreadyPresentError"');
+      await expect(transitionHash).to.be.rejectedWith(RPCError, 'DAPI RPC error: sendRawTransition: Invalid "stPacket" and "stateTransition" params: Invalid ST Packet data',
+        '[{"name":"ContractAlreadyPresentError"');
     });
 
   });

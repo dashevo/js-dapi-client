@@ -64,6 +64,7 @@ describe('RPCClient', async () => {
         expect(err).to.be.an.instanceof(RPCError);
         expect(err.message).to.equal('DAPI RPC error: test: Invalid data');
         expect(err.getErrorData()).to.equal(undefined);
+        expect(err.stack.split('\n')[0]).to.equal('RPCError: DAPI RPC error: test: Invalid data');
       }
     });
     it('Should throw if there is error object with data in response body', async() => {
@@ -77,6 +78,7 @@ describe('RPCClient', async () => {
         expect(err).to.be.an.instanceof(RPCError);
         expect(err.message).to.equal('DAPI RPC error: test: Invalid data for error.data');
         expect(err.getErrorData()).to.equal('additional data here');
+        expect(err.stack.split('\n')[0]).to.equal('RPCError: DAPI RPC error: test: Invalid data for error.data');
       }
     });
 

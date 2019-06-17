@@ -962,7 +962,7 @@ describe('api', () => {
 
       const responseOne = await client.getLastUserStateTransitionHash(userId);
 
-      expect(responseOne).to.equal('');
+      expect(responseOne).to.equal(null);
 
       const responseTwo = await client.getLastUserStateTransitionHash(userId);
 

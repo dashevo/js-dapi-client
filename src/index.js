@@ -202,7 +202,7 @@ class DAPIClient {
       return hashBuffer.toString('hex');
     }
 
-    return hashBuffer;
+    return null;
   }
 
   /**

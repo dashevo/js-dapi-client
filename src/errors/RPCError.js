@@ -1,5 +1,9 @@
 class RPCError extends Error {
-  constructor(message, data) {
+  /**
+   * @param {string} message
+   * @param {Object} data
+   */
+  constructor(message, data = undefined) {
     super();
 
     this.message = message;
@@ -12,9 +16,11 @@ class RPCError extends Error {
   }
 
   /**
-   * @return {string}
+   * Get error data
+   *
+   * @return {Object}
    */
-  getErrorData() {
+  getData() {
     return this.data;
   }
 }

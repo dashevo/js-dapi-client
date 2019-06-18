@@ -200,7 +200,7 @@ class DAPIClient {
     const hashBuffer = response.getStateTransitionHash_asU8();
 
     if (hashBuffer.length > 0) {
-      return hashBuffer.buffer.toString('hex');
+      return Buffer.from(hashBuffer).toString('hex');
     }
 
     return null;

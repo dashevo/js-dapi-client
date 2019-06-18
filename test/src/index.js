@@ -931,43 +931,44 @@ describe('api', () => {
 
   describe('#getLastUserStateTransitionHash', () => {
     let userId;
-    let subTx;
+    let getLastUserStateTransitionHashStub;
 
     beforeEach(() => {
       userId = Buffer.alloc(256);
-      subTx = Buffer.from('536f6d65537562547848617368', 'hex');
 
-      const stub = sinon
+      getLastUserStateTransitionHashStub = sinon
         .stub(CorePromiseClient.prototype, 'getLastUserStateTransitionHash');
-
-      const responseOne = new LastUserStateTransitionHashResponse();
-
-      const responseTwo = new LastUserStateTransitionHashResponse();
-      responseTwo.setStateTransitionHash(subTx);
-
-      stub.onCall(0).resolves(
-        responseOne,
-      );
-
-      stub.onCall(1).resolves(
-        responseTwo,
-      );
     });
 
     afterEach(() => {
-      CorePromiseClient.prototype.getLastUserStateTransitionHash.restore();
+      getLastUserStateTransitionHashStub.restore();
     });
 
-    it('should return a proper response', async () => {
+    it('should return a hex string if the last ST is present', async () => {
+      const subTxHash = Buffer.from('536f6d65537562547848617368', 'hex');
+
+      const response = new LastUserStateTransitionHashResponse();
+      response.setStateTransitionHash(subTxHash);
+
+      getLastUserStateTransitionHashStub.resolves(response);
+
       const client = new DAPIClient();
 
-      const responseOne = await client.getLastUserStateTransitionHash(userId);
+      const result = await client.getLastUserStateTransitionHash(userId);
 
-      expect(responseOne).to.equal(null);
+      expect(result).to.equal(subTxHash.toString('hex'));
+    });
 
-      const responseTwo = await client.getLastUserStateTransitionHash(userId);
+    it('should return null if the last ST is not present', async () => {
+      const response = new LastUserStateTransitionHashResponse();
 
-      expect(responseTwo).to.equal(subTx.toString('hex'));
+      getLastUserStateTransitionHashStub.resolves(response);
+
+      const client = new DAPIClient();
+
+      const result = await client.getLastUserStateTransitionHash(userId);
+
+      expect(result).to.be.null();
     });
   });
 });

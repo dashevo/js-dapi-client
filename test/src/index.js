@@ -941,7 +941,6 @@ describe('api', () => {
         .stub(CorePromiseClient.prototype, 'getLastUserStateTransitionHash');
 
       const responseOne = new LastUserStateTransitionHashResponse();
-      responseOne.setStateTransitionHash(null);
 
       const responseTwo = new LastUserStateTransitionHashResponse();
       responseTwo.setStateTransitionHash(subTx);

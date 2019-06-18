@@ -183,6 +183,7 @@ class DAPIClient {
 
   /**
    * Retrieve user's last state transition hash
+   *
    * @param {string} userId
    * @returns {Promise<string>}
    */
@@ -196,10 +197,10 @@ class DAPIClient {
 
     const response = await client.getLastUserStateTransitionHash(request);
 
-    const hashBuffer = response.getStateTransitionHash();
+    const hashBuffer = response.getStateTransitionHash_asU8();
 
-    if (Buffer.isBuffer(hashBuffer)) {
-      return hashBuffer.toString('hex');
+    if (hashBuffer.length > 0) {
+      return hashBuffer.buffer.toString('hex');
     }
 
     return null;

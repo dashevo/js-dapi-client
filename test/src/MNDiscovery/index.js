@@ -136,7 +136,6 @@ describe('MNDiscovery', async () => {
 
             const numRequests = 10;
             for (let i = 0; i < numRequests; i++) {
-                // await new Promise(resolve => setTimeout(resolve, 110));
                 let randomMasternode = await discovery.getRandomMasternode(excludeIps);
                 expect(masternodeIps).to.contain(randomMasternode.service.split(':')[0]);
                 expect(randomMasternode.proRegTxHash).to.be.a('string');

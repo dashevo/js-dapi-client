@@ -503,7 +503,8 @@ describe('basicAPIs', () => {
         .change(faucetAddress)
         .sign(faucetPrivateKey);
 
-      await expect(dapiClient.sendRawTransaction(transaction.serialize())).to.be.rejectedWith(RPCError, 'DAPI RPC error: sendRawTransaction: 16: bad-subtx-dupusername');
+      await expect(dapiClient.sendRawTransaction(transaction.serialize())).to.be.rejectedWith(RPCError,
+        'DAPI RPC error: sendRawTransaction: 16: bad-subtx-dupusername');
     });
 
     it('should fetch errors from drive' , async () => {
@@ -525,7 +526,8 @@ describe('basicAPIs', () => {
         transaction.serialize(),
         stPacket.serialize().toString('hex'),
       );
-      await expect(transitionHash).to.be.rejectedWith(RPCError, 'DAPI RPC error: sendRawTransition: Invalid "stPacket" and "stateTransition" params: Invalid ST Packet data',
+      await expect(transitionHash).to.be.rejectedWith(RPCError,
+        'DAPI RPC error: sendRawTransition: Invalid "stPacket" and "stateTransition" params: Invalid ST Packet data',
         '[{"name":"ContractAlreadyPresentError"');
     });
 

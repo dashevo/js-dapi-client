@@ -1,7 +1,7 @@
 class RPCError extends Error {
   /**
    * @param {string} message
-   * @param {Object} data
+   * @param {Object} [data]
    */
   constructor(message, data = undefined) {
     super();

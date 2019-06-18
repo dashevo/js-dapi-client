@@ -968,7 +968,7 @@ describe('api', () => {
 
       const result = await client.getLastUserStateTransitionHash(userId);
 
-      expect(result).to.be.null();
+      expect(result).to.equal(null);
     });
   });
 });

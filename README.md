@@ -27,11 +27,33 @@ npm install @dashevo/dapi-client
 
 ## Usage
 
+### Basic
+
 ```javascript
 const DAPIClient = require('@dashevo/dapi-client');
 var client = new DAPIClient();
 
 client.getBalance('testaddress');
+```
+
+### Custom seed node
+
+Custom seed nodes are necessary for connecting the client to devnets since the
+client library is unaware of them otherwise.
+
+**Note**: The example seed node shown below (`dapi.dash.org`) _does not_ represent an actual node.
+
+```javascript
+const DAPIClient = require('@dashevo/dapi-client');
+
+var client = new DAPIClient({
+  seeds: [{
+    service: 'dapi.dash.org:9999',
+    port: 3000
+  }],
+});
+
+var blockHeight = client.getBestBlockHeight();
 ```
 
 ## Contributing

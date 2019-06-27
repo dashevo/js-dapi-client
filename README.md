@@ -1,7 +1,8 @@
 # DAPI Client
 
 [![Build Status](https://travis-ci.com/dashevo/dapi-client.svg?branch=master)](https://travis-ci.com/dashevo/dapi-client)
-[![npm version](https://badge.fury.io/js/%40dashevo%2Fdapi-client.svg)](https://badge.fury.io/js/%40dashevo%2Fdapi-client)
+![GitHub release](https://img.shields.io/github/release/dashevo/dapi-client.svg)
+![npm](https://img.shields.io/npm/v/@dashevo/dapi-client.svg)
 
 > Client library used to access Dash DAPI endpoints
 

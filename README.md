@@ -4,6 +4,13 @@
 
 > Client library used to access Dash DAPI endpoints
 
+This library enables HTTP-based interaction with the Dash blockchain and Dash
+Platform via the decentralized API ([DAPI](https://github.com/dashevo/dapi))
+hosted on Dash masternodes.
+
+ - `DAPI-Client` provides automatic server (masternode) discovery using either a default seed node or a user-supplied one
+ - `DAPI-Client` maps to DAPI's [RPC](https://github.com/dashevo/dapi/tree/master/lib/rpcServer/commands) and [gRPC](https://github.com/dashevo/dapi/tree/master/lib/grpcServer/handlers) endpoints
+
 ## Table of Contents
 - [Install](#install)
 - [Usage](#usage)

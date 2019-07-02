@@ -6,7 +6,6 @@ const {
   TransactionsWithProofsRequest,
 } = require('@dashevo/dapi-grpc');
 const chai = require('chai');
-const sinonChai = require('sinon-chai');
 const { EventEmitter } = require('events');
 const DAPIClient = require('../../src/index');
 const chaiAsPromised = require('chai-as-promised');
@@ -24,7 +23,7 @@ const {
 const doubleSha256 = require('../utils/doubleSha256');
 
 chai.use(chaiAsPromised);
-chai.use(sinonChai);
+
 const { expect } = chai;
 
 const validAddressWithOutputs = 'yXdxAYfK8eJgQmHpUzMaKEBhqwKQWKSezS';
@@ -936,7 +935,7 @@ describe('api', () => {
         { fromBlockHeight, count }
       );
 
-      expect(grpcClientSubscribeMock).to.be.calledOnce();
+      expect(grpcClientSubscribeMock.callCount).to.equal(1);
 
       const request = grpcClientSubscribeMock.getCall(0).args[0];
 

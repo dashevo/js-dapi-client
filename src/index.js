@@ -328,8 +328,8 @@ class DAPIClient {
 
   /**
    * @param {Object} bloomFilter
-   * @param {Array} bloomFilter.vData - The filter itself is simply a bit field of arbitrary
-   * byte-aligned size. The maximum size is 36,000 bytes.
+   * @param {Uint8Array|string} bloomFilter.vData - The filter itself is simply a bit
+   * field of arbitrary byte-aligned size. The maximum size is 36,000 bytes.
    * @param {number} bloomFilter.nHashFuncs - The number of hash functions to use in this filter.
    * The maximum value allowed in this field is 50.
    * @param {number} bloomFilter.nTweak - A random value to add to the seed value in the

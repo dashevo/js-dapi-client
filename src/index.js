@@ -336,11 +336,16 @@ class DAPIClient {
    * hash function used by the bloom filter.
    * @param {number} bloomFilter.nFlags - A set of flags that control how matched items
    * are added to the filter.
+   * @param {Object} [options]
+   * @param {string} [options.fromBlockHash] - Specifies block hash to start syncing from
+   * @param {int} [options.fromBlockHeight] - Specifies block height to start syncing from
+   * @param {int} [options.count=0] - Number of blocks to sync, if set to 0 syncing is continuously
+   * sends new data as well
    * @returns {
    *    Promise<EventEmitter>|!grpc.web.ClientReadableStream<!TransactionsWithProofsResponse>
    * }
    */
-  async subscribeToTransactionsWithProofs(bloomFilter) {
+  async subscribeToTransactionsWithProofs(bloomFilter, options = { count: 0 }) {
     const filter = new BloomFilter();
     filter.setVData(bloomFilter.vData);
     filter.setNHashFuncs(bloomFilter.nHashFuncs);
@@ -349,6 +354,9 @@ class DAPIClient {
 
     const request = new TransactionsWithProofsRequest();
     request.setBloomFilter(filter);
+    request.setFromBlockHash(options.fromBlockHash);
+    request.setFromBlockHeight(options.fromBlockHeight);
+    request.setCount(options.count);
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 

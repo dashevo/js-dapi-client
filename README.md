@@ -41,20 +41,21 @@ client.getBalance('testaddress');
 Custom seed nodes are necessary for connecting the client to devnets since the
 client library is unaware of them otherwise.
 
-**Note**: The example seed node shown below (`dapi.dash.org`) _does not_ represent an actual node.
-
 ```javascript
 const DAPIClient = require('@dashevo/dapi-client');
 
 var client = new DAPIClient({
   seeds: [{
-    service: 'dapi.dash.org:9999',
+    service: 'example.com:9999',
     port: 3000
   }],
 });
 
 var blockHeight = client.getBestBlockHeight();
 ```
+
+**Note**: The seed node shown above (`example.com`) is an [RFC 2606](https://tools.ietf.org/html/rfc2606)
+example domain and _does not_ represent an actual node.
 
 ## Contributing
 

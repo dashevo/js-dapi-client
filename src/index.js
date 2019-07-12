@@ -360,7 +360,9 @@ class DAPIClient {
     }
 
     if (options.fromBlockHash) {
-      request.setFromBlockHash(options.fromBlockHash);
+      request.setFromBlockHash(
+        Buffer.from(options.fromBlockHash, 'hex'),
+      );
     }
 
     request.setCount(options.count);

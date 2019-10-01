@@ -338,8 +338,8 @@ class DAPIClient {
    * @param {Object} [options]
    * @param {string} [options.fromBlockHash] - Specifies block hash to start syncing from
    * @param {number} [options.fromBlockHeight] - Specifies block height to start syncing from
-   * @param {number} [options.count=0] - Number of blocks to sync, if set to 0 syncing is continuously
-   * sends new data as well
+   * @param {number} [options.count=0] - Number of blocks to sync,
+   * if set to 0 syncing is continuously sends new data as well
    * @returns {
    *    Promise<EventEmitter>|!grpc.web.ClientReadableStream<!TransactionsWithProofsResponse>
    * }

@@ -318,7 +318,7 @@ class DAPIClient {
    */
   async updateState(stateTransition) {
     const stateTransitionRequest = new StateTransition();
-    stateTransitionRequest.setStateTransition(stateTransition);
+    stateTransitionRequest.setData(stateTransition);
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 

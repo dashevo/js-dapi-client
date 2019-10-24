@@ -333,15 +333,7 @@ class DAPIClient {
   searchUsers(pattern, limit = 10, offset = 0) { return this.makeRequestToRandomDAPINode('searchUsers', { pattern, limit, offset }); }
 
   /**
-   * @param {Object} bloomFilter
-   * @param {Uint8Array|string} bloomFilter.vData - The filter itself is simply a bit
-   * field of arbitrary byte-aligned size. The maximum size is 36,000 bytes.
-   * @param {number} bloomFilter.nHashFuncs - The number of hash functions to use in this filter.
-   * The maximum value allowed in this field is 50.
-   * @param {number} bloomFilter.nTweak - A random value to add to the seed value in the
-   * hash function used by the bloom filter.
-   * @param {number} bloomFilter.nFlags - A set of flags that control how matched items
-   * are added to the filter.
+   * @param {BloomFilter} bloomFilter
    * @param {Object} [options]
    * @param {string} [options.fromBlockHash] - Specifies block hash to start syncing from
    * @param {number} [options.fromBlockHeight] - Specifies block height to start syncing from
@@ -352,11 +344,13 @@ class DAPIClient {
    * }
    */
   async subscribeToTransactionsWithProofs(bloomFilter, options = { count: 0 }) {
+    const bloomFilterObject = bloomFilter.toObject();
+
     const bloomFilterMessage = new BloomFilter();
-    bloomFilterMessage.setVData(bloomFilter.vData);
-    bloomFilterMessage.setNHashFuncs(bloomFilter.nHashFuncs);
-    bloomFilterMessage.setNTweak(bloomFilter.nTweak);
-    bloomFilterMessage.setNFlags(bloomFilter.nFlags);
+    bloomFilterMessage.setVData(new Uint8Array(bloomFilterObject.vData));
+    bloomFilterMessage.setNHashFuncs(bloomFilterObject.nHashFuncs);
+    bloomFilterMessage.setNTweak(bloomFilterObject.nTweak);
+    bloomFilterMessage.setNFlags(bloomFilterObject.nFlags);
 
     const request = new TransactionsWithProofsRequest();
     request.setBloomFilter(bloomFilterMessage);

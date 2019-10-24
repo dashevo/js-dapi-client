@@ -5,7 +5,7 @@ const {
   LastUserStateTransitionHashRequest,
   TransactionsFilterStreamPromiseClient,
   TransactionsWithProofsRequest,
-  BloomFilter,
+  BloomFilter: BloomFilterMessage,
   StateTransition,
 } = require('@dashevo/dapi-grpc');
 const MNDiscovery = require('./MNDiscovery/index');
@@ -354,7 +354,7 @@ class DAPIClient {
   async subscribeToTransactionsWithProofs(bloomFilter, options = { count: 0 }) {
     const bloomFilterObject = bloomFilter.toObject();
 
-    const bloomFilterMessage = new BloomFilter();
+    const bloomFilterMessage = new BloomFilterMessage();
     bloomFilterMessage.setVData(new Uint8Array(bloomFilterObject.vData));
     bloomFilterMessage.setNHashFuncs(bloomFilterObject.nHashFuncs);
     bloomFilterMessage.setNTweak(bloomFilterObject.nTweak);

@@ -744,7 +744,7 @@ describe('api', () => {
       expect(blockHeader.bits).to.exist;
       expect(blockHeader.chainwork).to.exist;
       expect(blockHeader.confirmations).to.exist;
-      expect(blockHeader.diffstateTransitioniculty).to.exist;
+      expect(blockHeader.difficulty).to.exist;
       expect(blockHeader.hash).to.exist;
       expect(blockHeader.mediantime).to.exist;
       expect(blockHeader.merkleroot).to.exist;

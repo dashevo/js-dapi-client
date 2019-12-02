@@ -7,7 +7,7 @@ const {
   TransactionsWithProofsRequest,
   BloomFilter: BloomFilterMessage,
   UpdateStateRequest,
-  IdentityRequest,
+  FetchIdentityRequest,
 } = require('@dashevo/dapi-grpc');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
@@ -388,17 +388,17 @@ class DAPIClient {
   /**
    * Fetch the identity by id
    * @param {string} identityId
-   * @returns {Promise<!IdentityResponse>}
+   * @returns {Promise<!FetchIdentityResponse>}
    */
   async fetchIdentity(identityId) {
-    const identityRequest = new IdentityRequest();
-    identityRequest.setId(identityId);
+    const fetchIdentityRequest = new FetchIdentityRequest();
+    fetchIdentityRequest.setId(identityId);
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
     const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
 
-    return client.fetchIdentity(identityRequest);
+    return client.fetchIdentity(fetchIdentityRequest);
   }
 
   /**

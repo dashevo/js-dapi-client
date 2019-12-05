@@ -1015,12 +1015,13 @@ describe('api', () => {
 
     it('should return IdentityResponse', async () => {
       const response = new FetchIdentityResponse();
+      response.setIdentity(Buffer.from('identity'));
       fetchIdentityStub.resolves(response);
 
       const client = new DAPIClient();
       const result = await client.fetchIdentity(id);
 
-      expect(result).to.be.instanceOf(FetchIdentityResponse);
+      expect(result).to.be.instanceof(Buffer);
   });
   });
 });

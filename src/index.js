@@ -33,6 +33,7 @@ class DAPIClient {
     this.retries = options.retries ? options.retries : 3;
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.retries),
       'Expect retries to be an unsigned integer');
+    this.dpp = new DashPlatformProtocol();
   }
 
   /**
@@ -388,7 +389,7 @@ class DAPIClient {
   /**
    * Fetch the identity by id
    * @param {string} identityId
-   * @returns {Promise<!FetchIdentityResponse>}
+   * @returns {Promise<!Buffer|null>}
    */
   async fetchIdentity(identityId) {
     const fetchIdentityRequest = new FetchIdentityRequest();
@@ -397,8 +398,16 @@ class DAPIClient {
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
     const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+    const fetchIdentityResponse = await client.fetchIdentity(fetchIdentityRequest);
 
-    return client.fetchIdentity(fetchIdentityRequest);
+    const serializedIdentity = fetchIdentityResponse.getIdentity();
+    let identity = null;
+
+    if (serializedIdentity) {
+      identity = Buffer.from(serializedIdentity);
+    }
+
+    return identity;
   }
 
   /**

@@ -33,7 +33,6 @@ class DAPIClient {
     this.retries = options.retries ? options.retries : 3;
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.retries),
       'Expect retries to be an unsigned integer');
-    this.dpp = new DashPlatformProtocol();
   }
 
   /**

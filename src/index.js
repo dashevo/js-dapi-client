@@ -387,12 +387,12 @@ class DAPIClient {
 
   /**
    * Fetch the identity by id
-   * @param {string} identityId
+   * @param {string} id
    * @returns {Promise<!Buffer|null>}
    */
-  async fetchIdentity(identityId) {
+  async fetchIdentity(id) {
     const fetchIdentityRequest = new FetchIdentityRequest();
-    fetchIdentityRequest.setId(identityId);
+    fetchIdentityRequest.setId(id);
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 

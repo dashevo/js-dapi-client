@@ -6,7 +6,8 @@ const {
   TransactionsFilterStreamPromiseClient,
   TransactionsWithProofsRequest,
   BloomFilter: BloomFilterMessage,
-  StateTransition,
+  UpdateStateRequest,
+  FetchIdentityRequest,
 } = require('@dashevo/dapi-grpc');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
@@ -314,17 +315,17 @@ class DAPIClient {
    * Send State Transition to machine
    *
    * @param {DataContractStateTransition|DocumentsStateTransition} stateTransition
-   * @returns {Promise<!UpdateStateTransitionResponse>}
+   * @returns {Promise<!UpdateStateResponse>}
    */
   async updateState(stateTransition) {
-    const stateTransitionRequest = new StateTransition();
-    stateTransitionRequest.setData(stateTransition.serialize());
+    const updateStateRequest = new UpdateStateRequest();
+    updateStateRequest.setStateTransition(stateTransition.serialize());
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
     const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
 
-    return client.updateState(stateTransitionRequest);
+    return client.updateState(updateStateRequest);
   }
 
   // Here go methods that used in VMN. Most of this methods will work only in regtest mode
@@ -382,6 +383,30 @@ class DAPIClient {
     const client = new TransactionsFilterStreamPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
 
     return client.subscribeToTransactionsWithProofs(request);
+  }
+
+  /**
+   * Fetch the identity by id
+   * @param {string} id
+   * @returns {Promise<!Buffer|null>}
+   */
+  async fetchIdentity(id) {
+    const fetchIdentityRequest = new FetchIdentityRequest();
+    fetchIdentityRequest.setId(id);
+
+    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+
+    const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+    const fetchIdentityResponse = await client.fetchIdentity(fetchIdentityRequest);
+
+    const serializedIdentity = fetchIdentityResponse.getIdentity();
+    let identity = null;
+
+    if (serializedIdentity) {
+      identity = Buffer.from(serializedIdentity);
+    }
+
+    return identity;
   }
 
   /**

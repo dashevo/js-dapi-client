@@ -4,7 +4,8 @@ const {
   LastUserStateTransitionHashResponse,
   TransactionsFilterStreamPromiseClient,
   TransactionsWithProofsRequest,
-  UpdateStateTransitionResponse,
+  UpdateStateResponse,
+  FetchIdentityResponse,
 } = require('@dashevo/dapi-grpc');
 const chai = require('chai');
 const { EventEmitter } = require('events');
@@ -987,13 +988,40 @@ describe('api', () => {
     });
 
     it('should return UpdateStateTransitionResponse', async () => {
-      const response = new UpdateStateTransitionResponse();
+      const response = new UpdateStateResponse();
       updateStateStub.resolves(response);
 
       const client = new DAPIClient();
       const result = await client.updateState(stateTransitionFixture);
 
-      expect(result).to.be.instanceOf(UpdateStateTransitionResponse);
+      expect(result).to.be.instanceOf(UpdateStateResponse);
     });
+  });
+
+  describe('#fetchIdentity', () => {
+    let fetchIdentityStub;
+    let id;
+
+    beforeEach(() => {
+      fetchIdentityStub = sinon
+        .stub(CorePromiseClient.prototype, 'fetchIdentity');
+
+      id = '4f46066bd50cc2684484407696b7949e82bd906ea92c040f59a97cba47ed8176';
+    });
+
+    afterEach(() => {
+      fetchIdentityStub.restore();
+    });
+
+    it('should return IdentityResponse', async () => {
+      const response = new FetchIdentityResponse();
+      response.setIdentity(Buffer.from('identity'));
+      fetchIdentityStub.resolves(response);
+
+      const client = new DAPIClient();
+      const result = await client.fetchIdentity(id);
+
+      expect(result).to.be.instanceof(Buffer);
+  });
   });
 });

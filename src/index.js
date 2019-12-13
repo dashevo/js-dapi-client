@@ -1,13 +1,15 @@
 const jsutil = require('@dashevo/dashcore-lib').util.js;
 const preconditionsUtil = require('@dashevo/dashcore-lib').util.preconditions;
 const {
-  CorePromiseClient,
-  LastUserStateTransitionHashRequest,
+  // CorePromiseClient,
+  PlatformPromiseClient,
   TransactionsFilterStreamPromiseClient,
   TransactionsWithProofsRequest,
   BloomFilter: BloomFilterMessage,
-  UpdateStateRequest,
-  FetchIdentityRequest,
+  ApplyStateTransitionRequest,
+  GetIdentityRequest,
+  GetDataContractRequest,
+  GetDocumentsRequest,
 } = require('@dashevo/dapi-grpc');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
@@ -19,14 +21,19 @@ class DAPIClient {
    * @param {Array<Object>} [options.seeds] - seeds. If no seeds provided
    * default seed will be used.
    * @param {number} [options.port=3000] - default port for connection to the DAPI
-   * @param {number} [options.nativeGrpcPort=3010] - Native GRPC port for connection to the DAPI
+   * @param {number} [options.grpcCorePort=3005] - GRPC Core port for connection to the DAPI
+   * @param {number} [options.grpcTxFilterStreamPort=3010] - GRPC TxFilterStream port for
+   * connection to the DAPI
+   * @param {number} [options.grpcPlatformPort=3006] - GRPC Platform port for connection to the DAPI
    * @param {number} [options.timeout=2000] - timeout for connection to the DAPI
    * @param {number} [options.retries=3] - num of retries if there is no response from DAPI node
    */
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
-    this.nativeGrpcPort = options.nativeGrpcPort || config.grpc.nativePort;
+    this.grpcCorePort = options.grpcCorePort || config.grpc.corePort;
+    this.grpcTxFilterStreamPort = options.grpcTxFilterStreamPort || config.grpc.txFilterStreamPort;
+    this.grpcPlatformPort = options.grpcPlatformPort || config.grpc.platformPort;
     this.timeout = options.timeout || 2000;
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.timeout),
       'Expect timeout to be an unsigned integer');
@@ -184,31 +191,6 @@ class DAPIClient {
   getHistoricBlockchainDataSyncStatus() { return this.makeRequestToRandomDAPINode('getHistoricBlockchainDataSyncStatus', {}); }
 
   /**
-   * Retrieve user's last state transition hash
-   *
-   * @param {string} userId
-   * @returns {Promise<string>}
-   */
-  async getLastUserStateTransitionHash(userId) {
-    const request = new LastUserStateTransitionHashRequest();
-    request.setUserId(Buffer.from(userId, 'hex'));
-
-    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
-
-    const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
-
-    const response = await client.getLastUserStateTransitionHash(request);
-
-    const hashBuffer = response.getStateTransitionHash_asU8();
-
-    if (hashBuffer.length > 0) {
-      return Buffer.from(hashBuffer).toString('hex');
-    }
-
-    return null;
-  }
-
-  /**
    * Returns mempool usage info
    * @returns {Promise<object>}
    */
@@ -281,22 +263,6 @@ class DAPIClient {
 
   /* Layer 2 commands */
 
-  fetchContract(contractId) { return this.makeRequestToRandomDAPINode('fetchContract', { contractId }); }
-
-  /**
-   * Fetch DAP Objects from DashDrive State View
-   * @param {string} contractId
-   * @param {string} type - Dap objects type to fetch
-   * @param options
-   * @param {Object} options.where - Mongo-like query
-   * @param {Object} options.orderBy - Mongo-like sort field
-   * @param {number} options.limit - how many objects to fetch
-   * @param {number} options.startAt - number of objects to skip
-   * @param {number} options.startAfter - exclusive skip
-   * @return {Promise<Object[]>}
-   */
-  fetchDocuments(contractId, type, options) { return this.makeRequestToRandomDAPINode('fetchDocuments', { contractId, type, options }); }
-
   /**
    * Returns blockchain user by its username or regtx id
    * @param {string} userId - user reg tx id
@@ -310,23 +276,6 @@ class DAPIClient {
    * @returns {Promise<Object>} - blockchain user
    */
   getUserByName(username) { return this.makeRequestToRandomDAPINode('getUser', { username }); }
-
-  /**
-   * Send State Transition to machine
-   *
-   * @param {DataContractStateTransition|DocumentsStateTransition} stateTransition
-   * @returns {Promise<!UpdateStateResponse>}
-   */
-  async updateState(stateTransition) {
-    const updateStateRequest = new UpdateStateRequest();
-    updateStateRequest.setStateTransition(stateTransition.serialize());
-
-    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
-
-    const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
-
-    return client.updateState(updateStateRequest);
-  }
 
   // Here go methods that used in VMN. Most of this methods will work only in regtest mode
   searchUsers(pattern, limit = 10, offset = 0) { return this.makeRequestToRandomDAPINode('searchUsers', { pattern, limit, offset }); }
@@ -380,9 +329,30 @@ class DAPIClient {
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new TransactionsFilterStreamPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+    const client = new TransactionsFilterStreamPromiseClient(`${nodeToConnect.getIp()}:${this.getTxFilterStreamGrpcPort()}`);
 
     return client.subscribeToTransactionsWithProofs(request);
+  }
+
+  /*
+  * Platform gRPC methods
+  * */
+
+  /**
+   * Send State Transition to machine
+   *
+   * @param {DataContractStateTransition|DocumentsStateTransition} stateTransition
+   * @returns {Promise<!ApplyStateTransitionResponse>}
+   */
+  async applyStateTransition(stateTransition) {
+    const applyStateTransitionRequest = new ApplyStateTransitionRequest();
+    applyStateTransitionRequest.setStateTransition(stateTransition.serialize());
+
+    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getPlatformGrpcPort()}`);
+
+    return client.applyStateTransition(applyStateTransitionRequest);
   }
 
   /**
@@ -390,37 +360,104 @@ class DAPIClient {
    * @param {string} id
    * @returns {Promise<!Buffer|null>}
    */
-  async fetchIdentity(id) {
-    const fetchIdentityRequest = new FetchIdentityRequest();
-    fetchIdentityRequest.setId(id);
+  async getIdentity(id) {
+    const getIdentityRequest = new GetIdentityRequest();
+    getIdentityRequest.setId(id);
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new CorePromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
-    const fetchIdentityResponse = await client.fetchIdentity(fetchIdentityRequest);
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getPlatformGrpcPort()}`);
+    const getIdentityResponse = await client.getIdentity(getIdentityRequest);
 
-    const serializedIdentity = fetchIdentityResponse.getIdentity();
+    const serializedIdentityBinaryArray = getIdentityResponse.getIdentity();
     let identity = null;
 
-    if (serializedIdentity) {
-      identity = Buffer.from(serializedIdentity);
+    if (serializedIdentityBinaryArray) {
+      identity = Buffer.from(serializedIdentityBinaryArray);
     }
 
     return identity;
   }
 
   /**
+   * Fetch Data Contract by id
+   * @param {string} contractId
+   * @returns {Promise<Buffer>}
+   */
+  async getDataContract(contractId) {
+    const getDataContractRequest = new GetDataContractRequest();
+
+    getDataContractRequest.setId(contractId);
+
+    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getPlatformGrpcPort()}`);
+    const getDataContractResponse = await client.getDataContract(getDataContractRequest);
+
+    return getDataContractResponse.getDataContract();
+  }
+
+  /**
+   * Fetch Documents from Drive
+   * @param {string} contractId
+   * @param {string} type - Dap objects type to fetch
+   * @param options
+   * @param {Object} options.where - Mongo-like query
+   * @param {Object} options.orderBy - Mongo-like sort field
+   * @param {number} options.limit - how many objects to fetch
+   * @param {number} options.startAt - number of objects to skip
+   * @param {number} options.startAfter - exclusive skip
+   * @return {Promise<Buffer[]>}
+   */
+  async getDocuments(contractId, type, options) {
+    const {
+      where,
+      orderBy,
+      limit,
+      startAt,
+      startAfter,
+    } = options;
+
+    const getDocumentsRequest = new GetDocumentsRequest();
+    getDocumentsRequest.setDataContractId(contractId);
+    getDocumentsRequest.setDocumentType(type);
+    getDocumentsRequest.setWhere(where);
+    getDocumentsRequest.setOrderBy(orderBy);
+    getDocumentsRequest.setLimit(limit);
+    getDocumentsRequest.setStartAfter(startAfter);
+    getDocumentsRequest.setStartAt(startAt);
+
+    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getPlatformGrpcPort()}`);
+
+    const getDocumentsResponse = await client.getDocuments(getDocumentsRequest);
+
+    return getDocumentsResponse.getDocumentsList();
+  }
+
+  /**
    * @private
    * @return {number}
    */
-  getGrpcPort() {
-    if (typeof process !== 'undefined'
-      && process.versions != null
-      && process.versions.node != null) {
-      return this.nativeGrpcPort;
-    }
+  getCoreGrpcPort() {
+    return this.grpcCorePort;
+  }
 
-    return this.DAPIPort;
+  /**
+   * @private
+   * @return {number}
+   */
+  getPlatformGrpcPort() {
+    return this.grpcPlatformPort;
+  }
+
+  /**
+   * @private
+   * @return {number}
+   */
+  getTxFilterStreamGrpcPort() {
+    return this.grpcTxFilterStreamPort;
   }
 }
 

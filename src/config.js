@@ -3,7 +3,9 @@ const config = {
     port: 3000,
   },
   grpc: {
-    nativePort: 3010,
+    corePort: 3005,
+    platformPort: 3006,
+    txFilterStreamPort: 3010,
   },
   nullHash: '0000000000000000000000000000000000000000000000000000000000000000',
   MNListUpdateInterval: 60000,

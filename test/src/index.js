@@ -904,7 +904,7 @@ describe('api', () => {
     });
   });
 
-  describe.skip('#applyStateTransition', () => {
+  describe('#applyStateTransition', () => {
     let applyStateTransitionStub;
     let stateTransitionFixture;
 
@@ -935,7 +935,7 @@ describe('api', () => {
     });
   });
 
-  describe.skip('#getIdentity', () => {
+  describe('#getIdentity', () => {
     let getIdentityStub;
     let id;
 
@@ -962,7 +962,7 @@ describe('api', () => {
     });
   });
 
-  describe.skip('#getDocuments', () => {
+  describe('#getDocuments', () => {
     let getDocumentsStub;
     let serializedDocuments;
 
@@ -989,7 +989,7 @@ describe('api', () => {
     });
   });
 
-  describe.skip('#getDataContract', () => {
+  describe('#getDataContract', () => {
     let getDataContractStub;
     let serializedDataContract;
 

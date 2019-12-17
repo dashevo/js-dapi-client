@@ -1,11 +1,10 @@
 const config = {
   Api: {
-    port: 3000,
+    port: 2501,
   },
   grpc: {
-    corePort: 3005,
-    platformPort: 3006,
-    txFilterStreamPort: 3010,
+    apiPort: 2500,
+    txFilterStreamPort: 2510,
   },
   nullHash: '0000000000000000000000000000000000000000000000000000000000000000',
   MNListUpdateInterval: 60000,

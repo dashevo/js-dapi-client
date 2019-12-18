@@ -28,7 +28,7 @@ class DAPIClient {
    * @param {number} [options.retries=3] - num of retries if there is no response from DAPI node
    */
   constructor(options = {}) {
-    this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
+    this.MNDiscovery = new MNDiscovery(options.seeds, options.apiJsonRpcPort);
     this.DAPIPort = options.apiJsonRpcPort || config.jsonRpc.apiPort;
     this.apiGrpcPort = options.apiGrpcPort || config.grpc.apiPort;
     this.txFilterStreamGrpcPort = options.txFilterStreamGrpcPort || config.grpc.txFilterStreamPort;

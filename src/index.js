@@ -20,18 +20,18 @@ class DAPIClient {
    * @param options
    * @param {Array<Object>} [options.seeds] - seeds. If no seeds provided
    * default seed will be used.
-   * @param {number} [options.port=2501] - default port for connection to the DAPI
-   * @param {number} [options.grpcApiPort=2500] - Native GRPC API port for connection to the DAPI
-   * @param {number} [options.grpcTxFilterStreamPort=2501] - Native GRPC TxFilerStream port
+   * @param {number} [options.apiJsonRpcPort=2501] - default port for connection to the DAPI
+   * @param {number} [options.apiGrpcPort=2500] - Native GRPC API port for connection to the DAPI
+   * @param {number} [options.txFilterStreamGrpcPort=2501] - Native GRPC TxFilerStream port
    * for connection to the DAPI
    * @param {number} [options.timeout=2000] - timeout for connection to the DAPI
    * @param {number} [options.retries=3] - num of retries if there is no response from DAPI node
    */
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
-    this.DAPIPort = options.port || config.Api.port;
-    this.grpcApiPort = options.grpcApiPort || config.grpc.apiPort;
-    this.grpcTxFilterStreamPort = options.grpcTxFilterStreamPort || config.grpc.txFilterStreamPort;
+    this.DAPIPort = options.apiJsonRpcPort || config.jsonRpc.apiPort;
+    this.apiGrpcPort = options.apiGrpcPort || config.grpc.apiPort;
+    this.txFilterStreamGrpcPort = options.txFilterStreamGrpcPort || config.grpc.txFilterStreamPort;
     this.timeout = options.timeout || 2000;
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.timeout),
       'Expect timeout to be an unsigned integer');
@@ -327,7 +327,7 @@ class DAPIClient {
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new TransactionsFilterStreamPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpctxFilterStreamPort()}`);
+    const client = new TransactionsFilterStreamPromiseClient(`${nodeToConnect.getIp()}:${this.getTxFilterStreamGrpcPort()}`);
 
     return client.subscribeToTransactionsWithProofs(request);
   }
@@ -348,7 +348,7 @@ class DAPIClient {
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcApiPort()}`);
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getApiGrpcPort()}`);
 
     return client.applyStateTransition(applyStateTransitionRequest);
   }
@@ -364,7 +364,7 @@ class DAPIClient {
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcApiPort()}`);
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getApiGrpcPort()}`);
     const getIdentityResponse = await client.getIdentity(getIdentityRequest);
 
     const serializedIdentityBinaryArray = getIdentityResponse.getIdentity();
@@ -389,7 +389,7 @@ class DAPIClient {
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcApiPort()}`);
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getApiGrpcPort()}`);
     const getDataContractResponse = await client.getDataContract(getDataContractRequest);
 
     return getDataContractResponse.getDataContract();
@@ -427,7 +427,7 @@ class DAPIClient {
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcApiPort()}`);
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getApiGrpcPort()}`);
 
     const getDocumentsResponse = await client.getDocuments(getDocumentsRequest);
 
@@ -438,11 +438,11 @@ class DAPIClient {
    * @private
    * @return {number}
    */
-  getGrpcApiPort() {
+  getApiGrpcPort() {
     if (typeof process !== 'undefined'
       && process.versions != null
       && process.versions.node != null) {
-      return this.grpcApiPort;
+      return this.apiGrpcPort;
     }
 
     return this.DAPIPort;
@@ -452,11 +452,11 @@ class DAPIClient {
    * @private
    * @return {number}
    */
-  getGrpctxFilterStreamPort() {
+  getTxFilterStreamGrpcPort() {
     if (typeof process !== 'undefined'
       && process.versions != null
       && process.versions.node != null) {
-      return this.grpcTxFilterStreamPort;
+      return this.txFilterStreamGrpcPort;
     }
 
     return this.DAPIPort;

@@ -46,27 +46,27 @@ describe('MNListProvider', async () => {
       const SecondBaseHash = '0000000005b3f97e0af8c72f9a96eca720237e374ca860938ba0d7a68471c4d6';
       const SecondBlockHash = '000000325235a2a92011589df3d2be404eaea062afb6fa9a0dc02eee6e53bec8';
       RPCClientStub
-        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getBlockHash', { height: genesisHeight })
+        .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort }, 'getBlockHash', { height: genesisHeight })
         .returns(new Promise((resolve) => {
           resolve(genesisHash);
         }));
       RPCClientStub
-        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getBestBlockHash', {})
+        .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort }, 'getBestBlockHash', {})
         .returns(new Promise((resolve) => {
           resolve(FirstBlockHash);
         }));
       RPCClientStub
-        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
+        .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
         .returns(new Promise((resolve) => {
           resolve(SMNListFixture.getFirstDiff());
         }));
       RPCClientStub
-        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMnListDiff', { baseBlockHash: SecondBaseHash, blockHash: SecondBlockHash })
+        .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort }, 'getMnListDiff', { baseBlockHash: SecondBaseHash, blockHash: SecondBlockHash })
         .returns(new Promise((resolve) => {
           resolve(SMNListFixture.getSecondDiff());
         }));
       RPCClientStub
-        .withArgs({ host: '127.0.0.1', port: config.Api.port +1 }, 'getMnListDiff', {})
+        .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort +1 }, 'getMnListDiff', {})
         .returns(new Promise((resolve) => {
           resolve(null);
         }));
@@ -75,14 +75,14 @@ describe('MNListProvider', async () => {
       // Stubs for request to any MN from MNList, returned by seed. This call should return updated list
       for (let masternode of SMNListFixture.getFirstDiff().mnList) {
         RPCClientStub
-          .withArgs({ host: masternode.service.split(':')[0], port: config.Api.port }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
+          .withArgs({ host: masternode.service.split(':')[0], port: config.jsonRpc.apiPort }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
           .returns(new Promise((resolve) => {
             resolve(SMNListFixture.getSecondDiff());
           }));
       }
       for (let masternode of SMNListFixture.getFirstDiff().mnList) {
         RPCClientStub
-          .withArgs({ host: masternode.service.split(':')[0], port: config.Api.port }, 'getBestBlockHash', {} )
+          .withArgs({ host: masternode.service.split(':')[0], port: config.jsonRpc.apiPort }, 'getBestBlockHash', {} )
           .returns(new Promise((resolve) => {
             resolve(SecondBlockHash);
           }));
@@ -170,7 +170,7 @@ describe('MNListProvider', async () => {
       const blockHash = '0000000005b3f97e0af8c72f9a96eca720237e374ca860938ba0d7a68471c4d6';
       RPCClient.request.resetHistory();
       RPCClient.request
-        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
+        .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
         .onFirstCall()
         .returns(new Promise(resolve => resolve(null)));
 
@@ -183,7 +183,7 @@ describe('MNListProvider', async () => {
       const blockHash = '0000000005b3f97e0af8c72f9a96eca720237e374ca860938ba0d7a68471c4d6';
         RPCClient.request.resetHistory();
         RPCClient.request
-          .withArgs({ host: '127.0.0.1', port: config.Api.port+1 }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
+          .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort+1 }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
           .onFirstCall()
           .returns(new Promise(resolve => resolve(null)));
 
@@ -196,7 +196,7 @@ describe('MNListProvider', async () => {
       const blockHash = '0000000005b3f97e0af8c72f9a96eca720237e374ca860938ba0d7a68471c4d6';
       RPCClient.request.resetHistory();
       RPCClient.request
-        .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
+        .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort }, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
         .onFirstCall()
         .returns(new Promise(resolve => resolve(masternodesThatReturnNull)));
 

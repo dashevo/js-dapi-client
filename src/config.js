@@ -1,6 +1,6 @@
 const config = {
-  Api: {
-    port: 2501,
+  jsonRpc: {
+    apiPort: 2501,
   },
   grpc: {
     apiPort: 2500,

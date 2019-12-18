@@ -327,7 +327,7 @@ class DAPIClient {
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new TransactionsFilterStreamPromiseClient(`${nodeToConnect.getIp()}:${this.getApiGrpcPort()}`);
+    const client = new TransactionsFilterStreamPromiseClient(`${nodeToConnect.getIp()}:${this.getTxFilterStreamGrpcPort()}`);
 
     return client.subscribeToTransactionsWithProofs(request);
   }

@@ -26,17 +26,17 @@ describe('MNDiscovery', async () => {
             const genesisHeight = 0;
             const RPCClientStub = sinon.stub(RPCClient, 'request');
             RPCClientStub
-                .withArgs({host: '127.0.0.1', port: config.jsonRpc.apiPort}, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
+                .withArgs({host: '127.0.0.1', port: config.Api.port}, 'getMnListDiff', { baseBlockHash: baseHash, blockHash: blockHash })
                 .returns(new Promise((resolve) => {
                     resolve(SMNListFixture.getFirstDiff());
                 }));
             RPCClientStub
-              .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort }, 'getBlockHash', { height: genesisHeight })
+              .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getBlockHash', { height: genesisHeight })
               .returns(new Promise((resolve) => {
                   resolve(baseHash);
               }));
           RPCClientStub
-            .withArgs({ host: '127.0.0.1', port: config.jsonRpc.apiPort }, 'getBestBlockHash', {})
+            .withArgs({ host: '127.0.0.1', port: config.Api.port }, 'getBestBlockHash', {})
             .returns(new Promise((resolve) => {
               resolve(blockHash);
             }));

@@ -1,10 +1,9 @@
 const config = {
-  jsonRpc: {
-    apiPort: 2501,
+  Api: {
+    port: 3000,
   },
   grpc: {
-    apiPort: 2500,
-    txFilterStreamPort: 2510,
+    nativePort: 3010,
   },
   nullHash: '0000000000000000000000000000000000000000000000000000000000000000',
   MNListUpdateInterval: 60000,

@@ -536,7 +536,7 @@ describe('api', () => {
     it('Should set seeds and port, if passed', async () => {
       const dapi = new DAPIClient({
         seeds: [{ service: '127.1.2.3:19999' }],
-        apiJsonRpcPort: 1234
+        port: 1234
       });
       expect(dapi.DAPIPort).to.be.equal(1234);
       expect(dapi.MNDiscovery.masternodeListProvider.DAPIPort).to.be.equal(1234);

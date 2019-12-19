@@ -90,7 +90,7 @@ async function validateDiff(diff) { // eslint-disable-line no-unused-vars
  */
 
 class MasternodeListProvider {
-  constructor(seeds, DAPIPort = config.Api.port) {
+  constructor(seeds, DAPIPort = config.jsonRpc.apiPort) {
     const seedsIsArray = Array.isArray(seeds);
 
     if (seeds && !seedsIsArray) {

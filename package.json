@@ -1,6 +1,6 @@
 {
   "name": "@dashevo/dapi-client",
-  "version": "0.8.0-dev.11",
+  "version": "0.8.0-dev.13",
   "description": "Client library used to access Dash DAPI endpoints",
   "main": "index.js",
   "dependencies": {
@@ -9,6 +9,7 @@
     "@dashevo/dash-spv": "^1.1.5",
     "@dashevo/dashcore-lib": "^0.17.11",
     "axios": "^0.19.0",
+    "cbor": "^5.0.1",
     "lodash": "^4.17.11",
     "lowdb": "^1.0.0"
   },

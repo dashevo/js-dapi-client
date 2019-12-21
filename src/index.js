@@ -15,6 +15,8 @@ const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
 
+const cbor = require('cbor');
+
 class DAPIClient {
   /**
    * @param options
@@ -416,22 +418,32 @@ class DAPIClient {
       startAfter,
     } = options;
 
+    let whereSerialized = Buffer.alloc(0);
+    if (where) {
+      whereSerialized = cbor.encode(where);
+    }
+
+    let orderBySerialized = Buffer.alloc(0);
+    if (orderBy) {
+      orderBySerialized = cbor.encode(orderBy);
+    }
+
     const getDocumentsRequest = new GetDocumentsRequest();
     getDocumentsRequest.setDataContractId(contractId);
     getDocumentsRequest.setDocumentType(type);
-    getDocumentsRequest.setWhere(where);
-    getDocumentsRequest.setOrderBy(orderBy);
+    getDocumentsRequest.setWhere(whereSerialized);
+    getDocumentsRequest.setOrderBy(orderBySerialized);
     getDocumentsRequest.setLimit(limit);
     getDocumentsRequest.setStartAfter(startAfter);
     getDocumentsRequest.setStartAt(startAt);
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getApiGrpcPort()}`);
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
 
     const getDocumentsResponse = await client.getDocuments(getDocumentsRequest);
 
-    return getDocumentsResponse.getDocumentsList();
+    return getDocumentsResponse.getDocumentsList().map(document => Buffer.from(document));
   }
 
   /**

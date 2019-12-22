@@ -425,12 +425,12 @@ class DAPIClient {
       startAfter,
     } = options;
 
-    let whereSerialized = Buffer.alloc(0);
+    let whereSerialized;
     if (where) {
       whereSerialized = cbor.encode(where);
     }
 
-    let orderBySerialized = Buffer.alloc(0);
+    let orderBySerialized;
     if (orderBy) {
       orderBySerialized = cbor.encode(orderBy);
     }

@@ -446,7 +446,7 @@ class DAPIClient {
 
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getApiGrpcPort()}`);
 
     const getDocumentsResponse = await client.getDocuments(getDocumentsRequest);
 

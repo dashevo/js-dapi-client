@@ -1,5 +1,6 @@
 const jsutil = require('@dashevo/dashcore-lib').util.js;
 const preconditionsUtil = require('@dashevo/dashcore-lib').util.preconditions;
+const cbor = require('cbor');
 const {
   // CorePromiseClient,
   PlatformPromiseClient,
@@ -14,8 +15,6 @@ const {
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
-
-const cbor = require('cbor');
 
 class DAPIClient {
   /**

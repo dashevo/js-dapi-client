@@ -1,5 +1,6 @@
 const jsutil = require('@dashevo/dashcore-lib').util.js;
 const preconditionsUtil = require('@dashevo/dashcore-lib').util.preconditions;
+const cbor = require('cbor');
 const {
   // CorePromiseClient,
   PlatformPromiseClient,
@@ -424,11 +425,21 @@ class DAPIClient {
       startAfter,
     } = options;
 
+    let whereSerialized;
+    if (where) {
+      whereSerialized = cbor.encode(where);
+    }
+
+    let orderBySerialized;
+    if (orderBy) {
+      orderBySerialized = cbor.encode(orderBy);
+    }
+
     const getDocumentsRequest = new GetDocumentsRequest();
     getDocumentsRequest.setDataContractId(contractId);
     getDocumentsRequest.setDocumentType(type);
-    getDocumentsRequest.setWhere(where);
-    getDocumentsRequest.setOrderBy(orderBy);
+    getDocumentsRequest.setWhere(whereSerialized);
+    getDocumentsRequest.setOrderBy(orderBySerialized);
     getDocumentsRequest.setLimit(limit);
     getDocumentsRequest.setStartAfter(startAfter);
     getDocumentsRequest.setStartAt(startAt);
@@ -439,7 +450,7 @@ class DAPIClient {
 
     const getDocumentsResponse = await client.getDocuments(getDocumentsRequest);
 
-    return getDocumentsResponse.getDocumentsList();
+    return getDocumentsResponse.getDocumentsList().map(document => Buffer.from(document));
   }
 
   /**

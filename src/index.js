@@ -393,7 +393,15 @@ class DAPIClient {
     const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getApiGrpcPort()}`);
     const getDataContractResponse = await client.getDataContract(getDataContractRequest);
 
-    return getDataContractResponse.getDataContract();
+    const serializedDataContractBinaryArray = getDataContractResponse.getDataContract();
+
+    let dataContract = null;
+
+    if (serializedDataContractBinaryArray) {
+      dataContract = Buffer.from(serializedDataContractBinaryArray);
+    }
+
+    return dataContract;
   }
 
   /**

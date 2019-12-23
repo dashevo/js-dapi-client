@@ -1,6 +1,6 @@
 {
   "name": "@dashevo/dapi-client",
-  "version": "0.8.0-dev.12",
+  "version": "0.8.0-dev.14",
   "description": "Client library used to access Dash DAPI endpoints",
   "main": "index.js",
   "dependencies": {
@@ -9,6 +9,7 @@
     "@dashevo/dash-spv": "^1.1.5",
     "@dashevo/dashcore-lib": "^0.17.11",
     "axios": "^0.19.0",
+    "cbor": "^5.0.1",
     "lodash": "^4.17.11",
     "lowdb": "^1.0.0"
   },
@@ -47,7 +48,7 @@
     "build": "webpack --display-error-details",
     "lint": "eslint .",
     "test": "npm run build && npm run test:node && npm run test:firefox",
-    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=83 --branches=63 --functions=70 mocha test/src --recursive",
+    "test:node": "nyc --check-coverage --reporter=html --reporter=text --lines=83 --branches=62 --functions=70 mocha test/src --recursive",
     "test:firefox": "karma start ./karma.conf.js --browsers Firefox --single-run",
     "test:integration": "mocha './test/integration/*.spec.js' --timeout 240000",
     "check-package": "npm run check-package:name && npm run check-package:version",

@@ -21,8 +21,8 @@ class DAPIClient {
    * @param options
    * @param {Array<Object>} [options.seeds] - seeds. If no seeds provided
    * default seed will be used.
-   * @param {number} [options.port=3000] - default port for connection to the DAPI
-   * @param {number} [options.nativeGrpcPort=3010] - Native GRPC port for connection to the DAPI
+   * @param {number} [options.port=2501] - default port for connection to the DAPI
+   * @param {number} [options.nativeGrpcPort=2500] - Native GRPC port for connection to the DAPI
    * @param {number} [options.timeout=2000] - timeout for connection to the DAPI
    * @param {number} [options.retries=3] - num of retries if there is no response from DAPI node
    */

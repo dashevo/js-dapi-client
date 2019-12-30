@@ -11,8 +11,10 @@
     "@dashevo/dpp": "~0.10.1",
     "axios": "^0.19.1",
     "cbor": "^5.0.1",
+    "core-js": "^3.6.1",
     "lodash": "^4.17.15",
-    "lowdb": "^1.0.0"
+    "lowdb": "^1.0.0",
+    "regenerator-runtime": "^0.13.3"
   },
   "devDependencies": {
     "@babel/core": "^7.8.3",

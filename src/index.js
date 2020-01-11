@@ -12,9 +12,13 @@ const {
   GetDataContractRequest,
   GetDocumentsRequest,
 } = require('@dashevo/dapi-grpc');
+const {
+  ApplyStateTransitionResponse,
+} = require('@dashevo/dapi-grpc');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
+
 
 class DAPIClient {
   /**
@@ -344,9 +348,10 @@ class DAPIClient {
    */
   async applyStateTransition(stateTransition) {
     if (this.forceJsonRpc) {
-      return this.makeRequestToRandomDAPINode('applyStateTransition', {
+      await this.makeRequestToRandomDAPINode('applyStateTransition', {
         stateTransition: stateTransition.serialize(),
       });
+      return new ApplyStateTransitionResponse();
     }
     const applyStateTransitionRequest = new ApplyStateTransitionRequest();
     applyStateTransitionRequest.setStateTransition(stateTransition.serialize());

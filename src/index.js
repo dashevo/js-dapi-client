@@ -349,7 +349,7 @@ class DAPIClient {
   async applyStateTransition(stateTransition) {
     if (this.forceJsonRpc) {
       await this.makeRequestToRandomDAPINode('applyStateTransition', {
-        stateTransition: stateTransition.serialize(),
+        stateTransition: stateTransition.serialize().toString('base64'),
       });
       return new ApplyStateTransitionResponse();
     }

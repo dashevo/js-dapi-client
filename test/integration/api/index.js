@@ -120,12 +120,6 @@ describe('basicAPIs', () => {
       port: masterNode.dapiCore.options.getRpcPort(),
     });
 
-    dapiClientForcedJsonRPC = new DAPIClient({
-      seeds,
-      port: masterNode.dapiCore.options.getRpcPort(),
-      forceJsonRpc: true
-    });
-
     insightURL = `http://127.0.0.1:${masterNode.insightApi.options.getApiPort()}/insight-api`;
 
     transactionIdSendToAddress = await masterNode.dashCore.getApi()

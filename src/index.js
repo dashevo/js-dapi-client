@@ -25,12 +25,14 @@ class DAPIClient {
    * @param {number} [options.nativeGrpcPort=3010] - Native GRPC port for connection to the DAPI
    * @param {number} [options.timeout=2000] - timeout for connection to the DAPI
    * @param {number} [options.retries=3] - num of retries if there is no response from DAPI node
+   * @param {boolean} [options.forceJsonRpc] - use json rpc even when grpc endpoint is available
    */
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
     this.nativeGrpcPort = options.nativeGrpcPort || config.grpc.nativePort;
     this.timeout = options.timeout || 2000;
+    this.forceJsonRpc = options.forceJsonRpc;
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.timeout),
       'Expect timeout to be an unsigned integer');
     this.retries = options.retries ? options.retries : 3;
@@ -341,6 +343,11 @@ class DAPIClient {
    * @returns {Promise<!ApplyStateTransitionResponse>}
    */
   async applyStateTransition(stateTransition) {
+    if (this.forceJsonRpc) {
+      return this.makeRequestToRandomDAPINode('applyStateTransition', {
+        stateTransition: stateTransition.serialize(),
+      });
+    }
     const applyStateTransitionRequest = new ApplyStateTransitionRequest();
     applyStateTransitionRequest.setStateTransition(stateTransition.serialize());
 

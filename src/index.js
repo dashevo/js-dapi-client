@@ -401,6 +401,10 @@ class DAPIClient {
    * @returns {Promise<Buffer>}
    */
   async getDataContract(contractId) {
+    if (this.forceJsonRpc) {
+      const result = await this.makeRequestToRandomDAPINode('getDataContract', { id: contractId });
+      return Buffer.from(result.dataContract, 'base64');
+    }
     const getDataContractRequest = new GetDataContractRequest();
 
     getDataContractRequest.setId(contractId);

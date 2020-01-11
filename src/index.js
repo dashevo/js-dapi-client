@@ -369,6 +369,13 @@ class DAPIClient {
    * @returns {Promise<!Buffer|null>}
    */
   async getIdentity(id) {
+    if (this.forceJsonRpc) {
+      const result = await this.makeRequestToRandomDAPINode('getIdentity', { id });
+      if (!result.identity) {
+        return null;
+      }
+      return Buffer.from(result.identity, 'base64');
+    }
     const getIdentityRequest = new GetIdentityRequest();
     getIdentityRequest.setId(id);
 

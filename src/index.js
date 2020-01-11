@@ -459,7 +459,9 @@ class DAPIClient {
         ...options,
       });
       return result.map(
-        documentJson => this.dpp.document.createFromObject(documentJson).serialize(),
+        documentJson => this.dpp.document.createFromObject(
+          documentJson, { skipValidation: true },
+        ).serialize(),
       );
     }
 

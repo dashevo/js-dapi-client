@@ -15,10 +15,10 @@ const {
 const {
   ApplyStateTransitionResponse,
 } = require('@dashevo/dapi-grpc');
+const DPP = require('@dashevo/dpp');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
-
 
 class DAPIClient {
   /**
@@ -42,6 +42,7 @@ class DAPIClient {
     this.retries = options.retries ? options.retries : 3;
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.retries),
       'Expect retries to be an unsigned integer');
+    this.dpp = new DPP();
   }
 
   /**
@@ -449,6 +450,17 @@ class DAPIClient {
     let orderBySerialized;
     if (orderBy) {
       orderBySerialized = cbor.encode(orderBy);
+    }
+
+    if (this.forceJsonRpc) {
+      const result = await this.makeRequestToRandomDAPINode('getDocuments', {
+        dataContractId: contractId,
+        documentType: type,
+        ...options,
+      });
+      return result.map(
+        documentJson => this.dpp.document.createFromObject(documentJson).serialize(),
+      );
     }
 
     const getDocumentsRequest = new GetDocumentsRequest();

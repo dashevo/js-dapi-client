@@ -11,6 +11,7 @@ const datacontracts={
 describe('E2E tests against testnet', function suite(){
   this.timeout(20000);
   let client;
+  let bestBlockHash;
   before(async () => {
     client = new DAPIClient({
       seeds: seeds,
@@ -31,6 +32,20 @@ describe('E2E tests against testnet', function suite(){
     const bestBlockHeight = await client.getBestBlockHeight();
     expect(typeof bestBlockHeight).to.be.equal('number');
     expect(bestBlockHeight).to.be.gt(0);
+  });
+  it('should get best block hash', async function () {
+    bestBlockHash = await client.getBestBlockHash();
+    expect(typeof bestBlockHash).to.be.equal('string');
+    expect(bestBlockHash.length).to.equal(64)
+    expect(bestBlockHash.startsWith('0000')).to.equal(true);
+  });
+  it('should get best raw block', async function () {
+    const bestRawBlock = await client.getRawBlock(bestBlockHash);
+    expect(bestRawBlock.startsWith('0000')).to.equal(true);
+  });
+  it('should get an app identity', async function () {
+    const rawIdentity = await client.getIdentity(datacontracts.dpns);
+    expect(rawIdentity.toString().includes(datacontracts.dpns)).to.equal(true);
   });
   it('should getDataContract', async function () {
     const rawContract = await client.getDataContract(datacontracts.dpns);

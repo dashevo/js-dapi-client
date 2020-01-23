@@ -5,12 +5,14 @@ module.exports = (config) => {
     files: [
       './test/dist/dapi-client.min.js',
       './test.spec.js',
+      './integration.spec.js',
     ],
     exclude: [
     ],
     preprocessors: {
       './test/dist/dapi-client.min.js': ['webpack'],
       './test.spec.js': ['webpack'],
+      './integration.spec.js': ['webpack'],
     },
     webpack: {
       mode: 'production',

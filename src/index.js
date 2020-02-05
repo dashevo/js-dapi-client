@@ -495,14 +495,17 @@ class DAPIClient {
    */
   async getGrpcUrl() {
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+    let url;
 
     if (typeof process !== 'undefined'
       && process.versions != null
       && process.versions.node != null) {
-      return `${nodeToConnect.getIp()}:${this.nativeGrpcPort}`;
+      url = `${nodeToConnect.getIp()}:${this.nativeGrpcPort}`;
+    } else {
+      url = `http://${nodeToConnect.getIp()}:${this.DAPIPort}`;
     }
 
-    return `http://${nodeToConnect.getIp()}:${this.DAPIPort}`;
+    return url;
   }
 }
 

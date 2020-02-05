@@ -463,11 +463,11 @@ class DAPIClient {
         ...options,
       });
       const docModels = await Promise.all(result.map(
-        (documentJson) => this.dpp.document.createFromObject(
+        documentJson => this.dpp.document.createFromObject(
           documentJson, { skipValidation: true },
         ),
       ));
-      return docModels.map((document) => document.serialize());
+      return docModels.map(document => document.serialize());
     }
 
     const getDocumentsRequest = new GetDocumentsRequest();
@@ -485,7 +485,7 @@ class DAPIClient {
 
     const getDocumentsResponse = await client.getDocuments(getDocumentsRequest);
 
-    return getDocumentsResponse.getDocumentsList().map((document) => Buffer.from(document));
+    return getDocumentsResponse.getDocumentsList().map(document => Buffer.from(document));
   }
 
   /**

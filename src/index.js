@@ -330,9 +330,9 @@ class DAPIClient {
 
     request.setCount(options.count);
 
-    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+    const urlToConnect = await this.getGrpcUrl();
 
-    const client = new TransactionsFilterStreamPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+    const client = new TransactionsFilterStreamPromiseClient(urlToConnect);
 
     return client.subscribeToTransactionsWithProofs(request);
   }
@@ -357,9 +357,9 @@ class DAPIClient {
     const applyStateTransitionRequest = new ApplyStateTransitionRequest();
     applyStateTransitionRequest.setStateTransition(stateTransition.serialize());
 
-    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+    const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+    const client = new PlatformPromiseClient(urlToConnect);
 
     return client.applyStateTransition(applyStateTransitionRequest);
   }
@@ -380,9 +380,9 @@ class DAPIClient {
     const getIdentityRequest = new GetIdentityRequest();
     getIdentityRequest.setId(id);
 
-    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+    const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+    const client = new PlatformPromiseClient(urlToConnect);
     const getIdentityResponse = await client.getIdentity(getIdentityRequest);
 
     const serializedIdentityBinaryArray = getIdentityResponse.getIdentity();
@@ -409,9 +409,9 @@ class DAPIClient {
 
     getDataContractRequest.setId(contractId);
 
-    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+    const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+    const client = new PlatformPromiseClient(urlToConnect);
     const getDataContractResponse = await client.getDataContract(getDataContractRequest);
 
     const serializedDataContractBinaryArray = getDataContractResponse.getDataContract();
@@ -479,9 +479,9 @@ class DAPIClient {
     getDocumentsRequest.setStartAfter(startAfter);
     getDocumentsRequest.setStartAt(startAt);
 
-    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+    const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(`${nodeToConnect.getIp()}:${this.getGrpcPort()}`);
+    const client = new PlatformPromiseClient(urlToConnect);
 
     const getDocumentsResponse = await client.getDocuments(getDocumentsRequest);
 
@@ -489,17 +489,20 @@ class DAPIClient {
   }
 
   /**
+   * Get gRPC url to connect
    * @private
-   * @return {number}
+   * @returns {Promise<string>}
    */
-  getGrpcPort() {
+  async getGrpcUrl() {
+    const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
+
     if (typeof process !== 'undefined'
       && process.versions != null
       && process.versions.node != null) {
-      return this.nativeGrpcPort;
+      return `${nodeToConnect.getIp()}:${this.nativeGrpcPort}`;
     }
 
-    return this.DAPIPort;
+    return `http://${nodeToConnect.getIp()}:${this.DAPIPort}`;
   }
 }
 

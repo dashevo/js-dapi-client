@@ -500,12 +500,10 @@ class DAPIClient {
     if (typeof process !== 'undefined'
       && process.versions != null
       && process.versions.node != null) {
-      url = `${nodeToConnect.getIp()}:${this.nativeGrpcPort}`;
-    } else {
-      url = `http://${nodeToConnect.getIp()}:${this.DAPIPort}`;
+      return `${nodeToConnect.getIp()}:${this.nativeGrpcPort}`;
     }
 
-    return url;
+    return `http://${nodeToConnect.getIp()}:${this.DAPIPort}`;
   }
 }
 

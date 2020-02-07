@@ -344,7 +344,6 @@ class DAPIClient {
    */
   async getGrpcUrl() {
     const nodeToConnect = await this.MNDiscovery.getRandomMasternode();
-    let url;
 
     if (typeof process !== 'undefined'
       && process.versions != null

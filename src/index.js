@@ -34,7 +34,6 @@ class DAPIClient {
    * @param {number} [options.timeout=2000] - timeout for connection to the DAPI
    * @param {number} [options.retries=3] - num of retries if there is no response from DAPI node
    * @param {boolean} [options.forceJsonRpc] - use json rpc even when grpc endpoint is available
-   * @param {boolean} [options.forceGRPCWeb] - use json rpc even when grpc endpoint is available
    */
   constructor(options = {}) {
     this.MNDiscovery = new MNDiscovery(options.seeds, options.port);

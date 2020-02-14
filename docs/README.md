@@ -1,17 +1,17 @@
-## Wallet-lib
+## DAPI-Client
 
-[![Package Version](https://img.shields.io/github/package-json/v/dashevo/wallet-lib.svg?&style=flat-square)](https://www.npmjs.org/package/@dashevo/wallet-lib)
-[![Build Status](https://img.shields.io/travis/com/dashevo/wallet-lib.svg?branch=master&style=flat-square)](https://travis-ci.com/dashevo/wallet-lib)
+[![Build Status](https://travis-ci.com/dashevo/dapi-client.svg?branch=master)](https://travis-ci.com/dashevo/dapi-client)
+[![GitHub Current Tag](https://img.shields.io/github/tag-date/dashevo/dapi-client.svg)](https://github.com/dashevo/dapi-client/tags)
+[![npm](https://img.shields.io/npm/v/@dashevo/dapi-client.svg)](https://www.npmjs.com/package/@dashevo/dapi-client)
 
-> A pure and extensible JavaScript Wallet Library for Dash
+> Client library used to access Dash DAPI endpoints
 
-### What it is 
+This library enables HTTP-based interaction with the Dash blockchain and Dash
+Platform via the decentralized API ([DAPI](https://github.com/dashevo/dapi))
+hosted on Dash masternodes.
 
-From being able to display an account balance, to paying to another address, passing by the need to automate back-end task related to a cold-storage.  
-The Wallet-lib allows you to easily work with Wallet/Account for HDWallet, or from just a single private key.  
-Wallet-lib also allow you to watch for a public key or an HDPubKey.  
-You might also wish to have your own set of plugins or your own coin selection logic.  
-The wallet-lib provides all the set of feature intended for node and browser usage.  
+ - `DAPI-Client` provides automatic server (masternode) discovery using either a default seed node or a user-supplied one
+ - `DAPI-Client` maps to DAPI's [RPC](https://github.com/dashevo/dapi/tree/master/lib/rpcServer/commands) and [gRPC](https://github.com/dashevo/dapi/tree/master/lib/grpcServer/handlers) endpoints
 
 ### Install
 
@@ -19,22 +19,22 @@ The wallet-lib provides all the set of feature intended for node and browser usa
 
 In order to use this library in Node, you will need to add it to your project as a dependency.
 
-Having [NodeJS](https://nodejs.org/) installed, just type in your terminal : 
+Having [NodeJS](https://nodejs.org/) installed, just type in your terminal :
 
 ```sh
-npm install @dashevo/wallet-lib
+npm install @dashevo/dapi-client
 ```
 
 ### CDN Standalone
 
-For browser usage, you can also directly rely on unpkg :  
+For browser usage, you can also directly rely on unpkg :
 
 ```
-<script src="https://unpkg.com/@dashevo/wallet-lib"></script>
+<script src="https://unpkg.com/@dashevo/dapi-client"></script>
 ```
 
 
 ## Licence
 
-[MIT](https://github.com/dashevo/wallet-lib/blob/master/LICENCE.md) © Dash Core Group, Inc.
+[MIT](https://github.com/dashevo/dapi-client/blob/master/LICENCE.md) © Dash Core Group, Inc.
 

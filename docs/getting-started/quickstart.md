@@ -32,4 +32,4 @@ const client = new DAPIClient();
 
 ## Quicknotes
 
-This package allows you to fetch & send informations from both the payment chain (layer 1) and the application chain (layer 2, a.k.a Platform chain).
+This package allows you to fetch & send information from both the payment chain (layer 1) and the application chain (layer 2, a.k.a Platform chain).

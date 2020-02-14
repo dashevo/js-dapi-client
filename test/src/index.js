@@ -1,6 +1,6 @@
 const sinon = require('sinon');
 const {
-  // CorePromiseClient,
+  CorePromiseClient,
   PlatformPromiseClient,
   TransactionsFilterStreamPromiseClient,
   TransactionsWithProofsRequest,
@@ -8,11 +8,20 @@ const {
   GetIdentityResponse,
   GetDocumentsResponse,
   GetDataContractResponse,
+  GetBlockRequest,
+  GetBlockResponse,
+  GetStatusRequest,
+  GetStatusResponse,
+  GetTransactionRequest,
+  GetTransactionResponse,
+  SendTransactionRequest,
+  SendTransactionResponse,
 } = require('@dashevo/dapi-grpc');
 const chai = require('chai');
 const { EventEmitter } = require('events');
 const DAPIClient = require('../../src/index');
 const chaiAsPromised = require('chai-as-promised');
+const sinonChai = require('sinon-chai');
 const rpcClient = require('../../src/RPCClient');
 const config = require('../../src/config');
 const SMNListFixture = require('../fixtures/mnList');
@@ -28,10 +37,25 @@ const DashPlatformProtocol = require('@dashevo/dpp');
 const getDataContractFixture = require('@dashevo/dpp/lib/test/fixtures/getDataContractFixture');
 
 chai.use(chaiAsPromised);
+chai.use(sinonChai);
 
 const { expect } = chai;
 
 const validAddressWithOutputs = 'yXdxAYfK8eJgQmHpUzMaKEBhqwKQWKSezS';
+const validAddressSummary = {
+  'addrStr': validAddressWithOutputs,
+  'balance': 4173964.74940914,
+  'balanceSat': 417396474940914,
+  'totalReceived': 4287576.24940914,
+  'totalReceivedSat': 428757624940914,
+  'totalSent': 113611.5,
+  'totalSentSat': 11361150000000,
+  'unconfirmedBalance': 0,
+  'unconfirmedBalanceSat': 0,
+  'unconfirmedTxApperances': 0,
+  'txApperances': 27434,
+  'transactions': ['4f46066bd50cc2684484407696b7949e82bd906ea92c040f59a97cba47ed8176', '8890a0ee95a17f6723ab2d9a0bdd579351b9220738ad34f5b49cbe63f09b082a']
+};
 const contractId = '11c70af56a763b05943888fa3719ef56b3e826615fdda2d463c63f4034cb861c';
 
 const contract = {
@@ -267,6 +291,9 @@ describe('api', () => {
             }
             throw new RPCError('DAPI RPC error: getBlockHash: Error: Address not found');
           }
+          if (method === 'getAddressSummary') {
+            return validAddressSummary;
+          }
           if (method === 'getBestBlockHash') {
             return validBlockHash;
           }
@@ -372,6 +399,209 @@ describe('api', () => {
       expect(mnlistdiff.blockHash).to.be.equal(validBlockHash);
       expect(mnlistdiff.deletedMNs).to.be.an('array');
       expect(mnlistdiff.mnList).to.be.an('array');
+    });
+  });
+
+  describe('.address.getAddressSummary', () => {
+    it('Should return a summary for an address', async () => {
+      const dapi = new DAPIClient();
+      const summary = await dapi.getAddressSummary(validAddressWithOutputs);
+      expect(summary).to.be.an('object');
+      expect(summary.balanceSat).to.be.a('number');
+      expect(summary.unconfirmedBalanceSat).to.be.an('number');
+      expect(summary.transactions).to.be.an('array');
+      expect(summary.addrStr).to.be.equal(validAddressWithOutputs);
+    });
+    it('Should equal options.retries passed in', async () => {
+      const options = { retries: 1 };
+      const dapi = new DAPIClient(options);
+      await dapi.getAddressSummary(validAddressWithOutputs);
+      expect(dapi.retries).to.equal(1);
+    });
+  });
+
+  describe('#getBlockByHeight', () => {
+    let getBlockStub;
+    let height;
+
+    beforeEach(() => {
+      getBlockStub = sinon
+        .stub(CorePromiseClient.prototype, 'getBlock');
+
+      height = 1;
+    });
+
+    afterEach(() => {
+      getBlockStub.restore();
+    });
+
+    it('should return a block as Buffer', async () => {
+      const response = new GetBlockResponse();
+      response.setBlock(Buffer.from('block'));
+      getBlockStub.resolves(response);
+
+      const request = new GetBlockRequest();
+      request.setHeight(height);
+
+      const client = new DAPIClient();
+      const result = await client.getBlockByHeight(height);
+
+      expect(getBlockStub).to.be.calledOnceWithExactly(request);
+
+      expect(result).to.be.instanceof(Buffer);
+    });
+  });
+
+  describe('#getBlockByHash', () => {
+    let getBlockStub;
+    let hash;
+
+    beforeEach(() => {
+      getBlockStub = sinon
+        .stub(CorePromiseClient.prototype, 'getBlock');
+
+      hash = '4f46066bd50cc2684484407696b7949e82bd906ea92c040f59a97cba47ed8176';
+    });
+
+    afterEach(() => {
+      getBlockStub.restore();
+    });
+
+    it('should return a block as Buffer', async () => {
+      const response = new GetBlockResponse();
+      response.setBlock(Buffer.from('block'));
+      getBlockStub.resolves(response);
+
+      const request = new GetBlockRequest();
+      request.setHash(hash);
+
+      const client = new DAPIClient();
+      const result = await client.getBlockByHash(hash);
+
+      expect(getBlockStub).to.be.calledOnceWithExactly(request);
+
+      expect(result).to.be.instanceof(Buffer);
+    });
+  });
+
+  describe('#getStatus', () => {
+    let getStatusStub;
+
+    beforeEach(() => {
+      getStatusStub = sinon
+        .stub(CorePromiseClient.prototype, 'getStatus');
+    });
+
+    afterEach(() => {
+      getStatusStub.restore();
+    });
+
+    it('should return status as plain object', async () => {
+      const status = {
+        coreVersion: 1,
+        protocolVersion: 2,
+        blocks: 3,
+        timeOffset: 4,
+        connections: 5,
+        proxy: 'proxy',
+        difficulty: 0.4344343,
+        testnet: true,
+        relayFee: 0.1321321,
+        errors: '',
+        network: 'mainnet',
+      };
+
+      const response = new GetStatusResponse();
+      response.setCoreVersion(status.coreVersion);
+      response.setProtocolVersion(status.protocolVersion);
+      response.setBlocks(status.blocks);
+      response.setTimeOffset(status.timeOffset);
+      response.setConnections(status.connections);
+      response.setProxy(status.proxy);
+      response.setDifficulty(status.difficulty);
+      response.setTestnet(status.testnet);
+      response.setRelayFee(status.relayFee);
+      response.setErrors(status.errors);
+      response.setNetwork(status.network);
+
+      getStatusStub.resolves(response);
+
+      const request = new GetStatusRequest();
+
+      const client = new DAPIClient();
+      const result = await client.getStatus();
+
+      expect(getStatusStub).to.be.calledOnceWithExactly(request);
+
+      expect(result).to.be.deep.equal(status);
+    });
+  });
+
+  describe('#getTransaction', () => {
+    let getTransactionStub;
+    let id;
+
+    beforeEach(() => {
+      getTransactionStub = sinon
+        .stub(CorePromiseClient.prototype, 'getTransaction');
+
+      id = '4f46066bd50cc2684484407696b7949e82bd906ea92c040f59a97cba47ed8176';
+    });
+
+    afterEach(() => {
+      getTransactionStub.restore();
+    });
+
+    it('should return a transaction as Buffer', async () => {
+      const response = new GetTransactionResponse();
+      response.setTransaction(Buffer.from('transaction'));
+      getTransactionStub.resolves(response);
+
+      const request = new GetTransactionRequest();
+      request.setId(id);
+
+      const client = new DAPIClient();
+      const result = await client.getTransaction(id);
+
+      expect(getTransactionStub).to.be.calledOnceWithExactly(request);
+
+      expect(result).to.be.instanceof(Buffer);
+    });
+  });
+
+  describe('#sendTransaction', () => {
+    let sendTransactionStub;
+    let transaction;
+    let id;
+
+    beforeEach(() => {
+      sendTransactionStub = sinon
+        .stub(CorePromiseClient.prototype, 'sendTransaction');
+
+      transaction = Buffer.from('transaction');
+      id = '4f46066bd50cc2684484407696b7949e82bd906ea92c040f59a97cba47ed8176';
+    });
+
+    afterEach(() => {
+      sendTransactionStub.restore();
+    });
+
+    it('should return a transaction as Buffer', async () => {
+      const response = new SendTransactionResponse();
+      response.setTransactionId(id);
+      sendTransactionStub.resolves(response);
+
+      const request = new SendTransactionRequest();
+      request.setTransaction(transaction);
+      request.setAllowHighFees(true);
+      request.setBypassLimits(false);
+
+      const client = new DAPIClient();
+      const result = await client.sendTransaction(transaction, { allowHighFees: true });
+
+      expect(sendTransactionStub).to.be.calledOnceWithExactly(request);
+
+      expect(result).to.equal(id);
     });
   });
 

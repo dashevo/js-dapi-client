@@ -14,6 +14,4 @@
         - [`.getGrpcUrl()`](usage/utils/getGrpcUrl.md)
         - [`.getMnListDiff()`](usage/utils/getMnListDiff.md)
         - [`.subscribeToTransactionsWithProofs()`](usage/utils/subscribeToTransactionsWithProofs.md)
-- Examples
-    - [RegisterUser](https://github.com/dashevo/dapi-client/blob/master/examples/registerUser.js)
 - [License](https://github.com/dashevo/dapi-client/blob/master/LICENSE)

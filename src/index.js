@@ -1,5 +1,6 @@
 const jsutil = require('@dashevo/dashcore-lib').util.js;
 const preconditionsUtil = require('@dashevo/dashcore-lib').util.preconditions;
+const { Transaction } = require('@dashevo/dashcore-lib');
 const cbor = require('cbor');
 const {
   CorePromiseClient,
@@ -234,15 +235,17 @@ class DAPIClient {
   /**
    * Send Transaction
    *
-   * @param {Buffer} transaction
+   * @param {string|Transaction} transaction
    * @param {Object} [options]
    * @param {Object} [options.allowHighFees=false]
    * @param {Object} [options.bypassLimits=false]
    * @return {string}
    */
   async sendTransaction(transaction, options = {}) {
+    const serializedTransaction = Buffer.from(new Transaction(transaction).serialize(), 'hex');
     const sendTransactionRequest = new SendTransactionRequest();
-    sendTransactionRequest.setTransaction(transaction);
+
+    sendTransactionRequest.setTransaction(serializedTransaction);
     sendTransactionRequest.setAllowHighFees(options.allowHighFees || false);
     sendTransactionRequest.setBypassLimits(options.bypassLimits || false);
 

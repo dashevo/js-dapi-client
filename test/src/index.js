@@ -17,6 +17,13 @@ const {
   SendTransactionRequest,
   SendTransactionResponse,
 } = require('@dashevo/dapi-grpc');
+const {
+  server: {
+    error: {
+      NotFoundGrpcError,
+    },
+  },
+} = require('@dashevo/grpc-common');
 const chai = require('chai');
 const { EventEmitter } = require('events');
 const DAPIClient = require('../../src/index');
@@ -450,6 +457,16 @@ describe('api', () => {
 
       expect(result).to.be.instanceof(Buffer);
     });
+
+    it('should return null if block is not found', async () => {
+      const error = new NotFoundGrpcError('Not found');
+      getBlockStub.throws(error);
+
+      const client = new DAPIClient();
+      const result = await client.getBlockByHeight(height);
+
+      expect(result).to.be.null();
+    });
   });
 
   describe('#getBlockByHash', () => {
@@ -481,6 +498,16 @@ describe('api', () => {
       expect(getBlockStub).to.be.calledOnceWithExactly(request);
 
       expect(result).to.be.instanceof(Buffer);
+    });
+
+    it('should return null if block is not found', async () => {
+      const error = new NotFoundGrpcError('Not found');
+      getBlockStub.throws(error);
+
+      const client = new DAPIClient();
+      const result = await client.getBlockByHash(hash);
+
+      expect(result).to.be.null();
     });
   });
 
@@ -566,6 +593,16 @@ describe('api', () => {
       expect(getTransactionStub).to.be.calledOnceWithExactly(request);
 
       expect(result).to.be.instanceof(Buffer);
+    });
+
+    it('should return null if transaction is not found', async () => {
+      const error = new NotFoundGrpcError('Not found');
+      getTransactionStub.throws(error);
+
+      const client = new DAPIClient();
+      const result = await client.getTransaction(id);
+
+      expect(result).to.be.null();
     });
   });
 
@@ -713,6 +750,16 @@ describe('api', () => {
 
       expect(result).to.be.instanceof(Buffer);
     });
+
+    it('should return null if identity is not found', async () => {
+      const error = new NotFoundGrpcError('Not found');
+      getIdentityStub.throws(error);
+
+      const client = new DAPIClient();
+      const result = await client.getIdentity(id);
+
+      expect(result).to.be.null();
+    });
   });
 
   describe('#getDocuments', () => {
@@ -767,6 +814,16 @@ describe('api', () => {
 
       expect(result).to.be.instanceof(Buffer);
       expect(result).to.be.deep.equal(serializedDataContract);
+    });
+
+    it('should return null if data contract is not found', async () => {
+      const error = new NotFoundGrpcError('Not found');
+      getDataContractStub.throws(error);
+
+      const client = new DAPIClient();
+      const result = await client.getDataContract(contractId);
+
+      expect(result).to.be.null();
     });
   });
 });

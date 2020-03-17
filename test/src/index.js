@@ -20,7 +20,7 @@ const {
 const {
   server: {
     error: {
-      NotFoundGrpcError,
+      GrpcError,
     },
   },
 } = require('@dashevo/grpc-common');
@@ -459,7 +459,9 @@ describe('api', () => {
     });
 
     it('should return null if block is not found', async () => {
-      const error = new NotFoundGrpcError('Not found');
+      const error = new Error('Not found');
+      error.code = GrpcError.CODES.NOT_FOUND;
+
       getBlockStub.throws(error);
 
       const client = new DAPIClient();
@@ -501,7 +503,9 @@ describe('api', () => {
     });
 
     it('should return null if block is not found', async () => {
-      const error = new NotFoundGrpcError('Not found');
+      const error = new Error('Not found');
+      error.code = GrpcError.CODES.NOT_FOUND;
+
       getBlockStub.throws(error);
 
       const client = new DAPIClient();
@@ -596,7 +600,8 @@ describe('api', () => {
     });
 
     it('should return null if transaction is not found', async () => {
-      const error = new NotFoundGrpcError('Not found');
+      const error = new Error('Not found');
+      error.code = GrpcError.CODES.NOT_FOUND;
       getTransactionStub.throws(error);
 
       const client = new DAPIClient();
@@ -752,7 +757,8 @@ describe('api', () => {
     });
 
     it('should return null if identity is not found', async () => {
-      const error = new NotFoundGrpcError('Not found');
+      const error = new Error('Not found');
+      error.code = GrpcError.CODES.NOT_FOUND;
       getIdentityStub.throws(error);
 
       const client = new DAPIClient();
@@ -817,7 +823,8 @@ describe('api', () => {
     });
 
     it('should return null if data contract is not found', async () => {
-      const error = new NotFoundGrpcError('Not found');
+      const error = new Error('Not found');
+      error.code = GrpcError.CODES.NOT_FOUND;
       getDataContractStub.throws(error);
 
       const client = new DAPIClient();

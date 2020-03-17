@@ -22,7 +22,7 @@ const {
 const {
   server: {
     error: {
-      NotFoundGrpcError,
+      GrpcError,
     },
   },
 } = require('@dashevo/grpc-common');
@@ -162,7 +162,7 @@ class DAPIClient {
     try {
       response = await client.getBlock(getBlockRequest);
     } catch (e) {
-      if (e instanceof NotFoundGrpcError) {
+      if (e.code === GrpcError.CODES.NOT_FOUND) {
         return null;
       }
 
@@ -192,7 +192,7 @@ class DAPIClient {
     try {
       response = await client.getBlock(getBlockRequest);
     } catch (e) {
-      if (e instanceof NotFoundGrpcError) {
+      if (e.code === GrpcError.CODES.NOT_FOUND) {
         return null;
       }
 
@@ -239,7 +239,7 @@ class DAPIClient {
     try {
       response = await client.getTransaction(getTransactionRequest);
     } catch (e) {
-      if (e instanceof NotFoundGrpcError) {
+      if (e.code === GrpcError.CODES.NOT_FOUND) {
         return null;
       }
 
@@ -402,7 +402,7 @@ class DAPIClient {
     try {
       getIdentityResponse = await client.getIdentity(getIdentityRequest);
     } catch (e) {
-      if (e instanceof NotFoundGrpcError) {
+      if (e.code === GrpcError.CODES.NOT_FOUND) {
         return null;
       }
 
@@ -441,7 +441,7 @@ class DAPIClient {
     try {
       getDataContractResponse = await client.getDataContract(getDataContractRequest);
     } catch (e) {
-      if (e instanceof NotFoundGrpcError) {
+      if (e.code === GrpcError.CODES.NOT_FOUND) {
         return null;
       }
 

@@ -13,6 +13,7 @@
 * implement basic Core gRPC endpoints ([6fe4d4a](https://github.com/dashevo/dapi-client/commit/6fe4d4a79bce750210672ee7f2df9cc14d4437fd))
 * remove obsolete API endpoints and code ([982a514](https://github.com/dashevo/dapi-client/commit/982a51437b94b3cb6ae0ba1b9031daef0a468940))
 
+
 ### BREAKING CHANGES
 
 * Removed unsupported `generate` endpoint

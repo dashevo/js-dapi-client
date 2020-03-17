@@ -17,13 +17,6 @@ const {
   SendTransactionRequest,
   SendTransactionResponse,
 } = require('@dashevo/dapi-grpc');
-const {
-  server: {
-    error: {
-      GrpcError,
-    },
-  },
-} = require('@dashevo/grpc-common');
 const chai = require('chai');
 const { EventEmitter } = require('events');
 const DAPIClient = require('../../src/index');
@@ -34,6 +27,7 @@ const config = require('../../src/config');
 const SMNListFixture = require('../fixtures/mnList');
 
 const RPCError = require("../../src/errors/RPCError");
+const { responseErrorCodes } = require('../../src/constants');
 
 const {
   BloomFilter,
@@ -460,14 +454,14 @@ describe('api', () => {
 
     it('should return null if block is not found', async () => {
       const error = new Error('Not found');
-      error.code = GrpcError.CODES.NOT_FOUND;
+      error.code = responseErrorCodes.NOT_FOUND;
 
       getBlockStub.throws(error);
 
       const client = new DAPIClient();
       const result = await client.getBlockByHeight(height);
 
-      expect(result).to.be.null();
+      expect(result).to.equal(null);
     });
   });
 
@@ -504,14 +498,14 @@ describe('api', () => {
 
     it('should return null if block is not found', async () => {
       const error = new Error('Not found');
-      error.code = GrpcError.CODES.NOT_FOUND;
+      error.code = responseErrorCodes.NOT_FOUND;
 
       getBlockStub.throws(error);
 
       const client = new DAPIClient();
       const result = await client.getBlockByHash(hash);
 
-      expect(result).to.be.null();
+      expect(result).to.equal(null);
     });
   });
 
@@ -601,13 +595,13 @@ describe('api', () => {
 
     it('should return null if transaction is not found', async () => {
       const error = new Error('Not found');
-      error.code = GrpcError.CODES.NOT_FOUND;
+      error.code = responseErrorCodes.NOT_FOUND;
       getTransactionStub.throws(error);
 
       const client = new DAPIClient();
       const result = await client.getTransaction(id);
 
-      expect(result).to.be.null();
+      expect(result).to.equal(null);
     });
   });
 
@@ -758,13 +752,13 @@ describe('api', () => {
 
     it('should return null if identity is not found', async () => {
       const error = new Error('Not found');
-      error.code = GrpcError.CODES.NOT_FOUND;
+      error.code = responseErrorCodes.NOT_FOUND;
       getIdentityStub.throws(error);
 
       const client = new DAPIClient();
       const result = await client.getIdentity(id);
 
-      expect(result).to.be.null();
+      expect(result).to.equal(null);
     });
   });
 
@@ -824,13 +818,13 @@ describe('api', () => {
 
     it('should return null if data contract is not found', async () => {
       const error = new Error('Not found');
-      error.code = GrpcError.CODES.NOT_FOUND;
+      error.code = responseErrorCodes.NOT_FOUND;
       getDataContractStub.throws(error);
 
       const client = new DAPIClient();
       const result = await client.getDataContract(contractId);
 
-      expect(result).to.be.null();
+      expect(result).to.equal(null);
     });
   });
 });

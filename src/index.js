@@ -19,17 +19,11 @@ const {
 const {
   ApplyStateTransitionResponse,
 } = require('@dashevo/dapi-grpc');
-const {
-  server: {
-    error: {
-      GrpcError,
-    },
-  },
-} = require('@dashevo/grpc-common');
 const DPP = require('@dashevo/dpp');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
+const { responseErrorCodes } = require('./constants');
 
 class DAPIClient {
   /**
@@ -162,7 +156,7 @@ class DAPIClient {
     try {
       response = await client.getBlock(getBlockRequest);
     } catch (e) {
-      if (e.code === GrpcError.CODES.NOT_FOUND) {
+      if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
       }
 
@@ -192,7 +186,7 @@ class DAPIClient {
     try {
       response = await client.getBlock(getBlockRequest);
     } catch (e) {
-      if (e.code === GrpcError.CODES.NOT_FOUND) {
+      if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
       }
 
@@ -239,7 +233,7 @@ class DAPIClient {
     try {
       response = await client.getTransaction(getTransactionRequest);
     } catch (e) {
-      if (e.code === GrpcError.CODES.NOT_FOUND) {
+      if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
       }
 
@@ -402,7 +396,7 @@ class DAPIClient {
     try {
       getIdentityResponse = await client.getIdentity(getIdentityRequest);
     } catch (e) {
-      if (e.code === GrpcError.CODES.NOT_FOUND) {
+      if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
       }
 
@@ -441,7 +435,7 @@ class DAPIClient {
     try {
       getDataContractResponse = await client.getDataContract(getDataContractRequest);
     } catch (e) {
-      if (e.code === GrpcError.CODES.NOT_FOUND) {
+      if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
       }
 

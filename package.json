@@ -9,7 +9,6 @@
     "@dashevo/dash-spv": "^1.1.6",
     "@dashevo/dashcore-lib": "~0.18.0",
     "@dashevo/dpp": "~0.10.1",
-    "@dashevo/grpc-common": "~0.2.1",
     "axios": "^0.19.2",
     "cbor": "^5.0.1",
     "lodash": "^4.17.15",

@@ -17,5 +17,3 @@
 
 * Removed unsupported `generate` endpoint
 * Removed insecure endpoints
-
-

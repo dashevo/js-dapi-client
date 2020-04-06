@@ -349,7 +349,7 @@ class DAPIClient {
   /**
    * Send State Transition to machine
    *
-   * @param {DataContractStateTransition|DocumentsStateTransition} stateTransition
+   * @param {AbstractStateTransition} stateTransition
    * @returns {Promise<!ApplyStateTransitionResponse>}
    */
   async applyStateTransition(stateTransition) {

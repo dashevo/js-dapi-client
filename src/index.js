@@ -23,6 +23,7 @@ const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
 const { responseErrorCodes } = require('./constants');
+const { version } = require('../package.json');
 
 class DAPIClient {
   /**
@@ -147,7 +148,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect);
+    const client = new CorePromiseClient(urlToConnect, version);
 
     let response;
     try {
@@ -177,7 +178,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect);
+    const client = new CorePromiseClient(urlToConnect, version);
 
     let response;
     try {
@@ -205,7 +206,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect);
+    const client = new CorePromiseClient(urlToConnect, version);
 
     const response = await client.getStatus(getStatusRequest);
 
@@ -224,7 +225,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect);
+    const client = new CorePromiseClient(urlToConnect, version);
 
     let response;
     try {
@@ -264,7 +265,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect);
+    const client = new CorePromiseClient(urlToConnect, version);
 
     const response = await client.sendTransaction(sendTransactionRequest);
 
@@ -339,7 +340,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new TransactionsFilterStreamPromiseClient(urlToConnect);
+    const client = new TransactionsFilterStreamPromiseClient(urlToConnect, version);
 
     return client.subscribeToTransactionsWithProofs(request);
   }
@@ -358,7 +359,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(urlToConnect);
+    const client = new PlatformPromiseClient(urlToConnect, version);
 
     return client.applyStateTransition(applyStateTransitionRequest);
   }
@@ -374,7 +375,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(urlToConnect);
+    const client = new PlatformPromiseClient(urlToConnect, version);
 
     let getIdentityResponse;
     try {
@@ -409,7 +410,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(urlToConnect);
+    const client = new PlatformPromiseClient(urlToConnect, version);
 
     let getDataContractResponse;
     try {
@@ -475,7 +476,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(urlToConnect);
+    const client = new PlatformPromiseClient(urlToConnect, version);
 
     const getDocumentsResponse = await client.getDocuments(getDocumentsRequest);
 

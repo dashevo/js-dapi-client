@@ -19,11 +19,11 @@ const {
 } = require('@dashevo/dapi-grpc');
 
 const DPP = require('@dashevo/dpp');
+const { version: protocolVersion } = require('@dashevo/dpp/package.json');
 const MNDiscovery = require('./MNDiscovery/index');
 const rpcClient = require('./RPCClient');
 const config = require('./config');
 const { responseErrorCodes } = require('./constants');
-const { version } = require('../package.json');
 
 class DAPIClient {
   /**
@@ -149,7 +149,7 @@ class DAPIClient {
     const urlToConnect = await this.getGrpcUrl();
 
     const client = new CorePromiseClient(urlToConnect);
-    client.setProtocolVersion(version);
+    client.setProtocolVersion(protocolVersion);
 
     let response;
     try {
@@ -180,7 +180,7 @@ class DAPIClient {
     const urlToConnect = await this.getGrpcUrl();
 
     const client = new CorePromiseClient(urlToConnect);
-    client.setProtocolVersion(version);
+    client.setProtocolVersion(protocolVersion);
 
     let response;
     try {
@@ -209,7 +209,7 @@ class DAPIClient {
     const urlToConnect = await this.getGrpcUrl();
 
     const client = new CorePromiseClient(urlToConnect);
-    client.setProtocolVersion(version);
+    client.setProtocolVersion(protocolVersion);
 
     const response = await client.getStatus(getStatusRequest);
 
@@ -229,7 +229,7 @@ class DAPIClient {
     const urlToConnect = await this.getGrpcUrl();
 
     const client = new CorePromiseClient(urlToConnect);
-    client.setProtocolVersion(version);
+    client.setProtocolVersion(protocolVersion);
 
     let response;
     try {
@@ -270,7 +270,7 @@ class DAPIClient {
     const urlToConnect = await this.getGrpcUrl();
 
     const client = new CorePromiseClient(urlToConnect);
-    client.setProtocolVersion(version);
+    client.setProtocolVersion(protocolVersion);
 
     const response = await client.sendTransaction(sendTransactionRequest);
 
@@ -345,7 +345,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new TransactionsFilterStreamPromiseClient(urlToConnect, version);
+    const client = new TransactionsFilterStreamPromiseClient(urlToConnect, protocolVersion);
 
     return client.subscribeToTransactionsWithProofs(request);
   }
@@ -364,7 +364,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(urlToConnect, version);
+    const client = new PlatformPromiseClient(urlToConnect, protocolVersion);
 
     return client.applyStateTransition(applyStateTransitionRequest);
   }
@@ -380,7 +380,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(urlToConnect, version);
+    const client = new PlatformPromiseClient(urlToConnect, protocolVersion);
 
     let getIdentityResponse;
     try {
@@ -415,7 +415,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(urlToConnect, version);
+    const client = new PlatformPromiseClient(urlToConnect, protocolVersion);
 
     let getDataContractResponse;
     try {
@@ -481,7 +481,7 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new PlatformPromiseClient(urlToConnect, version);
+    const client = new PlatformPromiseClient(urlToConnect, protocolVersion);
 
     const getDocumentsResponse = await client.getDocuments(getDocumentsRequest);
 

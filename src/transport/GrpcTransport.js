@@ -4,7 +4,8 @@ const {
   TransactionsFilterStreamPromiseClient,
 } = require('@dashevo/dapi-grpc');
 
-const grpcErrorCodes = require('../errors/grpcErrorCodes');
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { CODES: grpcErrorCodes } = require('@dashevo/grpc-common/lib/server/error/GrpcError');
 
 class GrpcTransport {
   /**

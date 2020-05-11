@@ -148,7 +148,8 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect, version);
+    const client = new CorePromiseClient(urlToConnect);
+    client.setProtocolVersion(version);
 
     let response;
     try {
@@ -178,7 +179,8 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect, version);
+    const client = new CorePromiseClient(urlToConnect);
+    client.setProtocolVersion(version);
 
     let response;
     try {
@@ -206,7 +208,8 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect, version);
+    const client = new CorePromiseClient(urlToConnect);
+    client.setProtocolVersion(version);
 
     const response = await client.getStatus(getStatusRequest);
 
@@ -225,7 +228,8 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect, version);
+    const client = new CorePromiseClient(urlToConnect);
+    client.setProtocolVersion(version);
 
     let response;
     try {
@@ -265,7 +269,8 @@ class DAPIClient {
 
     const urlToConnect = await this.getGrpcUrl();
 
-    const client = new CorePromiseClient(urlToConnect, version);
+    const client = new CorePromiseClient(urlToConnect);
+    client.setProtocolVersion(version);
 
     const response = await client.sendTransaction(sendTransactionRequest);
 

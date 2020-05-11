@@ -1,9 +1,3 @@
-const {
-  CorePromiseClient,
-  PlatformPromiseClient,
-  TransactionsFilterStreamPromiseClient,
-} = require('@dashevo/dapi-grpc');
-
 // eslint-disable-next-line import/no-extraneous-dependencies
 const { CODES: grpcErrorCodes } = require('@dashevo/grpc-common/lib/server/error/GrpcError');
 
@@ -12,13 +6,15 @@ class GrpcTransport {
    * @param {MNDiscovery} mnDiscovery
    * @param {number} dapiPort
    * @param {number} grpcNativePort
-   * @param {string} clientType
+   * @param {
+   *   CorePromiseClient|PlatformPromiseClient|TransactionsFilterStreamPromiseClient
+   * } ClientClass
    */
-  constructor(mnDiscovery, dapiPort, grpcNativePort, clientType) {
+  constructor(mnDiscovery, dapiPort, grpcNativePort, ClientClass) {
     this.mnDiscovery = mnDiscovery;
     this.dapiPort = dapiPort;
     this.grpcNativePort = grpcNativePort;
-    this.clientType = clientType;
+    this.ClientClass = ClientClass;
   }
 
   /**
@@ -42,24 +38,7 @@ class GrpcTransport {
     try {
       urlToConnect = await this.getGrpcUrl(excludedIps);
 
-      let client;
-      switch (this.clientType) {
-        case GrpcTransport.TYPES.CORE: {
-          client = new CorePromiseClient(urlToConnect);
-          break;
-        }
-        case GrpcTransport.TYPES.PLATFORM: {
-          client = new PlatformPromiseClient(urlToConnect);
-          break;
-        }
-        case GrpcTransport.TYPES.TX: {
-          client = new TransactionsFilterStreamPromiseClient(urlToConnect);
-          break;
-        }
-        default: {
-          throw new Error('Unknown gRPC client type selected');
-        }
-      }
+      const client = new this.ClientClass(urlToConnect);
 
       return client[method](request);
     } catch (e) {
@@ -104,11 +83,5 @@ class GrpcTransport {
     return `http://${randomMasternode.getIp()}:${this.dapiPort}`;
   }
 }
-
-GrpcTransport.TYPES = {
-  CORE: 'core',
-  PLATFORM: 'platform',
-  TX: 'txFilterStream',
-};
 
 module.exports = GrpcTransport;

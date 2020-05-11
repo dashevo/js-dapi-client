@@ -1,3 +1,9 @@
+const {
+  CorePromiseClient,
+  PlatformPromiseClient,
+  TransactionsFilterStreamPromiseClient,
+} = require('@dashevo/dapi-grpc');
+
 const JsonRpcTransport = require('./JsonRpcTransport');
 const GrpcTransport = require('./GrpcTransport');
 
@@ -13,13 +19,13 @@ class TransportManager {
         mnDiscovery, dapiPort,
       ),
       [TransportManager.GRPC_CORE]: new GrpcTransport(
-        mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.CORE,
+        mnDiscovery, dapiPort, grpcNativePort, CorePromiseClient,
       ),
       [TransportManager.GRPC_PLATFORM]: new GrpcTransport(
-        mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.PLATFORM,
+        mnDiscovery, dapiPort, grpcNativePort, PlatformPromiseClient,
       ),
       [TransportManager.GRPC_TX]: new GrpcTransport(
-        mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.TX,
+        mnDiscovery, dapiPort, grpcNativePort, TransactionsFilterStreamPromiseClient,
       ),
     };
   }

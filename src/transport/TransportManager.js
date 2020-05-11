@@ -1,7 +1,7 @@
 const JsonRpcTransport = require('./JsonRpcTransport');
 const GrpcTransport = require('./GrpcTransport');
 
-class Transport {
+class TransportManager {
   /**
    * @param {MNDiscovery} mnDiscovery
    * @param {number} dapiPort
@@ -9,16 +9,16 @@ class Transport {
    */
   constructor(mnDiscovery, dapiPort, grpcNativePort) {
     this.transports = {
-      [Transport.JSON_RPC]: new JsonRpcTransport(
+      [TransportManager.JSON_RPC]: new JsonRpcTransport(
         mnDiscovery, dapiPort,
       ),
-      [Transport.GRPC_CORE]: new GrpcTransport(
+      [TransportManager.GRPC_CORE]: new GrpcTransport(
         mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.CORE,
       ),
-      [Transport.GRPC_PLATFORM]: new GrpcTransport(
+      [TransportManager.GRPC_PLATFORM]: new GrpcTransport(
         mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.PLATFORM,
       ),
-      [Transport.GRPC_TX]: new GrpcTransport(
+      [TransportManager.GRPC_TX]: new GrpcTransport(
         mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.TX,
       ),
     };
@@ -40,9 +40,9 @@ class Transport {
   }
 }
 
-Transport.JSON_RPC = 'jsonRPC';
-Transport.GRPC_CORE = 'grpcCore';
-Transport.GRPC_PLATFORM = 'grpcPlatform';
-Transport.GRPC_TX = 'grpcTxFilterStream';
+TransportManager.JSON_RPC = 'jsonRPC';
+TransportManager.GRPC_CORE = 'grpcCore';
+TransportManager.GRPC_PLATFORM = 'grpcPlatform';
+TransportManager.GRPC_TX = 'grpcTxFilterStream';
 
-module.exports = Transport;
+module.exports = TransportManager;

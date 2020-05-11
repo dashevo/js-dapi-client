@@ -16,7 +16,7 @@ const {
 } = require('@dashevo/dapi-grpc');
 
 const MNDiscovery = require('./MNDiscovery/index');
-const Transport = require('./transport');
+const TransportManager = require('./transport/TransportManager');
 const config = require('./config');
 const { responseErrorCodes } = require('./constants');
 
@@ -43,7 +43,7 @@ class DAPIClient {
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.retries),
       'Expect retries to be an unsigned integer');
 
-    this.transport = new Transport(this.MNDiscovery, this.DAPIPort, this.nativeGrpcPort);
+    this.transport = new TransportManager(this.MNDiscovery, this.DAPIPort, this.nativeGrpcPort);
   }
 
   /* Layer 1 commands */
@@ -54,7 +54,7 @@ class DAPIClient {
    * @returns {Promise<string[]>} - block hashes
    */
   generateToAddress(blocksNumber, address) {
-    return this.transport.get(Transport.JSON_RPC).makeRequest('generateToAddress', { blocksNumber, address });
+    return this.transport.get(TransportManager.JSON_RPC).makeRequest('generateToAddress', { blocksNumber, address });
   }
 
   /**
@@ -62,7 +62,7 @@ class DAPIClient {
    * @returns {Promise<string>}
    */
   getBestBlockHash() {
-    return this.transport.get(Transport.JSON_RPC).makeRequest('getBestBlockHash', {});
+    return this.transport.get(TransportManager.JSON_RPC).makeRequest('getBestBlockHash', {});
   }
 
   /**
@@ -71,7 +71,7 @@ class DAPIClient {
    * @returns {Promise<string>} - block hash
    */
   getBlockHash(height) {
-    return this.transport.get(Transport.JSON_RPC).makeRequest(
+    return this.transport.get(TransportManager.JSON_RPC).makeRequest(
       'getBlockHash', { height }, { retriesCount: this.retries, client: { timeout: this.timeout } },
     );
   }
@@ -83,7 +83,7 @@ class DAPIClient {
    * @return {Promise<object>}
    */
   getMnListDiff(baseBlockHash, blockHash) {
-    return this.transport.get(Transport.JSON_RPC).makeRequest('getMnListDiff', { baseBlockHash, blockHash });
+    return this.transport.get(TransportManager.JSON_RPC).makeRequest('getMnListDiff', { baseBlockHash, blockHash });
   }
 
   /**
@@ -97,7 +97,7 @@ class DAPIClient {
    * @returns {Promise<Object>} - an object with basic address info
    */
   getAddressSummary(address, noTxList, from, to, fromHeight, toHeight) {
-    return this.transport.get(Transport.JSON_RPC).makeRequest(
+    return this.transport.get(TransportManager.JSON_RPC).makeRequest(
       'getAddressSummary',
       {
         address, noTxList, from, to, fromHeight, toHeight,
@@ -117,7 +117,7 @@ class DAPIClient {
 
     let response;
     try {
-      response = await this.transport.get(Transport.GRPC_CORE)
+      response = await this.transport.get(TransportManager.GRPC_CORE)
         .makeRequest('getBlock', getBlockRequest);
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
@@ -144,7 +144,7 @@ class DAPIClient {
 
     let response;
     try {
-      response = await this.transport.get(Transport.GRPC_CORE)
+      response = await this.transport.get(TransportManager.GRPC_CORE)
         .makeRequest('getBlock', getBlockRequest);
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
@@ -167,7 +167,7 @@ class DAPIClient {
   async getStatus() {
     const getStatusRequest = new GetStatusRequest();
 
-    const response = await this.transport.get(Transport.GRPC_CORE)
+    const response = await this.transport.get(TransportManager.GRPC_CORE)
       .makeRequest('getStatus', getStatusRequest);
 
     return response.toObject();
@@ -185,7 +185,7 @@ class DAPIClient {
 
     let response;
     try {
-      response = await this.transport.get(Transport.GRPC_CORE)
+      response = await this.transport.get(TransportManager.GRPC_CORE)
         .makeRequest('getTransaction', getTransactionRequest);
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
@@ -220,7 +220,7 @@ class DAPIClient {
     sendTransactionRequest.setAllowHighFees(options.allowHighFees || false);
     sendTransactionRequest.setBypassLimits(options.bypassLimits || false);
 
-    const response = await this.transport.get(Transport.GRPC_CORE)
+    const response = await this.transport.get(TransportManager.GRPC_CORE)
       .makeRequest('sendTransaction', sendTransactionRequest);
 
     return response.getTransactionId();
@@ -236,7 +236,7 @@ class DAPIClient {
    * @returns {Promise<object>} - Object with pagination info and array of unspent outputs
    */
   getUTXO(address, from, to, fromHeight, toHeight) {
-    return this.transport.get(Transport.JSON_RPC).makeRequest(
+    return this.transport.get(TransportManager.JSON_RPC).makeRequest(
       'getUTXO',
       {
         address, from, to, fromHeight, toHeight,
@@ -294,7 +294,7 @@ class DAPIClient {
 
     request.setCount(options.count);
 
-    return this.transport.get(Transport.GRPC_TX)
+    return this.transport.get(TransportManager.GRPC_TX)
       .makeRequest('subscribeToTransactionsWithProofs', request);
   }
 
@@ -310,7 +310,7 @@ class DAPIClient {
     const applyStateTransitionRequest = new ApplyStateTransitionRequest();
     applyStateTransitionRequest.setStateTransition(stateTransition.serialize());
 
-    return this.transport.get(Transport.GRPC_PLATFORM)
+    return this.transport.get(TransportManager.GRPC_PLATFORM)
       .makeRequest('applyStateTransition', applyStateTransitionRequest);
   }
 
@@ -325,7 +325,7 @@ class DAPIClient {
 
     let getIdentityResponse;
     try {
-      getIdentityResponse = await this.transport.get(Transport.GRPC_PLATFORM)
+      getIdentityResponse = await this.transport.get(TransportManager.GRPC_PLATFORM)
         .makeRequest('getIdentity', getIdentityRequest);
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
@@ -357,7 +357,7 @@ class DAPIClient {
 
     let getDataContractResponse;
     try {
-      getDataContractResponse = await this.transport.get(Transport.GRPC_PLATFORM)
+      getDataContractResponse = await this.transport.get(TransportManager.GRPC_PLATFORM)
         .makeRequest('getDataContract', getDataContractRequest);
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
@@ -418,7 +418,7 @@ class DAPIClient {
     getDocumentsRequest.setStartAfter(startAfter);
     getDocumentsRequest.setStartAt(startAt);
 
-    const getDocumentsResponse = await this.transport.get(Transport.GRPC_PLATFORM)
+    const getDocumentsResponse = await this.transport.get(TransportManager.GRPC_PLATFORM)
       .makeRequest('getDocuments', getDocumentsRequest);
 
     return getDocumentsResponse.getDocumentsList().map((document) => Buffer.from(document));

@@ -4,6 +4,8 @@ const {
   TransactionsFilterStreamPromiseClient,
 } = require('@dashevo/dapi-grpc');
 
+const grpcErrorCodes = require('../errors/grpcErrorCodes');
+
 class GrpcTransport {
   /**
    * @param {MNDiscovery} mnDiscovery
@@ -15,7 +17,7 @@ class GrpcTransport {
     this.mnDiscovery = mnDiscovery;
     this.dapiPort = dapiPort;
     this.grpcNativePort = grpcNativePort;
-    this.clientType= clientType;
+    this.clientType = clientType;
   }
 
   /**
@@ -31,7 +33,7 @@ class GrpcTransport {
    *
    * @returns {Promise<*|undefined>}
    */
-  async makeRequest(method, request, options = { retriesCount: 3, excludedIps: []}) {
+  async makeRequest(method, request, options = { retriesCount: 3, excludedIps: [] }) {
     const retriesCount = options.retriesCount || 3;
     const excludedIps = options.excludedIps || [];
 
@@ -60,7 +62,7 @@ class GrpcTransport {
 
       return client[method](request);
     } catch (e) {
-      if (e.code !== 4 && e.code !== 14) {
+      if (e.code !== grpcErrorCodes.DEADLINE_EXCEEDED && e.code !== grpcErrorCodes.UNAVAILABLE) {
         throw e;
       }
 

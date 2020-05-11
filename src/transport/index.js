@@ -9,11 +9,19 @@ class Transport {
    */
   constructor(mnDiscovery, dapiPort, grpcNativePort) {
     this.transports = {
-      [Transport.JSON_RPC]: new JsonRpcTransport(mnDiscovery, dapiPort),
-      [Transport.GRPC_CORE]: new GrpcTransport(mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.CORE),
-      [Transport.GRPC_PLATFORM]: new GrpcTransport(mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.PLATFORM),
-      [Transport.GRPC_TX]: new GrpcTransport(mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.TX),
-    }
+      [Transport.JSON_RPC]: new JsonRpcTransport(
+        mnDiscovery, dapiPort,
+      ),
+      [Transport.GRPC_CORE]: new GrpcTransport(
+        mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.CORE,
+      ),
+      [Transport.GRPC_PLATFORM]: new GrpcTransport(
+        mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.PLATFORM,
+      ),
+      [Transport.GRPC_TX]: new GrpcTransport(
+        mnDiscovery, dapiPort, grpcNativePort, GrpcTransport.TYPES.TX,
+      ),
+    };
   }
 
   /**

@@ -72,7 +72,7 @@ class DAPIClient {
    */
   getBlockHash(height) {
     return this.transport.get(Transport.JSON_RPC).makeRequest(
-      'getBlockHash', { height }, { retriesCount: this.retries , client: { timeout: this.timeout }},
+      'getBlockHash', { height }, { retriesCount: this.retries, client: { timeout: this.timeout } },
     );
   }
 
@@ -167,7 +167,7 @@ class DAPIClient {
   async getStatus() {
     const getStatusRequest = new GetStatusRequest();
 
-    const response = await response = await this.transport.get(Transport.GRPC_CORE)
+    const response = await this.transport.get(Transport.GRPC_CORE)
       .makeRequest('getStatus', getStatusRequest);
 
     return response.toObject();

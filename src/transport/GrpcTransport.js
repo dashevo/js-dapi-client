@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { CODES: grpcErrorCodes } = require('@dashevo/grpc-common/lib/server/error/GrpcError');
+const GrpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorCodes');
 
 class GrpcTransport {
   /**
@@ -42,7 +42,7 @@ class GrpcTransport {
 
       return client[method](request);
     } catch (e) {
-      if (e.code !== grpcErrorCodes.DEADLINE_EXCEEDED && e.code !== grpcErrorCodes.UNAVAILABLE) {
+      if (e.code !== GrpcErrorCodes.DEADLINE_EXCEEDED && e.code !== GrpcErrorCodes.UNAVAILABLE) {
         throw e;
       }
 

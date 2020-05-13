@@ -54,7 +54,11 @@ class DAPIClient {
    * @returns {Promise<string[]>} - block hashes
    */
   generateToAddress(blocksNumber, address) {
-    return this.transport.get(TransportManager.JSON_RPC).makeRequest('generateToAddress', { blocksNumber, address });
+    return this.transport.get(TransportManager.JSON_RPC)
+      .makeRequest(
+        'generateToAddress', { blocksNumber, address },
+        { retriesCount: this.retries, client: { timeout: this.timeout } },
+      );
   }
 
   /**
@@ -62,7 +66,11 @@ class DAPIClient {
    * @returns {Promise<string>}
    */
   getBestBlockHash() {
-    return this.transport.get(TransportManager.JSON_RPC).makeRequest('getBestBlockHash', {});
+    return this.transport.get(TransportManager.JSON_RPC)
+      .makeRequest(
+        'getBestBlockHash', {},
+        { retriesCount: this.retries, client: { timeout: this.timeout } },
+      );
   }
 
   /**
@@ -71,9 +79,11 @@ class DAPIClient {
    * @returns {Promise<string>} - block hash
    */
   getBlockHash(height) {
-    return this.transport.get(TransportManager.JSON_RPC).makeRequest(
-      'getBlockHash', { height }, { retriesCount: this.retries, client: { timeout: this.timeout } },
-    );
+    return this.transport.get(TransportManager.JSON_RPC)
+      .makeRequest(
+        'getBlockHash', { height },
+        { retriesCount: this.retries, client: { timeout: this.timeout } },
+      );
   }
 
   /**
@@ -83,7 +93,11 @@ class DAPIClient {
    * @return {Promise<object>}
    */
   getMnListDiff(baseBlockHash, blockHash) {
-    return this.transport.get(TransportManager.JSON_RPC).makeRequest('getMnListDiff', { baseBlockHash, blockHash });
+    return this.transport.get(TransportManager.JSON_RPC)
+      .makeRequest(
+        'getMnListDiff', { baseBlockHash, blockHash },
+        { retriesCount: this.retries, client: { timeout: this.timeout } },
+      );
   }
 
   /**
@@ -102,6 +116,7 @@ class DAPIClient {
       {
         address, noTxList, from, to, fromHeight, toHeight,
       },
+      { retriesCount: this.retries, client: { timeout: this.timeout } },
     );
   }
 
@@ -118,7 +133,10 @@ class DAPIClient {
     let response;
     try {
       response = await this.transport.get(TransportManager.GRPC_CORE)
-        .makeRequest('getBlock', getBlockRequest);
+        .makeRequest(
+          'getBlock', getBlockRequest,
+          { retriesCount: this.retries, client: { timeout: this.timeout } },
+        );
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
@@ -145,7 +163,10 @@ class DAPIClient {
     let response;
     try {
       response = await this.transport.get(TransportManager.GRPC_CORE)
-        .makeRequest('getBlock', getBlockRequest);
+        .makeRequest(
+          'getBlock', getBlockRequest,
+          { retriesCount: this.retries, client: { timeout: this.timeout } },
+        );
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
@@ -168,7 +189,10 @@ class DAPIClient {
     const getStatusRequest = new GetStatusRequest();
 
     const response = await this.transport.get(TransportManager.GRPC_CORE)
-      .makeRequest('getStatus', getStatusRequest);
+      .makeRequest(
+        'getStatus', getStatusRequest,
+        { retriesCount: this.retries, client: { timeout: this.timeout } },
+      );
 
     return response.toObject();
   }
@@ -186,7 +210,10 @@ class DAPIClient {
     let response;
     try {
       response = await this.transport.get(TransportManager.GRPC_CORE)
-        .makeRequest('getTransaction', getTransactionRequest);
+        .makeRequest(
+          'getTransaction', getTransactionRequest,
+          { retriesCount: this.retries, client: { timeout: this.timeout } },
+        );
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
@@ -221,7 +248,10 @@ class DAPIClient {
     sendTransactionRequest.setBypassLimits(options.bypassLimits || false);
 
     const response = await this.transport.get(TransportManager.GRPC_CORE)
-      .makeRequest('sendTransaction', sendTransactionRequest);
+      .makeRequest(
+        'sendTransaction', sendTransactionRequest,
+        { retriesCount: this.retries, client: { timeout: this.timeout } },
+      );
 
     return response.getTransactionId();
   }
@@ -241,6 +271,7 @@ class DAPIClient {
       {
         address, from, to, fromHeight, toHeight,
       },
+      { retriesCount: this.retries, client: { timeout: this.timeout } },
     );
   }
 
@@ -295,7 +326,10 @@ class DAPIClient {
     request.setCount(options.count);
 
     return this.transport.get(TransportManager.GRPC_TX)
-      .makeRequest('subscribeToTransactionsWithProofs', request);
+      .makeRequest(
+        'subscribeToTransactionsWithProofs', request,
+        { retriesCount: this.retries, client: { timeout: this.timeout } },
+      );
   }
 
   /* Platform gRPC methods */
@@ -311,7 +345,10 @@ class DAPIClient {
     applyStateTransitionRequest.setStateTransition(stateTransition.serialize());
 
     return this.transport.get(TransportManager.GRPC_PLATFORM)
-      .makeRequest('applyStateTransition', applyStateTransitionRequest);
+      .makeRequest(
+        'applyStateTransition', applyStateTransitionRequest,
+        { retriesCount: this.retries, client: { timeout: this.timeout } },
+      );
   }
 
   /**
@@ -326,7 +363,10 @@ class DAPIClient {
     let getIdentityResponse;
     try {
       getIdentityResponse = await this.transport.get(TransportManager.GRPC_PLATFORM)
-        .makeRequest('getIdentity', getIdentityRequest);
+        .makeRequest(
+          'getIdentity', getIdentityRequest,
+          { retriesCount: this.retries, client: { timeout: this.timeout } },
+        );
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
@@ -358,7 +398,10 @@ class DAPIClient {
     let getDataContractResponse;
     try {
       getDataContractResponse = await this.transport.get(TransportManager.GRPC_PLATFORM)
-        .makeRequest('getDataContract', getDataContractRequest);
+        .makeRequest(
+          'getDataContract', getDataContractRequest,
+          { retriesCount: this.retries, client: { timeout: this.timeout } },
+        );
     } catch (e) {
       if (e.code === responseErrorCodes.NOT_FOUND) {
         return null;
@@ -419,7 +462,10 @@ class DAPIClient {
     getDocumentsRequest.setStartAt(startAt);
 
     const getDocumentsResponse = await this.transport.get(TransportManager.GRPC_PLATFORM)
-      .makeRequest('getDocuments', getDocumentsRequest);
+      .makeRequest(
+        'getDocuments', getDocumentsRequest,
+        { retriesCount: this.retries, client: { timeout: this.timeout } },
+      );
 
     return getDocumentsResponse.getDocumentsList().map((document) => Buffer.from(document));
   }

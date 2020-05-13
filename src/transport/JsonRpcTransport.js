@@ -32,7 +32,11 @@ class JsonRpcTransport {
     try {
       urlToConnect = await this.getJsonRpcUrl(excludedIps);
 
-      return rpcClient.request(urlToConnect, method, params, { timeout: 10000, ...clientOptions });
+      const result = await rpcClient.request(
+        urlToConnect, method, params, { timeout: 10000, ...clientOptions },
+      );
+
+      return result;
     } catch (e) {
       if (e.code !== 'ECONNABORTED' && e.code !== 'ECONNREFUSED') {
         throw e;

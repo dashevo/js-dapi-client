@@ -40,7 +40,9 @@ class GrpcTransport {
 
       const client = new this.ClientClass(urlToConnect);
 
-      return client[method](request);
+      const result = await client[method](request);
+
+      return result;
     } catch (e) {
       if (e.code !== GrpcErrorCodes.DEADLINE_EXCEEDED
             && e.code !== GrpcErrorCodes.UNAVAILABLE

@@ -43,7 +43,9 @@ class DAPIClient {
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.retries),
       'Expect retries to be an unsigned integer');
 
-    this.transport = new TransportManager(this.MNDiscovery, this.DAPIPort, this.nativeGrpcPort);
+    this.transportManager = new TransportManager(
+      this.MNDiscovery, this.DAPIPort, this.nativeGrpcPort,
+    );
   }
 
   /* Layer 1 commands */
@@ -54,7 +56,7 @@ class DAPIClient {
    * @returns {Promise<string[]>} - block hashes
    */
   generateToAddress(blocksNumber, address) {
-    return this.transport.get(TransportManager.JSON_RPC)
+    return this.transportManager.get(TransportManager.JSON_RPC)
       .makeRequest(
         'generateToAddress', { blocksNumber, address },
         { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -66,7 +68,7 @@ class DAPIClient {
    * @returns {Promise<string>}
    */
   getBestBlockHash() {
-    return this.transport.get(TransportManager.JSON_RPC)
+    return this.transportManager.get(TransportManager.JSON_RPC)
       .makeRequest(
         'getBestBlockHash', {},
         { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -79,7 +81,7 @@ class DAPIClient {
    * @returns {Promise<string>} - block hash
    */
   getBlockHash(height) {
-    return this.transport.get(TransportManager.JSON_RPC)
+    return this.transportManager.get(TransportManager.JSON_RPC)
       .makeRequest(
         'getBlockHash', { height },
         { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -93,7 +95,7 @@ class DAPIClient {
    * @return {Promise<object>}
    */
   getMnListDiff(baseBlockHash, blockHash) {
-    return this.transport.get(TransportManager.JSON_RPC)
+    return this.transportManager.get(TransportManager.JSON_RPC)
       .makeRequest(
         'getMnListDiff', { baseBlockHash, blockHash },
         { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -111,7 +113,7 @@ class DAPIClient {
    * @returns {Promise<Object>} - an object with basic address info
    */
   getAddressSummary(address, noTxList, from, to, fromHeight, toHeight) {
-    return this.transport.get(TransportManager.JSON_RPC).makeRequest(
+    return this.transportManager.get(TransportManager.JSON_RPC).makeRequest(
       'getAddressSummary',
       {
         address, noTxList, from, to, fromHeight, toHeight,
@@ -132,7 +134,7 @@ class DAPIClient {
 
     let response;
     try {
-      response = await this.transport.get(TransportManager.GRPC_CORE)
+      response = await this.transportManager.get(TransportManager.GRPC_CORE)
         .makeRequest(
           'getBlock', getBlockRequest,
           { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -162,7 +164,7 @@ class DAPIClient {
 
     let response;
     try {
-      response = await this.transport.get(TransportManager.GRPC_CORE)
+      response = await this.transportManager.get(TransportManager.GRPC_CORE)
         .makeRequest(
           'getBlock', getBlockRequest,
           { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -188,7 +190,7 @@ class DAPIClient {
   async getStatus() {
     const getStatusRequest = new GetStatusRequest();
 
-    const response = await this.transport.get(TransportManager.GRPC_CORE)
+    const response = await this.transportManager.get(TransportManager.GRPC_CORE)
       .makeRequest(
         'getStatus', getStatusRequest,
         { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -209,7 +211,7 @@ class DAPIClient {
 
     let response;
     try {
-      response = await this.transport.get(TransportManager.GRPC_CORE)
+      response = await this.transportManager.get(TransportManager.GRPC_CORE)
         .makeRequest(
           'getTransaction', getTransactionRequest,
           { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -247,7 +249,7 @@ class DAPIClient {
     sendTransactionRequest.setAllowHighFees(options.allowHighFees || false);
     sendTransactionRequest.setBypassLimits(options.bypassLimits || false);
 
-    const response = await this.transport.get(TransportManager.GRPC_CORE)
+    const response = await this.transportManager.get(TransportManager.GRPC_CORE)
       .makeRequest(
         'sendTransaction', sendTransactionRequest,
         { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -266,7 +268,7 @@ class DAPIClient {
    * @returns {Promise<object>} - Object with pagination info and array of unspent outputs
    */
   getUTXO(address, from, to, fromHeight, toHeight) {
-    return this.transport.get(TransportManager.JSON_RPC).makeRequest(
+    return this.transportManager.get(TransportManager.JSON_RPC).makeRequest(
       'getUTXO',
       {
         address, from, to, fromHeight, toHeight,
@@ -325,7 +327,7 @@ class DAPIClient {
 
     request.setCount(options.count);
 
-    return this.transport.get(TransportManager.GRPC_TX)
+    return this.transportManager.get(TransportManager.GRPC_TX)
       .makeRequest(
         'subscribeToTransactionsWithProofs', request,
         { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -344,7 +346,7 @@ class DAPIClient {
     const applyStateTransitionRequest = new ApplyStateTransitionRequest();
     applyStateTransitionRequest.setStateTransition(stateTransition.serialize());
 
-    return this.transport.get(TransportManager.GRPC_PLATFORM)
+    return this.transportManager.get(TransportManager.GRPC_PLATFORM)
       .makeRequest(
         'applyStateTransition', applyStateTransitionRequest,
         { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -362,7 +364,7 @@ class DAPIClient {
 
     let getIdentityResponse;
     try {
-      getIdentityResponse = await this.transport.get(TransportManager.GRPC_PLATFORM)
+      getIdentityResponse = await this.transportManager.get(TransportManager.GRPC_PLATFORM)
         .makeRequest(
           'getIdentity', getIdentityRequest,
           { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -397,7 +399,7 @@ class DAPIClient {
 
     let getDataContractResponse;
     try {
-      getDataContractResponse = await this.transport.get(TransportManager.GRPC_PLATFORM)
+      getDataContractResponse = await this.transportManager.get(TransportManager.GRPC_PLATFORM)
         .makeRequest(
           'getDataContract', getDataContractRequest,
           { retriesCount: this.retries, client: { timeout: this.timeout } },
@@ -461,7 +463,7 @@ class DAPIClient {
     getDocumentsRequest.setStartAfter(startAfter);
     getDocumentsRequest.setStartAt(startAt);
 
-    const getDocumentsResponse = await this.transport.get(TransportManager.GRPC_PLATFORM)
+    const getDocumentsResponse = await this.transportManager.get(TransportManager.GRPC_PLATFORM)
       .makeRequest(
         'getDocuments', getDocumentsRequest,
         { retriesCount: this.retries, client: { timeout: this.timeout } },

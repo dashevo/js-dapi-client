@@ -42,7 +42,9 @@ class GrpcTransport {
 
       return client[method](request);
     } catch (e) {
-      if (e.code !== GrpcErrorCodes.DEADLINE_EXCEEDED && e.code !== GrpcErrorCodes.UNAVAILABLE) {
+      if (e.code !== GrpcErrorCodes.DEADLINE_EXCEEDED
+            && e.code !== GrpcErrorCodes.UNAVAILABLE
+            && e.code !== GrpcErrorCodes.INTERNAL) {
         throw e;
       }
 

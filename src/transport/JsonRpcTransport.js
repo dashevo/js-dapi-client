@@ -24,7 +24,7 @@ class JsonRpcTransport {
    * @returns {Promise<*|undefined>}
    */
   async makeRequest(method, params, options = { retriesCount: 3, excludedIps: [] }) {
-    const retriesCount = options.retriesCount || 3;
+    const retriesCount = options.retriesCount != null ? options.retriesCount : 3;
     const excludedIps = options.excludedIps || [];
     const clientOptions = options.client || {};
 

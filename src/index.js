@@ -96,7 +96,7 @@ class DAPIClient {
    *
    * @param {string} baseBlockHash - hash or height of start block
    * @param {string} blockHash - hash or height of end block
-   * @return {Promise<object>}
+   * @returns {Promise<object>}
    */
   getMnListDiff(baseBlockHash, blockHash) {
     return this.transportManager.get(TransportManager.JSON_RPC)
@@ -131,7 +131,7 @@ class DAPIClient {
    * Get block by height
    *
    * @param {number} height
-   * @return {Promise<null|Buffer>}
+   * @returns {Promise<null|Buffer>}
    */
   async getBlockByHeight(height) {
     const getBlockRequest = new GetBlockRequest();
@@ -161,7 +161,7 @@ class DAPIClient {
    * Get block by hash
    *
    * @param {string} hash
-   * @return {Promise<null|Buffer>}
+   * @returns {Promise<null|Buffer>}
    */
   async getBlockByHash(hash) {
     const getBlockRequest = new GetBlockRequest();
@@ -190,7 +190,7 @@ class DAPIClient {
   /**
    * Get Core chain status
    *
-   * @return {Promise<Object>}
+   * @returns {Promise<object>}
    */
   async getStatus() {
     const getStatusRequest = new GetStatusRequest();
@@ -208,7 +208,7 @@ class DAPIClient {
    * Get Transaction by ID
    *
    * @param {string} id
-   * @return {Promise<null|Buffer>}
+   * @returns {Promise<null|Buffer>}
    */
   async getTransaction(id) {
     const getTransactionRequest = new GetTransactionRequest();
@@ -246,6 +246,7 @@ class DAPIClient {
    * @param {object} [options]
    * @param {object} [options.allowHighFees=false]
    * @param {object} [options.bypassLimits=false]
+   * @returns {string}
    */
   async sendTransaction(transaction, options = {}) {
     const sendTransactionRequest = new SendTransactionRequest();
@@ -441,7 +442,7 @@ class DAPIClient {
    * @param {number} options.limit - how many objects to fetch
    * @param {number} options.startAt - number of objects to skip
    * @param {number} options.startAfter - exclusive skip
-   * @return {Promise<Buffer[]>}
+   * @returns {Promise<Buffer[]>}
    */
   async getDocuments(contractId, type, options) {
     const {

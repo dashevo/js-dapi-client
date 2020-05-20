@@ -23,7 +23,7 @@ const { responseErrorCodes } = require('./constants');
 class DAPIClient {
   /**
    * @param options
-   * @param {Array<Object>} [options.seeds] - seeds. If no seeds provided
+ * @param {Array<object>} [options.seeds] - seeds. If no seeds provided
    * default seed will be used.
    * @param {number} [options.port=3000] - default port for connection to the DAPI
    * @param {number} [options.nativeGrpcPort=3010] - Native GRPC port for connection to the DAPI
@@ -115,7 +115,7 @@ class DAPIClient {
    * @param {number} [to] - end of range for the tx to be included in the tx list
    * @param {number} [fromHeight] - which height to start from (optional, overriding from/to)
    * @param {number} [toHeight] - on which height to end (optional, overriding from/to)
-   * @returns {Promise<Object>} - an object with basic address info
+   * @returns {Promise<object>} - an object with basic address info
    */
   getAddressSummary(address, noTxList, from, to, fromHeight, toHeight) {
     return this.transportManager.get(TransportManager.JSON_RPC).makeRequest(
@@ -243,10 +243,9 @@ class DAPIClient {
    * Send Transaction
    *
    * @param {Buffer} transaction
-   * @param {Object} [options]
-   * @param {Object} [options.allowHighFees=false]
-   * @param {Object} [options.bypassLimits=false]
-   * @return {string}
+   * @param {object} [options]
+   * @param {object} [options.allowHighFees=false]
+   * @param {object} [options.bypassLimits=false]
    */
   async sendTransaction(transaction, options = {}) {
     const sendTransactionRequest = new SendTransactionRequest();
@@ -287,7 +286,7 @@ class DAPIClient {
 
   /* txFilterStream methods */
   /**
-   * @param {Object} bloomFilter
+   * @param {object} bloomFilter
    * @param {Uint8Array|Array} bloomFilter.vData - The filter itself is simply a bit
    * field of arbitrary byte-aligned size. The maximum size is 36,000 bytes.
    * @param {number} bloomFilter.nHashFuncs - The number of hash functions to use in this filter.
@@ -296,7 +295,7 @@ class DAPIClient {
    * hash function used by the bloom filter.
    * @param {number} bloomFilter.nFlags - A set of flags that control how matched items
    * are added to the filter.
-   * @param {Object} [options]
+   * @param {object} [options]
    * @param {string} [options.fromBlockHash] - Specifies block hash to start syncing from
    * @param {number} [options.fromBlockHeight] - Specifies block height to start syncing from
    * @param {number} [options.count=0] - Number of blocks to sync,
@@ -436,9 +435,9 @@ class DAPIClient {
    *
    * @param {string} contractId
    * @param {string} type - Dap objects type to fetch
-   * @param options
-   * @param {Object} options.where - Mongo-like query
-   * @param {Object} options.orderBy - Mongo-like sort field
+   * @param {object} options
+   * @param {object} options.where - Mongo-like query
+   * @param {object} options.orderBy - Mongo-like sort field
    * @param {number} options.limit - how many objects to fetch
    * @param {number} options.startAt - number of objects to skip
    * @param {number} options.startAfter - exclusive skip

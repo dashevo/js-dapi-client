@@ -51,6 +51,7 @@ class DAPIClient {
   /* Layer 1 commands */
   /**
    * ONLY FOR TESTING PURPOSES WITH REGTEST. WILL NOT WORK ON TESTNET/LIVENET.
+   *
    * @param {number} blocksNumber - Number of blocks to generate
    * @param {string} address - The address that will receive the newly generated Dash
    * @returns {Promise<string[]>} - block hashes
@@ -65,6 +66,7 @@ class DAPIClient {
 
   /**
    * Returns block hash of chaintip
+   *
    * @returns {Promise<string>}
    */
   getBestBlockHash() {
@@ -77,6 +79,7 @@ class DAPIClient {
 
   /**
    * Returns block hash for the given height
+   *
    * @param {number} height
    * @returns {Promise<string>} - block hash
    */
@@ -90,6 +93,7 @@ class DAPIClient {
 
   /**
    * Get deterministic masternodelist diff
+   *
    * @param {string} baseBlockHash - hash or height of start block
    * @param {string} blockHash - hash or height of end block
    * @return {Promise<object>}
@@ -104,6 +108,7 @@ class DAPIClient {
 
   /**
    * Returns a summary (balance, txs) for a given address
+   *
    * @param {string|string[]} address or array of addresses
    * @param {boolean} [noTxList=false] - true if a list of all txs should NOT be included in result
    * @param {number} [from] - start of range for the tx to be included in the tx list
@@ -260,6 +265,7 @@ class DAPIClient {
 
   /**
    * Returns UTXO for a given address or multiple addresses (max result 1000)
+   *
    * @param {string|string[]} address or array of addresses
    * @param {number} [from] - start of range in the ordered list of latest UTXO (optional)
    * @param {number} [to] - end of range in the ordered list of latest UTXO (optional)
@@ -355,6 +361,7 @@ class DAPIClient {
 
   /**
    * Fetch the identity by id
+   *
    * @param {string} id
    * @returns {Promise<!Buffer|null>}
    */
@@ -389,6 +396,7 @@ class DAPIClient {
 
   /**
    * Fetch Data Contract by id
+   *
    * @param {string} contractId
    * @returns {Promise<Buffer>}
    */
@@ -425,6 +433,7 @@ class DAPIClient {
 
   /**
    * Fetch Documents from Drive
+   *
    * @param {string} contractId
    * @param {string} type - Dap objects type to fetch
    * @param options

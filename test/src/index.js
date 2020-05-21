@@ -891,7 +891,7 @@ describe('api', () => {
       getIdentityIdByFirstPublicKeyStub.resolves(response);
 
       const client = new DAPIClient();
-      const result = await client.getIdentity(publicKeyHash);
+      const result = await client.getIdentityIdByFirstPublicKey(publicKeyHash);
 
       expect(result).to.equal(id);
     });

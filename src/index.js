@@ -476,12 +476,12 @@ class DAPIClient {
 
   /**
    * Fetch the identity by public key hash
-   * @param {Buffer} publicKeyHash
+   * @param {string} publicKeyHash
    * @return {Promise<!Buffer|null>}
    */
   async getIdentityByFirstPublicKey(publicKeyHash) {
     const getIdentityByFirstPublicKeyRequest = new GetIdentityByFirstPublicKeyRequest();
-    getIdentityByFirstPublicKeyRequest.setPublicKeyHash(publicKeyHash);
+    getIdentityByFirstPublicKeyRequest.setPublicKeyHash(Buffer.from(publicKeyHash, 'hex'));
 
     let getIdentityByFirstPublicKeyResponse;
     try {
@@ -511,12 +511,12 @@ class DAPIClient {
 
   /**
    * Fetch the identity id by public key hash
-   * @param {Buffer} publicKeyHash
+   * @param {string} publicKeyHash
    * @return {Promise<!string|null>}
    */
   async getIdentityIdByFirstPublicKey(publicKeyHash) {
     const getIdentityIdByFirstPublicKeyRequest = new GetIdentityIdByFirstPublicKeyRequest();
-    getIdentityIdByFirstPublicKeyRequest.setPublicKeyHash(publicKeyHash);
+    getIdentityIdByFirstPublicKeyRequest.setPublicKeyHash(Buffer.from(publicKeyHash, 'hex'));
 
     let getIdentityIdByFirstPublicKeyResponse;
     try {

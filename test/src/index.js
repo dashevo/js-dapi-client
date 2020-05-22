@@ -838,7 +838,7 @@ describe('api', () => {
       getIdentityByFirstPublicKeyStub = sinon
         .stub(PlatformPromiseClient.prototype, 'getIdentityByFirstPublicKey');
 
-      publicKeyHash = 'publicKeyHash';
+      publicKeyHash = '556c2910d46fda2b327ef9d9bda850cc84d30db0';
     });
 
     afterEach(() => {
@@ -878,7 +878,7 @@ describe('api', () => {
         .stub(PlatformPromiseClient.prototype, 'getIdentityIdByFirstPublicKey');
 
       id = '4f46066bd50cc2684484407696b7949e82bd906ea92c040f59a97cba47ed8176';
-      publicKeyHash = 'publicKeyHash';
+      publicKeyHash = '556c2910d46fda2b327ef9d9bda850cc84d30db0';
     });
 
     afterEach(() => {

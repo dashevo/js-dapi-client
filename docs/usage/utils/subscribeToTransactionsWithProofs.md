@@ -1,5 +1,5 @@
 **Usage**: `async client.subscribeToTransactionsWithProofs(bloomFilter, options = { count: 0 })`
-**Description**: From a provided bloomfilter, will returns a ClientReadableStream streaming the transaction matching the filter.
+**Description**: For any provided bloomfilter, it will return a ClientReadableStream streaming the transaction matching the filter.
 
 
 Parameters:

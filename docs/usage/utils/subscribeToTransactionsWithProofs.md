@@ -33,10 +33,10 @@ stream
 
         if (transactions) {
           transactions.getTransactionsList()
-          .forEach((tx) => {
-              // tx are probabilistic, so you will have to verify it's yours
-              const tx = new Transaction(Buffer.from(tx));
-          });
+              .forEach((tx) => {
+                  // tx are probabilistic, so you will have to verify it's yours
+                  const tx = new Transaction(Buffer.from(tx));
+              });
         }
       })
     .on('error', (err) => {

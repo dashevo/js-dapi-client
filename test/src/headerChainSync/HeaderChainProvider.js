@@ -1,8 +1,8 @@
 const sinon = require('sinon');
 const { BlockHeader } = require('@dashevo/dashcore-lib');
 
-const HeaderChainProvider = require('../../../src/headerChainSync/HeaderChainProvider');
-const DAPIClient = require('../../../src/index');
+const HeaderChainProvider = require('../../../lib/headerChainSync/HeaderChainProvider');
+const DAPIClient = require('../../../lib/index');
 
 const MNListFixture = require('../../fixtures/mnList');
 const { testnet2: testnetHeaders } = require('../../fixtures/headers');

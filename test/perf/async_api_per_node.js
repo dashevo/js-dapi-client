@@ -13,14 +13,14 @@ const {
 } = require('@dashevo/dashcore-lib');
 
 const wait = require('../utils/wait');
-const MNDiscovery = require('../../src/MNDiscovery/index');
+const MNDiscovery = require('../../lib/MNDiscovery/index');
 
 const average = arr => arr.reduce((p, c) => p + c, 0) / arr.length;
 
 require('dotenv').config({path: path.resolve(__dirname, '.env')});
 
 
-const DAPIClient = require('../../src/index');
+const DAPIClient = require('../../lib/index');
 
 describe("Performance", function () {
     const timeoutTest = 320000;

@@ -21,15 +21,15 @@ const {
 } = require('@dashevo/dapi-grpc');
 const chai = require('chai');
 const { EventEmitter } = require('events');
-const DAPIClient = require('../../src/index');
+const DAPIClient = require('../../lib/index');
 const chaiAsPromised = require('chai-as-promised');
 const sinonChai = require('sinon-chai');
-const rpcClient = require('../../src/RPCClient');
-const config = require('../../src/config');
+const rpcClient = require('../../lib/transport/JsonRpcTransport/requestJsonRpc');
+const config = require('../../lib/config');
 const SMNListFixture = require('../fixtures/mnList');
 
-const RPCError = require("../../src/errors/RPCError");
-const { responseErrorCodes } = require('../../src/constants');
+const RPCError = require("../../lib/transport/JsonRpcTransport/errors/JsonRpcError");
+const { responseErrorCodes } = require('../../lib/constants');
 
 const {
   BloomFilter,

@@ -1,4 +1,4 @@
-const HeaderChainChunk = require('../../../src/headerChainSync/HeaderChainChunk');
+const HeaderChainChunk = require('../../../lib/headerChainSync/HeaderChainChunk');
 
 describe('HeaderChainChunk', () => {
   let headerChainChunk;

@@ -1,8 +1,8 @@
 const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const RPCClient = require('../../src/RPCClient');
-const RPCError = require("../../src/errors/RPCError");
+const RPCClient = require('../../lib/transport/JsonRpcTransport/requestJsonRpc');
+const RPCError = require("../../lib/transport/JsonRpcTransport/errors/JsonRpcError");
 const axios = require('axios');
 
 chai.use(chaiAsPromised);

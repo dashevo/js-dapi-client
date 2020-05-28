@@ -16,8 +16,8 @@ const {
   PublicKey,
   Address,
 } = require('@dashevo/dashcore-lib');
-const DAPIClient = require('../../../src/index');
-const MNDiscovery = require('../../../src/MNDiscovery/index');
+const DAPIClient = require('../../../lib/index');
+const MNDiscovery = require('../../../lib/MNDiscovery/index');
 
 const wait = require('../../utils/wait');
 

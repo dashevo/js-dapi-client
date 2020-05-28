@@ -17,9 +17,9 @@ const {
 
 const DashPlatformProtocol = require('@dashevo/dpp');
 const entropy = require('@dashevo/dpp/lib/util/entropy');
-const DAPIClient = require('../../../src/index');
-const MNDiscovery = require('../../../src/MNDiscovery/index');
-const RPCError = require("../../../src/errors/RPCError");
+const DAPIClient = require('../../../lib/index');
+const MNDiscovery = require('../../../lib/MNDiscovery/index');
+const RPCError = require("../../../lib/transport/JsonRpcTransport/errors/JsonRpcError");
 
 const wait = require('../../utils/wait');
 

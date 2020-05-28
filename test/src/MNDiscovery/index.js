@@ -1,10 +1,10 @@
 const { SimplifiedMNList } = require('@dashevo/dashcore-lib');
-const MNDiscovery = require('../../../src/MNDiscovery/index');
+const MNDiscovery = require('../../../lib/MNDiscovery/index');
 const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
-const RPCClient = require('../../../src/RPCClient');
-const config = require('../../../src/config');
+const RPCClient = require('../../../lib/transport/JsonRpcTransport/requestJsonRpc');
+const config = require('../../../lib/config');
 const SMNListFixture = require('../../fixtures/mnList');
 
 chai.use(chaiAsPromised);

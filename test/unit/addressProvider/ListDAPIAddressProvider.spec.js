@@ -50,9 +50,9 @@ describe('ListDAPIAddressProvider', () => {
     });
   });
 
-  describe('getAddress', () => {
+  describe('#getLiveAddress', () => {
     it('should return random live address', async () => {
-      const address = await listDAPIAddressProvider.getAddress();
+      const address = await listDAPIAddressProvider.getLiveAddress();
 
       expect(address).to.be.instanceOf(DAPIAddress);
       expect(address.getHost()).to.equal(notBannedAddressHost);
@@ -63,15 +63,15 @@ describe('ListDAPIAddressProvider', () => {
         address.markAsBanned();
       });
 
-      const address = await listDAPIAddressProvider.getAddress();
+      const address = await listDAPIAddressProvider.getLiveAddress();
 
       expect(address).to.be.undefined();
     });
   });
 
-  describe('#hasAddresses', () => {
+  describe('#hasLiveAddresses', () => {
     it('should return true if we have at least one unbanned address', async () => {
-      const hasAddresses = await listDAPIAddressProvider.hasAddresses();
+      const hasAddresses = await listDAPIAddressProvider.hasLiveAddresses();
 
       expect(hasAddresses).to.be.true();
     });
@@ -81,7 +81,7 @@ describe('ListDAPIAddressProvider', () => {
         address.markAsBanned();
       });
 
-      const hasAddresses = await listDAPIAddressProvider.hasAddresses();
+      const hasAddresses = await listDAPIAddressProvider.hasLiveAddresses();
 
       expect(hasAddresses).to.be.false();
     });

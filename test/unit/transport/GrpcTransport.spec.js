@@ -53,7 +53,7 @@ describe('GrpcTransport', () => {
         option: 'value',
       };
 
-      requestFunc = this.sinon.stub().resolves(data)
+      requestFunc = this.sinon.stub().resolves(data);
 
       clientClassMock = this.sinon.stub().returns({
         [method]: requestFunc,
@@ -87,7 +87,7 @@ describe('GrpcTransport', () => {
       expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
     });
 
-    it('should throw unknown error', async function it() {
+    it('should throw unknown error', async () => {
       const error = new Error('Unknown error');
 
       requestFunc.throws(error);
@@ -109,7 +109,7 @@ describe('GrpcTransport', () => {
       }
     });
 
-    it('should throw MaxRetriesReachedError', async function it() {
+    it('should throw MaxRetriesReachedError', async () => {
       const error = new Error('Internal error');
       error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
 
@@ -133,7 +133,7 @@ describe('GrpcTransport', () => {
       }
     });
 
-    it('should throw NoAvailableAddressesForRetry error', async function it() {
+    it('should throw NoAvailableAddressesForRetry error', async () => {
       addressProviderMock.hasLiveAddresses.resolves(false);
 
       globalOptions = {
@@ -168,7 +168,7 @@ describe('GrpcTransport', () => {
       }
     });
 
-    it('should retry the request if an internal error has thrown', async function it() {
+    it('should retry the request if an internal error has thrown', async () => {
       const error = new Error('Internal error');
       error.code = GrpcErrorCodes.INTERNAL;
 
@@ -258,8 +258,7 @@ describe('GrpcTransport', () => {
         Object.defineProperty(process, 'versions', {
           value: originalVersion,
         });
-      })
-
+      });
 
       it('should return make a request in web environment', async () => {
         const receivedData = await grpcTransport.request(

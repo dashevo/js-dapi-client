@@ -42,7 +42,10 @@ describe('SMLProvider', () => {
       secondMNListFixture,
     );
 
-    smlProvider = new SMLProvider(jsonTransportMock, { updateInterval: 50 });
+    smlProvider = new SMLProvider(jsonTransportMock, {
+      updateInterval: 50,
+      networkType: 'testnet',
+    });
   });
 
   describe('#getSimplifiedMNList', () => {

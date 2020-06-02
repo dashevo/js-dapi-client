@@ -1,6 +1,4 @@
-const {
-  BloomFilter,
-} = require('@dashevo/dashcore-lib');
+const BloomFilter = require('@dashevo/dashcore-lib/lib/bloomfilter');
 
 const { BloomFilter: BloomFilterMessage } = require('@dashevo/dapi-grpc');
 

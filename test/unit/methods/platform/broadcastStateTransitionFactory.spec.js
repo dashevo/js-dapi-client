@@ -3,7 +3,9 @@ const {
   ApplyStateTransitionResponse,
   PlatformPromiseClient,
 } = require('@dashevo/dapi-grpc');
+
 const DashPlatformProtocol = require('@dashevo/dpp');
+
 const getDataContractFixture = require('@dashevo/dpp/lib/test/fixtures/getDataContractFixture');
 
 const broadcastStateTransitionFactory = require('../../../../lib/methods/platform/broadcastStateTransitionFactory');

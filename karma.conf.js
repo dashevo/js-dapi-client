@@ -8,7 +8,7 @@ module.exports = (config) => {
       'lib/test/karma/loader.js': ['webpack'],
     },
     webpack: {
-      mode: 'development',
+      mode: 'production',
     },
     reporters: ['mocha'],
     port: 9876,

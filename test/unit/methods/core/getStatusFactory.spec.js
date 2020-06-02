@@ -45,7 +45,9 @@ describe('getStatusFactory', () => {
     response.setNetwork(status.network);
     grpcTransportMock.request.resolves(response);
 
-    const options = {};
+    const options = {
+      timeout: 1000,
+    };
 
     const result = await getStatus(
       options,

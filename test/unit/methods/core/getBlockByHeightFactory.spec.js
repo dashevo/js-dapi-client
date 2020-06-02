@@ -66,4 +66,29 @@ describe('getBlockByHeightFactory', () => {
       {},
     );
   });
+
+  it('should throw unknown error', async () => {
+    const error = new Error('Unknown found');
+
+    grpcTransportMock.request.throws(error);
+
+    const height = 1;
+
+    const request = new GetBlockRequest();
+    request.setHeight(height);
+
+    try {
+      await getBlockByHeight(height);
+
+      expect.fail('should throw unknown error');
+    } catch (e) {
+      expect(e).to.deep.equal(error);
+      expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
+        CorePromiseClient,
+        'getBlock',
+        request,
+        {},
+      );
+    }
+  });
 });

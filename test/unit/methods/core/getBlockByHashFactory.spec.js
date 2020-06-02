@@ -66,4 +66,29 @@ describe('getBlockByHashFactory', () => {
       {},
     );
   });
+
+  it('should throw unknown error', async () => {
+    const error = new Error('Unknown found');
+
+    grpcTransportMock.request.throws(error);
+
+    const hash = '4f46066bd50cc2684484407696b7949e82bd906ea92c040f59a97cba47ed8176';
+
+    const request = new GetBlockRequest();
+    request.setHash(hash);
+
+    try {
+      await getBlockByHash(hash);
+
+      expect.fail('should throw unknown error');
+    } catch (e) {
+      expect(e).to.deep.equal(error);
+      expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
+        CorePromiseClient,
+        'getBlock',
+        request,
+        {},
+      );
+    }
+  });
 });

@@ -21,13 +21,13 @@ describe('createAddressProviderFromOptions', () => {
       };
     });
 
-    it('should return AddressProvider from options', async () => {
+    it('should return AddressProvider from `addressProvider` option', async () => {
       const result = createAddressProviderFromOptions(options);
 
       expect(result).to.equal(addressProvider);
     });
 
-    it('should throw DAPIClientError with address option', async () => {
+    it('should throw DAPIClientError if `address` option is passed too', async () => {
       options.address = 'localhost';
 
       try {
@@ -39,7 +39,7 @@ describe('createAddressProviderFromOptions', () => {
       }
     });
 
-    it('should throw DAPIClientError with seeds option', async () => {
+    it('should throw DAPIClientError if `seeds` option is passed too', async () => {
       options.seeds = ['127.0.0.1'];
 
       try {
@@ -51,7 +51,7 @@ describe('createAddressProviderFromOptions', () => {
       }
     });
 
-    it('should throw DAPIClientError with network option', async () => {
+    it('should throw DAPIClientError if `network` option is passed too', async () => {
       options.network = 'testnet';
 
       try {
@@ -73,13 +73,13 @@ describe('createAddressProviderFromOptions', () => {
       };
     });
 
-    it('should return ListAddressProvider', async () => {
+    it('should return ListAddressProvider with address', async () => {
       const result = createAddressProviderFromOptions(options);
 
       expect(result).to.be.an.instanceOf(ListAddressProvider);
     });
 
-    it('should throw DAPIClientError with seeds option', async () => {
+    it('should throw DAPIClientError if `seeds` option is passed too', async () => {
       options.seeds = ['127.0.0.1'];
 
       try {
@@ -91,7 +91,7 @@ describe('createAddressProviderFromOptions', () => {
       }
     });
 
-    it('should throw DAPIClientError with network option', async () => {
+    it('should throw DAPIClientError if `network` option is passed too', async () => {
       options.network = 'testnet';
 
       try {
@@ -113,13 +113,13 @@ describe('createAddressProviderFromOptions', () => {
       };
     });
 
-    it('should return SMLAddressProvider', async () => {
+    it('should return SMLAddressProvider based on seeds', async () => {
       const result = createAddressProviderFromOptions(options);
 
       expect(result).to.be.an.instanceOf(SMLAddressProvider);
     });
 
-    it('should throw DAPIClientError with network option', async () => {
+    it('should throw DAPIClientError if `network` option is passed too', async () => {
       options.network = 'testnet';
 
       try {
@@ -132,7 +132,7 @@ describe('createAddressProviderFromOptions', () => {
     });
   });
 
-  describe('$network', () => {
+  describe('#network', () => {
     let options;
 
     beforeEach(() => {
@@ -141,13 +141,13 @@ describe('createAddressProviderFromOptions', () => {
       };
     });
 
-    it('should create address provider from options', async () => {
+    it('should create address provider from `network` options', async () => {
       const result = createAddressProviderFromOptions(options);
 
       expect(result).to.be.an.instanceOf(SMLAddressProvider);
     });
 
-    it('should throw DAPIClientError with invalid network', async () => {
+    it('should throw DAPIClientError if `network` is invalid', async () => {
       options.network = 'unknown';
 
       try {
@@ -159,5 +159,4 @@ describe('createAddressProviderFromOptions', () => {
       }
     });
   });
-
 });

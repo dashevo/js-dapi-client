@@ -96,7 +96,7 @@ describe('MNListProvider', async () => {
     it('Should fetch MN list from seed if list has never updated', async() => {
       const mnListProvider = new MNListProvider();
       expect(mnListProvider.lastUpdateDate).to.equal(0);
-      expect(mnListProvider.masternodeList.length).to.equal(0);
+      expect(mnListProvider.validMasternodesList.length).to.equal(0);
       expect(mnListProvider.seeds).to.be.deep.equal(config.DAPIDNSSeeds);
 
       const MNList = await mnListProvider.getMNList();
@@ -109,13 +109,13 @@ describe('MNListProvider', async () => {
       expect(MNListItem.votingAddress).to.be.a('string');
       expect(MNListItem.isValid).to.be.a('boolean');
 
-      expect(mnListProvider.masternodeList.length).to.equal(95);
+      expect(mnListProvider.validMasternodesList.length).to.equal(95);
     });
     it('Should update MNList if needed and return updated list', async () => {
       const mnListProvider = new MNListProvider();
       let MNList = await mnListProvider.getMNList();
       expect(mnListProvider.lastUpdateDate).be.closeTo(Date.now(), 10000);
-      expect(mnListProvider.masternodeList.length).to.equal(95);
+      expect(mnListProvider.validMasternodesList.length).to.equal(95);
       let MNListItem = MNList[0];
       const smnList = new SimplifiedMNList(SMNListFixture.getFirstDiff());
       const SMNListFixtureItem = smnList.getValidMasternodesList()[0];
@@ -127,7 +127,7 @@ describe('MNListProvider', async () => {
 
       MNList = await mnListProvider.getMNList();
       expect(mnListProvider.lastUpdateDate).be.closeTo(Date.now(), 10000);
-      expect(mnListProvider.masternodeList.length).to.equal(114);
+      expect(mnListProvider.validMasternodesList.length).to.equal(114);
       expect(MNList).to.be.an('array');
       MNListItem = MNList[0];
       smnList.applyDiff(SMNListFixture.getSecondDiff());
@@ -142,7 +142,7 @@ describe('MNListProvider', async () => {
       const networkCallCount = RPCClient.request.callCount;
 
       expect(mnListProvider.lastUpdateDate).be.closeTo(Date.now(), 10000);
-      expect(mnListProvider.masternodeList.length).to.equal(95);
+      expect(mnListProvider.validMasternodesList.length).to.equal(95);
       const smnList = new SimplifiedMNList(SMNListFixture.getFirstDiff());
       const SMNListFixtureItem = smnList.getValidMasternodesList()[0];
       expect(MNListItem.service).to.be.equal(SMNListFixtureItem.service);
@@ -154,7 +154,7 @@ describe('MNListProvider', async () => {
       MNListItem = MNList[0];
 
       expect(mnListProvider.lastUpdateDate).be.equal(updateDate);
-      expect(mnListProvider.masternodeList.length).to.equal(95);
+      expect(mnListProvider.validMasternodesList.length).to.equal(95);
       expect(MNListItem.service).to.be.equal(SMNListFixtureItem.service);
       expect(RPCClient.request.callCount).to.be.equal(networkCallCount);
     });
@@ -202,7 +202,7 @@ describe('MNListProvider', async () => {
 
       const mnListProvider = new MNListProvider();
       let MNList = await mnListProvider.getMNList();
-      expect(mnListProvider.masternodeList.length).to.equal(1);
+      expect(mnListProvider.validMasternodesList.length).to.equal(1);
       expect(MNList.length).to.equal(1);
 
       RPCClient.request

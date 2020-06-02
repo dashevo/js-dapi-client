@@ -1,7 +1,7 @@
 const path = require('path');
 
 const commonJSConfig = {
-  entry: ['core-js/stable', 'regenerator-runtime/runtime', './src/index.js'],
+  entry: ['core-js/stable', './lib/DAPIClient.js'],
   module: {
     rules: [
       {
@@ -9,9 +9,6 @@ const commonJSConfig = {
         exclude: /(node_modules)/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: ['@babel/preset-env'],
-          },
         },
       },
     ],
@@ -19,7 +16,7 @@ const commonJSConfig = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'dapi-client.min.js',
-    library: 'dapiClient',
+    library: 'DAPIClient',
     libraryTarget: 'umd',
   },
 };

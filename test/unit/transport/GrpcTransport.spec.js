@@ -246,5 +246,37 @@ describe('GrpcTransport', () => {
       expect(clientClassMock).to.be.calledTwice();
       expect(requestFunc).to.be.calledTwice();
     });
+
+    describe('gRPC-Web', () => {
+      let originalVersion;
+
+      before(() => {
+        originalVersion = process.versions;
+        Object.defineProperty(process, 'versions', {
+          value: null,
+        });
+      });
+
+      after(() => {
+        Object.defineProperty(process, 'versions', {
+          value: originalVersion,
+        });
+      });
+
+      it('should return make a request in web environment', async () => {
+        const receivedData = await grpcTransport.request(
+          clientClassMock,
+          method,
+          requestMessage,
+          options,
+        );
+
+        expect(receivedData).to.deep.equal(data);
+        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(clientClassMock).to.be.calledOnceWithExactly(`http://${host}:${dapiAddress.getHttpPort()}`);
+        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+        expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
+      });
+    });
   });
 });

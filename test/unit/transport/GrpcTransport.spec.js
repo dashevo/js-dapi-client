@@ -18,7 +18,6 @@ describe('GrpcTransport', () => {
   beforeEach(function beforeEach() {
     host = '127.0.0.1';
     dapiAddress = new DAPIAddress(host);
-    url = `${host}:${dapiAddress.getGrpcPort()}`;
 
     addressProviderMock = {
       getLiveAddress: this.sinon.stub().resolves(dapiAddress),
@@ -28,6 +27,7 @@ describe('GrpcTransport', () => {
     globalOptions = {
       retries: 0,
     };
+
     createAddressProviderFromOptionsMock = this.sinon.stub().returns(null);
 
     grpcTransport = new GrpcTransport(
@@ -35,6 +35,9 @@ describe('GrpcTransport', () => {
       addressProviderMock,
       globalOptions,
     );
+
+    // noinspection JSUnresolvedFunction
+    url = grpcTransport.makeGrpcUrlFromAddress(dapiAddress);
   });
 
   describe('#request', () => {
@@ -242,38 +245,6 @@ describe('GrpcTransport', () => {
       expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
       expect(clientClassMock).to.be.calledTwice();
       expect(requestFunc).to.be.calledTwice();
-    });
-
-    describe('gRPC-Web', () => {
-      let originalVersion;
-
-      before(() => {
-        originalVersion = process.versions;
-        Object.defineProperty(process, 'versions', {
-          value: null,
-        });
-      });
-
-      after(() => {
-        Object.defineProperty(process, 'versions', {
-          value: originalVersion,
-        });
-      });
-
-      it('should return make a request in web environment', async () => {
-        const receivedData = await grpcTransport.request(
-          clientClassMock,
-          method,
-          requestMessage,
-          options,
-        );
-
-        expect(receivedData).to.deep.equal(data);
-        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
-        expect(clientClassMock).to.be.calledOnceWithExactly(`http://${host}:${dapiAddress.getHttpPort()}`);
-        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
-        expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
-      });
     });
   });
 });

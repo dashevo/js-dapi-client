@@ -9,7 +9,7 @@ const networks = require('../../../lib/networkConfigs');
 const DAPIClientError = require('../../../lib/errors/DAPIClientError');
 
 describe('createAddressProviderFromOptions', () => {
-  describe('#addressProvider', () => {
+  describe('addressProvider', () => {
     let options;
     let addressProvider;
 
@@ -64,7 +64,7 @@ describe('createAddressProviderFromOptions', () => {
     });
   });
 
-  describe('#address', () => {
+  describe('address', () => {
     let options;
 
     beforeEach(() => {
@@ -104,7 +104,7 @@ describe('createAddressProviderFromOptions', () => {
     });
   });
 
-  describe('#seeds', () => {
+  describe('seeds', () => {
     let options;
 
     beforeEach(() => {
@@ -132,7 +132,7 @@ describe('createAddressProviderFromOptions', () => {
     });
   });
 
-  describe('#network', () => {
+  describe('network', () => {
     let options;
 
     beforeEach(() => {

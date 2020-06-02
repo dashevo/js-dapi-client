@@ -1,5 +1,5 @@
 const { SimplifiedMNList } = require('@dashevo/dashcore-lib');
-const MNListProvider = require('../../../lib/addressProvider/DMLAddressProvder/DMLProvider');
+const MNListProvider = require('../../../lib/SMLProvider/SMLProvider');
 const sinon = require('sinon');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');

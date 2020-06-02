@@ -10,7 +10,7 @@ describe('GrpcTransport', () => {
   let grpcTransport;
   let addressProviderMock;
   let globalOptions;
-  let createDAPIAddressProviderFromOptionsMock;
+  let createAddressProviderFromOptionsMock;
   let dapiAddress;
   let host;
   let url;
@@ -28,10 +28,10 @@ describe('GrpcTransport', () => {
     globalOptions = {
       retries: 0,
     };
-    createDAPIAddressProviderFromOptionsMock = this.sinon.stub().returns(null);
+    createAddressProviderFromOptionsMock = this.sinon.stub().returns(null);
 
     grpcTransport = new GrpcTransport(
-      createDAPIAddressProviderFromOptionsMock,
+      createAddressProviderFromOptionsMock,
       addressProviderMock,
       globalOptions,
     );
@@ -66,7 +66,7 @@ describe('GrpcTransport', () => {
       };
 
       grpcTransport = new GrpcTransport(
-        createDAPIAddressProviderFromOptionsMock,
+        createAddressProviderFromOptionsMock,
         addressProviderMock,
         globalOptions,
       );
@@ -81,7 +81,7 @@ describe('GrpcTransport', () => {
       );
 
       expect(receivedData).to.equal(data);
-      expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+      expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
       expect(clientClassMock).to.be.calledOnceWithExactly(url);
       expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
       expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
@@ -103,7 +103,7 @@ describe('GrpcTransport', () => {
         expect.fail('should throw error');
       } catch (e) {
         expect(e).to.deep.equal(error);
-        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(url);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
       }
@@ -127,7 +127,7 @@ describe('GrpcTransport', () => {
         expect.fail('should throw MaxRetriesReachedError');
       } catch (e) {
         expect(e).to.be.an.instanceof(MaxRetriesReachedError);
-        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(url);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
       }
@@ -141,7 +141,7 @@ describe('GrpcTransport', () => {
       };
 
       grpcTransport = new GrpcTransport(
-        createDAPIAddressProviderFromOptionsMock,
+        createAddressProviderFromOptionsMock,
         addressProviderMock,
         globalOptions,
       );
@@ -162,7 +162,7 @@ describe('GrpcTransport', () => {
         expect.fail('should throw NoAvailableAddressesForRetry');
       } catch (e) {
         expect(e).to.be.an.instanceof(NoAvailableAddressesForRetry);
-        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(url);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
       }
@@ -182,7 +182,7 @@ describe('GrpcTransport', () => {
       );
 
       expect(receivedData).to.deep.equal(data);
-      expect(createDAPIAddressProviderFromOptionsMock).to.be.calledTwice();
+      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
       expect(clientClassMock).to.be.calledTwice();
       expect(requestFunc).to.be.calledTwice();
     });
@@ -201,7 +201,7 @@ describe('GrpcTransport', () => {
       );
 
       expect(receivedData).to.deep.equal(data);
-      expect(createDAPIAddressProviderFromOptionsMock).to.be.calledTwice();
+      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
       expect(clientClassMock).to.be.calledTwice();
       expect(requestFunc).to.be.calledTwice();
     });
@@ -220,7 +220,7 @@ describe('GrpcTransport', () => {
       );
 
       expect(receivedData).to.deep.equal(data);
-      expect(createDAPIAddressProviderFromOptionsMock).to.be.calledTwice();
+      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
       expect(clientClassMock).to.be.calledTwice();
       expect(requestFunc).to.be.calledTwice();
     });
@@ -239,7 +239,7 @@ describe('GrpcTransport', () => {
       );
 
       expect(receivedData).to.deep.equal(data);
-      expect(createDAPIAddressProviderFromOptionsMock).to.be.calledTwice();
+      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
       expect(clientClassMock).to.be.calledTwice();
       expect(requestFunc).to.be.calledTwice();
     });
@@ -269,7 +269,7 @@ describe('GrpcTransport', () => {
         );
 
         expect(receivedData).to.deep.equal(data);
-        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(`http://${host}:${dapiAddress.getHttpPort()}`);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);

@@ -66,7 +66,7 @@ describe('SMLProvider', () => {
       expect(jsonTransportMock.request.getCall(1).args).to.deep.equal([
         'getMnListDiff',
         { baseBlockHash: SMLProvider.NULL_HASH, blockHash: firstMNListFixture.blockHash },
-        { address: lastUsedAddress },
+        { addresses: [lastUsedAddress] },
       ]);
     });
 
@@ -107,7 +107,7 @@ describe('SMLProvider', () => {
       expect(jsonTransportMock.request.getCall(3).args).to.deep.equal([
         'getMnListDiff',
         { baseBlockHash: firstMNListFixture.blockHash, blockHash: secondMNListFixture.blockHash },
-        { address: lastUsedAddress },
+        { addresses: [lastUsedAddress] },
       ]);
     });
   });

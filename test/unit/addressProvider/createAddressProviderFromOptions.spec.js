@@ -27,8 +27,8 @@ describe('createAddressProviderFromOptions', () => {
       expect(result).to.equal(addressProvider);
     });
 
-    it('should throw DAPIClientError if `address` option is passed too', async () => {
-      options.address = 'localhost';
+    it('should throw DAPIClientError if `addresses` option is passed too', async () => {
+      options.addresses = ['localhost'];
 
       try {
         createAddressProviderFromOptions(options);
@@ -64,16 +64,16 @@ describe('createAddressProviderFromOptions', () => {
     });
   });
 
-  describe('address', () => {
+  describe('addresses', () => {
     let options;
 
     beforeEach(() => {
       options = {
-        address: 'localhost',
+        addresses: ['localhost'],
       };
     });
 
-    it('should return ListAddressProvider with address', async () => {
+    it('should return ListAddressProvider with addresses', async () => {
       const result = createAddressProviderFromOptions(options);
 
       expect(result).to.be.an.instanceOf(ListAddressProvider);

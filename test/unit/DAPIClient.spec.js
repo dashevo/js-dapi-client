@@ -16,16 +16,18 @@ describe('DAPIClient', () => {
     dapiClient = new DAPIClient(options);
   });
 
-  it('should set all variables in constructor', async () => {
-    expect(dapiClient.options).to.deep.equal({
-      retries: 0,
-      newOption: true,
-      timeout: 2000,
+  describe('#constructor', () => {
+    it('should construct DAPIClient', async () => {
+      expect(dapiClient.options).to.deep.equal({
+        retries: 0,
+        newOption: true,
+        timeout: 2000,
+      });
+
+      expect(dapiClient.addressProvider).to.be.an.instanceOf(SMLAddressProvider);
+
+      expect(dapiClient.core).to.be.an.instanceOf(CoreMethodsFacade);
+      expect(dapiClient.platform).to.be.an.instanceOf(PlatformMethodsFacade);
     });
-
-    expect(dapiClient.addressProvider).to.be.an.instanceOf(SMLAddressProvider);
-
-    expect(dapiClient.core).to.be.an.instanceOf(CoreMethodsFacade);
-    expect(dapiClient.platform).to.be.an.instanceOf(PlatformMethodsFacade);
   });
 });

@@ -1,6 +1,6 @@
 const SimplifiedMNListEntry = require('@dashevo/dashcore-lib/lib/deterministicmnlist/SimplifiedMNListEntry');
 
-const getFirstMNListDiffFixture = require('../../../lib/test/fixtures/getFirstMNListDiffFixture');
+const getMNListDiffsFixture = require('../../../lib/test/fixtures/getMNListDiffsFixture');
 const DAPIAddress = require('../../../lib/addressProvider/DAPIAddress');
 
 const SMLAddressProvider = require('../../../lib/addressProvider/SMLAddressProvider');
@@ -14,7 +14,7 @@ describe('SMLAddressProvider', () => {
   let addresses;
 
   beforeEach(function beforeEach() {
-    const mnListDiffFixture = getFirstMNListDiffFixture();
+    const [mnListDiffFixture] = getMNListDiffsFixture();
 
     validMasternodeList = [
       new SimplifiedMNListEntry(mnListDiffFixture.mnList[0]),

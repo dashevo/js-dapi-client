@@ -3,8 +3,7 @@ const SimplifiedMNList = require('@dashevo/dashcore-lib/lib/deterministicmnlist/
 const SMLProvider = require('../../../lib/SMLProvider/SMLProvider');
 const DAPIAddress = require('../../../lib/addressProvider/DAPIAddress');
 
-const getFirstMNListDiffFixture = require('../../../lib/test/fixtures/getFirstMNListDiffFixture');
-const getSecondMNListDiffFixture = require('../../../lib/test/fixtures/getSecondMNListDiffFixture');
+const getMNListDiffsFixture = require('../../../lib/test/fixtures/getMNListDiffsFixture');
 
 const wait = require('../../../lib/test/utils/wait');
 
@@ -12,8 +11,7 @@ describe('SMLProvider', () => {
   let jsonTransportMock;
   let smlProvider;
   let lastUsedAddress;
-  let firstMNListFixture;
-  let secondMNListFixture;
+  let mnListDiffsFixture;
 
   beforeEach(function beforeEach() {
     lastUsedAddress = new DAPIAddress('127.0.0.1');
@@ -23,23 +21,22 @@ describe('SMLProvider', () => {
       getLastUsedAddress: this.sinon.stub().returns(lastUsedAddress),
     };
 
-    firstMNListFixture = getFirstMNListDiffFixture();
-    secondMNListFixture = getSecondMNListDiffFixture();
+    mnListDiffsFixture = getMNListDiffsFixture();
 
     jsonTransportMock.request.withArgs('getBestBlockHash').onCall(0).resolves(
-      firstMNListFixture.blockHash,
+      mnListDiffsFixture[0].blockHash,
     );
 
     jsonTransportMock.request.withArgs('getBestBlockHash').onCall(1).resolves(
-      secondMNListFixture.blockHash,
+      mnListDiffsFixture[1].blockHash,
     );
 
     jsonTransportMock.request.withArgs('getMnListDiff').onCall(0).resolves(
-      firstMNListFixture,
+      mnListDiffsFixture[0],
     );
 
     jsonTransportMock.request.withArgs('getMnListDiff').onCall(1).resolves(
-      secondMNListFixture,
+      mnListDiffsFixture[1],
     );
 
     smlProvider = new SMLProvider(jsonTransportMock, {
@@ -56,20 +53,26 @@ describe('SMLProvider', () => {
       const sml = await smlProvider.getSimplifiedMNList();
 
       expect(sml).to.be.an.instanceOf(SimplifiedMNList);
-      expect(sml.mnList).to.have.lengthOf(firstMNListFixture.mnList.length);
+      expect(sml.mnList).to.have.lengthOf(mnListDiffsFixture[0].mnList.length);
 
       expect(smlProvider.lastUpdateDate).to.not.equal(0);
-      expect(smlProvider.baseBlockHash).to.equal(firstMNListFixture.blockHash);
+      expect(smlProvider.baseBlockHash).to.equal(mnListDiffsFixture[0].blockHash);
 
       expect(jsonTransportMock.request).to.be.calledTwice();
 
       expect(jsonTransportMock.request.getCall(0).args).to.deep.equal([
         'getBestBlockHash',
       ]);
+
       expect(jsonTransportMock.request.getCall(1).args).to.deep.equal([
         'getMnListDiff',
-        { baseBlockHash: SMLProvider.NULL_HASH, blockHash: firstMNListFixture.blockHash },
-        { addresses: [lastUsedAddress] },
+        {
+          baseBlockHash: SMLProvider.NULL_HASH,
+          blockHash: mnListDiffsFixture[0].blockHash,
+        },
+        {
+          addresses: [lastUsedAddress],
+        },
       ]);
     });
 
@@ -82,7 +85,7 @@ describe('SMLProvider', () => {
       const sml = await smlProvider.getSimplifiedMNList();
 
       expect(sml).to.be.an.instanceOf(SimplifiedMNList);
-      expect(sml.mnList).to.have.lengthOf(firstMNListFixture.mnList.length);
+      expect(sml.mnList).to.have.lengthOf(mnListDiffsFixture[0].mnList.length);
 
       expect(jsonTransportMock.request).to.be.calledTwice();
     });
@@ -91,7 +94,7 @@ describe('SMLProvider', () => {
       const firstSML = await smlProvider.getSimplifiedMNList();
 
       expect(firstSML).to.be.an.instanceOf(SimplifiedMNList);
-      expect(firstSML.mnList).to.have.lengthOf(firstMNListFixture.mnList.length);
+      expect(firstSML.mnList).to.have.lengthOf(mnListDiffsFixture[0].mnList.length);
 
       expect(jsonTransportMock.request).to.be.calledTwice();
 
@@ -107,10 +110,16 @@ describe('SMLProvider', () => {
       expect(jsonTransportMock.request.getCall(2).args).to.deep.equal([
         'getBestBlockHash',
       ]);
+
       expect(jsonTransportMock.request.getCall(3).args).to.deep.equal([
         'getMnListDiff',
-        { baseBlockHash: firstMNListFixture.blockHash, blockHash: secondMNListFixture.blockHash },
-        { addresses: [lastUsedAddress] },
+        {
+          baseBlockHash: mnListDiffsFixture[0].blockHash,
+          blockHash: mnListDiffsFixture[1].blockHash,
+        },
+        {
+          addresses: [lastUsedAddress],
+        },
       ]);
     });
   });

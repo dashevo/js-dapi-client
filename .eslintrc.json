@@ -1,7 +1,14 @@
 {
-  "extends": "airbnb",
-  "env": {
-    "node": true,
-    "browser": true
+  "extends": "airbnb-base",
+  "rules": {
+    "eol-last": [
+      "error",
+      "always"
+    ],
+    "class-methods-use-this": "off",
+    "curly": [
+      "error",
+      "all"
+    ]
   }
 }

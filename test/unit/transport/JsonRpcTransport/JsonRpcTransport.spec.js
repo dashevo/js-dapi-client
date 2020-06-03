@@ -84,20 +84,19 @@ describe('JsonRpcTransport', () => {
         await jsonRpcTransport.request(
           method,
           params,
-          options,
         );
 
         expect.fail('should throw error');
       } catch (e) {
         expect(e).to.deep.equal(error);
-        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly({});
         expect(jsonRpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
         expect(requestJsonRpcMock).to.be.calledOnceWithExactly(
           dapiAddress.getHost(),
           dapiAddress.getHttpPort(),
           method,
           params,
-          { timeout: options.timeout },
+          {},
         );
       }
     });
@@ -110,21 +109,20 @@ describe('JsonRpcTransport', () => {
       try {
         await jsonRpcTransport.request(
           method,
-          params,
-          options,
         );
 
         expect.fail('should throw MaxRetriesReachedError');
       } catch (e) {
         expect(e).to.be.an.instanceof(MaxRetriesReachedError);
-        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(e.getError()).to.equal(error);
+        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly({});
         expect(jsonRpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
         expect(requestJsonRpcMock).to.be.calledOnceWithExactly(
           dapiAddress.getHost(),
           dapiAddress.getHttpPort(),
           method,
-          params,
-          { timeout: options.timeout },
+          {},
+          {},
         );
       }
     });
@@ -146,6 +144,7 @@ describe('JsonRpcTransport', () => {
         expect.fail('should throw NoAvailableAddressesForRetry');
       } catch (e) {
         expect(e).to.be.an.instanceof(NoAvailableAddressesForRetry);
+        expect(e.getError()).to.equal(error);
         expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(jsonRpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
         expect(requestJsonRpcMock).to.be.calledOnceWithExactly(

@@ -35,6 +35,14 @@ describe('requestJsonRpc', () => {
 
     axiosStub
       .withArgs(
+        `https://${host}`,
+        { ...payload, method: 'httpsRequest' },
+        options,
+      )
+      .resolves({ status: 200, data: { result: 'passed', error: null } });
+
+    axiosStub
+      .withArgs(
         url,
         { ...payload, method: 'wrongData' },
         options,
@@ -53,7 +61,7 @@ describe('requestJsonRpc', () => {
       .withArgs(
         url,
         { ...payload, method: 'errorData' },
-        options,
+        { timeout: undefined },
       )
       .resolves({ status: 200, data: { result: null, error: { message: 'Invalid data for error.data', data: 'additional data here', code: -1 } } });
   });
@@ -62,11 +70,25 @@ describe('requestJsonRpc', () => {
     axios.post.restore();
   });
 
-  it('should make rpc request and return result ', async () => {
+  it('should make rpc request and return result', async () => {
     const result = await requestJsonRpc(
       host,
       port,
       'shouldPass',
+      params,
+      { timeout },
+    );
+
+    expect(result).to.equal('passed');
+  });
+
+  it('should make https rpc request and return result', async () => {
+    port = 443;
+
+    const result = await requestJsonRpc(
+      host,
+      port,
+      'httpsRequest',
       params,
       { timeout },
     );
@@ -108,7 +130,6 @@ describe('requestJsonRpc', () => {
 
   it('should throw error if there is an error object with data in the response body', async () => {
     const method = 'errorData';
-    const options = { timeout };
 
     try {
       await requestJsonRpc(
@@ -116,7 +137,6 @@ describe('requestJsonRpc', () => {
         port,
         method,
         params,
-        options,
       );
 
       expect.fail('should throw error');
@@ -128,7 +148,7 @@ describe('requestJsonRpc', () => {
         port,
         method,
         params,
-        options,
+        options: {},
       });
       expect(e.getErrorMessage()).to.equal('Invalid data for error.data');
       expect(e.getErrorData()).to.equal('additional data here');

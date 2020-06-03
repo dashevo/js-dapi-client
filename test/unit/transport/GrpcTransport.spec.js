@@ -130,6 +130,7 @@ describe('GrpcTransport', () => {
         expect.fail('should throw MaxRetriesReachedError');
       } catch (e) {
         expect(e).to.be.an.instanceof(MaxRetriesReachedError);
+        expect(e.getError()).to.equal(error);
         expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(url);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
@@ -165,6 +166,7 @@ describe('GrpcTransport', () => {
         expect.fail('should throw NoAvailableAddressesForRetry');
       } catch (e) {
         expect(e).to.be.an.instanceof(NoAvailableAddressesForRetry);
+        expect(e.getError()).to.equal(error);
         expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(url);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
@@ -247,6 +249,36 @@ describe('GrpcTransport', () => {
       expect(requestFunc).to.be.calledTwice();
     });
 
+    it('should retry the request if a GRPC unknown error has thrown', async () => {
+      const error = new Error('Internal error');
+      error.code = GrpcErrorCodes.UNKNOWN;
+
+      requestFunc.onCall(0).throws(error);
+
+      const receivedData = await grpcTransport.request(
+        clientClassMock,
+        method,
+        requestMessage,
+        options,
+      );
+
+      expect(receivedData).to.deep.equal(data);
+      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+      expect(clientClassMock).to.be.calledTwice();
+      expect(requestFunc).to.be.calledTwice();
+    });
+
+    it('should return last used address', async () => {
+      await grpcTransport.request(
+        clientClassMock,
+        method,
+        requestMessage,
+      );
+
+      const getLastUsedAddress = grpcTransport.getLastUsedAddress();
+      expect(getLastUsedAddress).to.deep.equal(grpcTransport.lastUsedAddress);
+    });
+
     describe('gRPC-Web', () => {
       let originalVersion;
 
@@ -263,7 +295,7 @@ describe('GrpcTransport', () => {
         });
       });
 
-      it('should return make a request in web environment', async () => {
+      it('should make a request in web environment', async () => {
         const receivedData = await grpcTransport.request(
           clientClassMock,
           method,
@@ -274,6 +306,34 @@ describe('GrpcTransport', () => {
         expect(receivedData).to.deep.equal(data);
         expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(`http://${host}:${dapiAddress.getHttpPort()}`);
+        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+        expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
+      });
+
+      it('should make a https request in web environment', async () => {
+        dapiAddress = new DAPIAddress({
+          host,
+          httpPort: 443,
+        });
+
+        addressProviderMock.getLiveAddress.resolves(dapiAddress);
+
+        grpcTransport = new GrpcTransport(
+          createAddressProviderFromOptionsMock,
+          addressProviderMock,
+          globalOptions,
+        );
+
+        const receivedData = await grpcTransport.request(
+          clientClassMock,
+          method,
+          requestMessage,
+          options,
+        );
+
+        expect(receivedData).to.deep.equal(data);
+        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(clientClassMock).to.be.calledOnceWithExactly(`https://${host}:${dapiAddress.getHttpPort()}`);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
       });

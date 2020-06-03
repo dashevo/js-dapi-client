@@ -5,17 +5,14 @@ describe('ListAddressProvider', () => {
   let listAddressProvider;
   let addresses;
   let options;
-  let bannedAddressHost;
-  let notBannedAddressHost;
+  let bannedAddress;
+  let notBannedAddress;
 
   beforeEach(() => {
-    bannedAddressHost = '127.0.0.1';
-    notBannedAddressHost = '192.168.1.1';
-
-    const bannedAddress = new DAPIAddress(bannedAddressHost);
+    bannedAddress = new DAPIAddress('192.168.1.1');
     bannedAddress.markAsBanned();
 
-    const notBannedAddress = new DAPIAddress(notBannedAddressHost);
+    notBannedAddress = new DAPIAddress('192.168.1.2');
 
     addresses = [
       bannedAddress,
@@ -30,13 +27,49 @@ describe('ListAddressProvider', () => {
     );
   });
 
+  describe('#constructor', () => {
+    it('should set base ban time option', () => {
+      const baseBanTime = 1000;
+
+      listAddressProvider = new ListAddressProvider(
+        addresses,
+        { baseBanTime },
+      );
+
+      expect(listAddressProvider.options.baseBanTime).to.equal(baseBanTime);
+    });
+
+    it('should set default base ban time option if not passed', () => {
+      listAddressProvider = new ListAddressProvider(
+        addresses,
+      );
+
+      expect(listAddressProvider.options.baseBanTime).to.equal(60 * 1000);
+    });
+  });
+
   describe('#getLiveAddresses', () => {
     it('should return live addresses', () => {
+      const bannedInThePastAddress = new DAPIAddress('192.168.1.3');
+      bannedInThePastAddress.banCount = 1;
+      bannedInThePastAddress.banStartTime = Date.now() - 3 * 60 * 1000;
+
+      const bannedManyTimesAddress = new DAPIAddress('192.168.1.4');
+      bannedManyTimesAddress.banCount = 3;
+      bannedManyTimesAddress.banStartTime = Date.now() - 2 * 60 * 1000;
+
+      listAddressProvider = new ListAddressProvider([
+        bannedAddress,
+        notBannedAddress,
+        bannedInThePastAddress,
+        bannedManyTimesAddress,
+      ]);
+
       const liveAddresses = listAddressProvider.getLiveAddresses();
 
-      expect(liveAddresses).to.have.lengthOf(1);
-      expect(liveAddresses[0]).to.be.instanceOf(DAPIAddress);
-      expect(liveAddresses[0].getHost()).to.equal(notBannedAddressHost);
+      expect(liveAddresses).to.have.lengthOf(2);
+      expect(liveAddresses[0]).to.equal(notBannedAddress);
+      expect(liveAddresses[1]).to.equal(bannedInThePastAddress);
     });
 
     it('should return empty array', () => {
@@ -54,8 +87,7 @@ describe('ListAddressProvider', () => {
     it('should return random live address', async () => {
       const address = await listAddressProvider.getLiveAddress();
 
-      expect(address).to.be.instanceOf(DAPIAddress);
-      expect(address.getHost()).to.equal(notBannedAddressHost);
+      expect(address).to.equal(notBannedAddress);
     });
 
     it('should return undefined when there are no live addresses', async () => {
@@ -85,5 +117,13 @@ describe('ListAddressProvider', () => {
 
       expect(hasAddresses).to.be.false();
     });
+  });
+
+  describe('#getAllAddresses', () => {
+    it('should get all addresses');
+  });
+
+  describe('#setAddresses', () => {
+    it('should set addresses and overwrite previous');
   });
 });

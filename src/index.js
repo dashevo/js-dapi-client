@@ -248,7 +248,7 @@ class DAPIClient {
    * @param {object} [options]
    * @param {object} [options.allowHighFees=false]
    * @param {object} [options.bypassLimits=false]
-   * @returns {string}
+   * @returns {Promise<string>}
    */
   async sendTransaction(transaction, options = {}) {
     const sendTransactionRequest = new SendTransactionRequest();

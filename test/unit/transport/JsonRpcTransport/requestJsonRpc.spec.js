@@ -103,7 +103,6 @@ describe('requestJsonRpc', () => {
       expect.fail('should throw error');
     } catch (e) {
       expect(e.message).to.equal('DAPI JSON RPC error: invalidData - invalid data');
-      expect(e.getData()).to.equal(undefined);
     }
   });
 

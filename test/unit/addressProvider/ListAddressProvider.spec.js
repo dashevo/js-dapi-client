@@ -120,10 +120,21 @@ describe('ListAddressProvider', () => {
   });
 
   describe('#getAllAddresses', () => {
-    it('should get all addresses');
+    it('should get all addresses', () => {
+      const allAddresses = listAddressProvider.getAllAddresses();
+
+      expect(allAddresses).to.deep.equal(listAddressProvider.addresses);
+    });
   });
 
   describe('#setAddresses', () => {
-    it('should set addresses and overwrite previous');
+    it('should set addresses and overwrite previous', () => {
+      addresses = [
+        notBannedAddress,
+      ];
+      listAddressProvider.setAddresses(addresses);
+
+      expect(listAddressProvider.addresses).to.deep.equal(addresses);
+    });
   });
 });

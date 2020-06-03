@@ -24,63 +24,75 @@ describe('PlatformMethodsFacade', () => {
     platformMethods = new PlatformMethodsFacade(grpcTransportMock);
   });
 
-  it('should broadcast state transition', async () => {
-    const response = new ApplyStateTransitionResponse();
-    grpcTransportMock.request.resolves(response);
+  describe('#broadcastStateTransition', () => {
+    it('should broadcast state transition', async () => {
+      const response = new ApplyStateTransitionResponse();
+      grpcTransportMock.request.resolves(response);
 
-    const dpp = new DashPlatformProtocol();
-    const stateTransition = dpp.dataContract.createStateTransition(getDataContractFixture());
+      const dpp = new DashPlatformProtocol();
+      const stateTransition = dpp.dataContract.createStateTransition(getDataContractFixture());
 
-    await platformMethods.broadcastStateTransition(stateTransition);
+      await platformMethods.broadcastStateTransition(stateTransition);
 
-    expect(grpcTransportMock.request).to.be.calledOnce();
+      expect(grpcTransportMock.request).to.be.calledOnce();
+    });
   });
 
-  it('should get data contract', async () => {
-    const response = new GetDataContractResponse();
-    grpcTransportMock.request.resolves(response);
+  describe('#getDataContract', () => {
+    it('should get data contract', async () => {
+      const response = new GetDataContractResponse();
+      grpcTransportMock.request.resolves(response);
 
-    await platformMethods.getDataContract(getDataContractFixture().getId());
+      await platformMethods.getDataContract(getDataContractFixture().getId());
 
-    expect(grpcTransportMock.request).to.be.calledOnce();
+      expect(grpcTransportMock.request).to.be.calledOnce();
+    });
   });
 
-  it('should get documents', async () => {
-    const response = new GetDocumentsResponse();
-    grpcTransportMock.request.resolves(response);
+  describe('#getDocuments', () => {
+    it('should get documents', async () => {
+      const response = new GetDocumentsResponse();
+      grpcTransportMock.request.resolves(response);
 
-    await platformMethods.getDocuments(
-      '11c70af56a763b05943888fa3719ef56b3e826615fdda2d463c63f4034cb861c',
-      'niceDocument',
-    );
+      await platformMethods.getDocuments(
+        '11c70af56a763b05943888fa3719ef56b3e826615fdda2d463c63f4034cb861c',
+        'niceDocument',
+      );
 
-    expect(grpcTransportMock.request).to.be.calledOnce();
+      expect(grpcTransportMock.request).to.be.calledOnce();
+    });
   });
 
-  it('should get Identity by first public key', async () => {
-    const response = new GetIdentityByFirstPublicKeyResponse();
-    grpcTransportMock.request.resolves(response);
+  describe('#getIdentityByFirstPublicKey', () => {
+    it('should get Identity by first public key', async () => {
+      const response = new GetIdentityByFirstPublicKeyResponse();
+      grpcTransportMock.request.resolves(response);
 
-    await platformMethods.getIdentityByFirstPublicKey('556c2910d46fda2b327ef9d9bda850cc84d30db0');
+      await platformMethods.getIdentityByFirstPublicKey('556c2910d46fda2b327ef9d9bda850cc84d30db0');
 
-    expect(grpcTransportMock.request).to.be.calledOnce();
+      expect(grpcTransportMock.request).to.be.calledOnce();
+    });
   });
 
-  it('should get Identity', async () => {
-    const response = new GetIdentityResponse();
-    grpcTransportMock.request.resolves(response);
+  describe('#getIdentity', () => {
+    it('should get Identity', async () => {
+      const response = new GetIdentityResponse();
+      grpcTransportMock.request.resolves(response);
 
-    await platformMethods.getIdentity('41nthkqvHBLnqiMkSbsdTNANzYu9bgdv4etKoRUunY1M');
+      await platformMethods.getIdentity('41nthkqvHBLnqiMkSbsdTNANzYu9bgdv4etKoRUunY1M');
 
-    expect(grpcTransportMock.request).to.be.calledOnce();
+      expect(grpcTransportMock.request).to.be.calledOnce();
+    });
   });
 
-  it('should get Identity ID by first public key', async () => {
-    const response = new GetIdentityIdByFirstPublicKeyResponse();
-    grpcTransportMock.request.resolves(response);
+  describe('#getIdentityIdByFirstPublicKey', () => {
+    it('should get Identity ID by first public key', async () => {
+      const response = new GetIdentityIdByFirstPublicKeyResponse();
+      grpcTransportMock.request.resolves(response);
 
-    await platformMethods.getIdentityIdByFirstPublicKey('556c2910d46fda2b327ef9d9bda850cc84d30db0');
+      await platformMethods.getIdentityIdByFirstPublicKey('556c2910d46fda2b327ef9d9bda850cc84d30db0');
 
-    expect(grpcTransportMock.request).to.be.calledOnce();
+      expect(grpcTransportMock.request).to.be.calledOnce();
+    });
   });
 });

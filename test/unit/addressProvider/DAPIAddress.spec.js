@@ -31,12 +31,7 @@ describe('DAPIAddress', () => {
       dapiAddress = new DAPIAddress(address);
 
       expect(dapiAddress).to.be.an.instanceOf(DAPIAddress);
-      expect(dapiAddress.host).to.equal(host);
-      expect(dapiAddress.httpPort).to.equal(DAPIAddress.DEFAULT_HTTP_PORT);
-      expect(dapiAddress.grpcPort).to.equal(DAPIAddress.DEFAULT_GRPC_PORT);
-      expect(dapiAddress.proRegTxHash).to.be.undefined();
-      expect(dapiAddress.banCount).to.equal(0);
-      expect(dapiAddress.banStartTime).to.be.undefined();
+      expect(dapiAddress.toJSON()).to.deep.equal(address.toJSON());
     });
 
     it('should construct DAPIAddress form RawDAPIAddress', () => {
@@ -58,14 +53,14 @@ describe('DAPIAddress', () => {
       const grpcPort = DAPIAddress.DEFAULT_GRPC_PORT + 1;
       const proRegTxHash = 'proRegTxHash';
 
-      const rawDAPIAddress = new DAPIAddress(host).toJSON();
-      rawDAPIAddress.httpPort = httpPort;
-      rawDAPIAddress.grpcPort = grpcPort;
-      rawDAPIAddress.proRegTxHash = proRegTxHash;
-      rawDAPIAddress.banount = 100;
-      rawDAPIAddress.banStartTime = 1000;
-
-      dapiAddress = new DAPIAddress(rawDAPIAddress);
+      dapiAddress = new DAPIAddress({
+        host,
+        httpPort,
+        grpcPort,
+        proRegTxHash,
+        banCount: 100,
+        banStartTime: 1000,
+      });
 
       expect(dapiAddress).to.be.an.instanceOf(DAPIAddress);
       expect(dapiAddress.host).to.equal(host);
@@ -74,14 +69,17 @@ describe('DAPIAddress', () => {
       expect(dapiAddress.proRegTxHash).to.equal(proRegTxHash);
       expect(dapiAddress.banCount).to.equal(0);
       expect(dapiAddress.banStartTime).to.be.undefined();
+      expect(dapiAddress.toJSON()).to.deep.equal({
+        grpcPort,
+        host,
+        httpPort,
+        proRegTxHash,
+      });
     });
 
     it('should throw DAPIAddressHostMissingError if host is missed', () => {
-      const address = new DAPIAddress(host);
-      address.host = undefined;
-
       try {
-        dapiAddress = new DAPIAddress(address);
+        dapiAddress = new DAPIAddress('');
 
         expect.fail('should throw DAPIAddressHostMissingError');
       } catch (e) {
@@ -136,7 +134,6 @@ describe('DAPIAddress', () => {
     it('should get GRPC port', () => {
       dapiAddress = new DAPIAddress('127.0.0.1');
 
-      expect(dapiAddress.getGrpcPort()).to.equal(dapiAddress.grpcPort);
       expect(dapiAddress.getGrpcPort()).to.equal(DAPIAddress.DEFAULT_GRPC_PORT);
     });
   });
@@ -149,26 +146,24 @@ describe('DAPIAddress', () => {
       dapiAddress.setGrpcPort(port);
 
       expect(dapiAddress.getGrpcPort()).to.equal(port);
-      expect(dapiAddress.getHttpPort()).to.equal(DAPIAddress.DEFAULT_HTTP_PORT);
     });
   });
 
   describe('#getProRegTxHash', () => {
     it('should get ProRegTxHash', () => {
       const proRegTxHash = 'proRegTxHash';
-      const rawDAPIAddress = new DAPIAddress('127.0.0.1').toJSON();
-      rawDAPIAddress.proRegTxHash = proRegTxHash;
+      dapiAddress = new DAPIAddress({
+        host: '127.0.0.1',
+        proRegTxHash,
+      });
 
-      dapiAddress = new DAPIAddress(rawDAPIAddress);
-
-      expect(dapiAddress.getProRegTxHash()).to.equal(dapiAddress.proRegTxHash);
       expect(dapiAddress.getProRegTxHash()).to.equal(proRegTxHash);
     });
   });
 
   describe('#getBanStartTime', () => {
     it('should get ban start time', () => {
-      const now = new Date().getTime();
+      const now = Date.now();
       dapiAddress = new DAPIAddress('127.0.0.1');
       dapiAddress.banStartTime = now;
 
@@ -201,7 +196,7 @@ describe('DAPIAddress', () => {
     it('should mark address as live', () => {
       dapiAddress = new DAPIAddress('127.0.0.1');
       dapiAddress.banCount = 1;
-      this.banStartTime = Date.now();
+      dapiAddress.banStartTime = Date.now();
 
       dapiAddress.markAsLive();
 
@@ -223,9 +218,6 @@ describe('DAPIAddress', () => {
     });
 
     it('should return false if address is not banned', () => {
-      dapiAddress.banCount = 0;
-
-
       const isBanned = dapiAddress.isBanned();
       expect(isBanned).to.be.false();
     });

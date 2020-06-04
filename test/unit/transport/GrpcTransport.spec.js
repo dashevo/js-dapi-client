@@ -93,23 +93,25 @@ describe('GrpcTransport', () => {
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
       });
 
-      it('should make a request with `deadline` option if set', async () => {
+      it('should make a request with `deadline` option if `timeout` option is set', async () => {
+        const timeout = 2000;
+
         const deadline = new Date();
-        deadline.setSeconds((new Date()).getSeconds() + 5);
+        deadline.setMilliseconds((new Date()).getMilliseconds() + timeout);
 
         const receivedData = await grpcTransport.request(
           clientClassMock,
           method,
           requestMessage,
           {
-            deadline,
+            timeout,
             ...options,
           },
         );
 
         expect(receivedData).to.equal(data);
         expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly({
-          deadline,
+          timeout,
           ...options,
         });
         expect(clientClassMock).to.be.calledOnceWithExactly(url);

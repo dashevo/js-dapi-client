@@ -108,7 +108,7 @@ describe('ListAddressProvider', () => {
       expect(hasAddresses).to.be.true();
     });
 
-    it('should return false', async () => {
+    it('should return false if all addresses are banned', async () => {
       listAddressProvider.addresses.forEach((address) => {
         address.markAsBanned();
       });

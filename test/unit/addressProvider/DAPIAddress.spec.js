@@ -58,8 +58,6 @@ describe('DAPIAddress', () => {
         httpPort,
         grpcPort,
         proRegTxHash,
-        banCount: 100,
-        banStartTime: 1000,
       });
 
       expect(dapiAddress).to.be.an.instanceOf(DAPIAddress);
@@ -74,6 +72,25 @@ describe('DAPIAddress', () => {
         host,
         httpPort,
         proRegTxHash,
+      });
+    });
+
+    it('should not set banCount and banStartTime from RawDAPIAddress', async () => {
+      dapiAddress = new DAPIAddress({
+        host,
+        banCount: 100,
+        banStartTime: 1000,
+      });
+
+      expect(dapiAddress).to.be.an.instanceOf(DAPIAddress);
+      expect(dapiAddress.host).to.equal(host);
+      expect(dapiAddress.banCount).to.equal(0);
+      expect(dapiAddress.banStartTime).to.be.undefined();
+      expect(dapiAddress.toJSON()).to.deep.equal({
+        grpcPort: DAPIAddress.DEFAULT_GRPC_PORT,
+        host,
+        httpPort: DAPIAddress.DEFAULT_HTTP_PORT,
+        proRegTxHash: undefined,
       });
     });
 

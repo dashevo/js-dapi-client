@@ -61,10 +61,6 @@ describe('DAPIAddress', () => {
       });
 
       expect(dapiAddress).to.be.an.instanceOf(DAPIAddress);
-      expect(dapiAddress.host).to.equal(host);
-      expect(dapiAddress.httpPort).to.equal(httpPort);
-      expect(dapiAddress.grpcPort).to.equal(grpcPort);
-      expect(dapiAddress.proRegTxHash).to.equal(proRegTxHash);
       expect(dapiAddress.banCount).to.equal(0);
       expect(dapiAddress.banStartTime).to.be.undefined();
       expect(dapiAddress.toJSON()).to.deep.equal({
@@ -121,40 +117,49 @@ describe('DAPIAddress', () => {
 
   describe('#getHttpPort', () => {
     it('should get HTTP port', () => {
-      dapiAddress = new DAPIAddress('127.0.0.1');
+      const httpPort = 666;
 
-      expect(dapiAddress.getHttpPort()).to.equal(DAPIAddress.DEFAULT_HTTP_PORT);
+      dapiAddress = new DAPIAddress({
+        host: '127.0.0.1',
+        httpPort,
+      });
+
+      expect(dapiAddress.getHttpPort()).to.equal(httpPort);
     });
   });
 
   describe('#setHttpPort', () => {
     it('should set HTTP port', () => {
+      const httpPort = 666;
+      
       dapiAddress = new DAPIAddress('127.0.0.1');
-
-      const port = dapiAddress.getHttpPort() + 1;
       dapiAddress.setHttpPort(port);
 
-      expect(dapiAddress.getHttpPort()).to.equal(port);
-      expect(dapiAddress.getGrpcPort()).to.equal(DAPIAddress.DEFAULT_GRPC_PORT);
+      expect(dapiAddress.getHttpPort()).to.equal(httpPort);
     });
   });
 
   describe('#getGrpcPort', () => {
     it('should get GRPC port', () => {
-      dapiAddress = new DAPIAddress('127.0.0.1');
+      const grpcPort = 666;
+      
+      dapiAddress = new DAPIAddress({
+        host: '127.0.0.1',
+        grpcPort,
+      });
 
-      expect(dapiAddress.getGrpcPort()).to.equal(DAPIAddress.DEFAULT_GRPC_PORT);
+      expect(dapiAddress.getGrpcPort()).to.equal(grpcPort);
     });
   });
 
   describe('#setGrpcPort', () => {
     it('should set GRPC port', () => {
+      const grpcPort = 666;
+
       dapiAddress = new DAPIAddress('127.0.0.1');
+      dapiAddress.setGrpcPort(grpcPort);
 
-      const port = dapiAddress.getGrpcPort() + 1;
-      dapiAddress.setGrpcPort(port);
-
-      expect(dapiAddress.getGrpcPort()).to.equal(port);
+      expect(dapiAddress.getGrpcPort()).to.equal(grpcPort);
     });
   });
 

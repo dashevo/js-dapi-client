@@ -131,9 +131,9 @@ describe('DAPIAddress', () => {
   describe('#setHttpPort', () => {
     it('should set HTTP port', () => {
       const httpPort = 666;
-      
+
       dapiAddress = new DAPIAddress('127.0.0.1');
-      dapiAddress.setHttpPort(port);
+      dapiAddress.setHttpPort(httpPort);
 
       expect(dapiAddress.getHttpPort()).to.equal(httpPort);
     });
@@ -142,7 +142,7 @@ describe('DAPIAddress', () => {
   describe('#getGrpcPort', () => {
     it('should get GRPC port', () => {
       const grpcPort = 666;
-      
+
       dapiAddress = new DAPIAddress({
         host: '127.0.0.1',
         grpcPort,

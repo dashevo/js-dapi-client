@@ -61,6 +61,10 @@
   "peerDependencies": {
     "@dashevo/grpc-common": "^0.3.0"
   },
+  "files": [
+    "docs",
+    "lib"
+  ],
   "scripts": {
     "build": "webpack --display-error-details",
     "lint": "eslint .",

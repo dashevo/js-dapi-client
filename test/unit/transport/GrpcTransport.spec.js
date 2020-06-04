@@ -87,7 +87,13 @@ describe('GrpcTransport', () => {
         expect(receivedData).to.equal(data);
         expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(url);
-        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+        expect(requestFunc).to.be.calledOnceWithExactly(
+          requestMessage, {}, {
+            ...globalOptions,
+            ...options,
+            timeout: undefined,
+          },
+        );
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
       });
 
@@ -109,7 +115,11 @@ describe('GrpcTransport', () => {
           expect(e).to.deep.equal(error);
           expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);
-          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {
+            ...globalOptions,
+            ...options,
+            timeout: undefined,
+          });
         }
       });
 
@@ -134,7 +144,11 @@ describe('GrpcTransport', () => {
           expect(e.getError()).to.equal(error);
           expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);
-          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {
+            ...globalOptions,
+            ...options,
+            timeout: undefined,
+          });
         }
       });
 
@@ -170,7 +184,11 @@ describe('GrpcTransport', () => {
           expect(e.getError()).to.equal(error);
           expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);
-          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {
+            ...globalOptions,
+            ...options,
+            timeout: undefined,
+          });
         }
       });
 
@@ -310,7 +328,11 @@ describe('GrpcTransport', () => {
         expect(receivedData).to.deep.equal(data);
         expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(`http://${host}:${dapiAddress.getHttpPort()}`);
-        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {
+          ...globalOptions,
+          ...options,
+          timeout: undefined,
+        });
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
       });
 
@@ -338,7 +360,11 @@ describe('GrpcTransport', () => {
         expect(receivedData).to.deep.equal(data);
         expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(`https://${host}:${dapiAddress.getHttpPort()}`);
-        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {
+          ...globalOptions,
+          ...options,
+          timeout: undefined,
+        });
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
       });
     });

@@ -83,15 +83,8 @@ describe('DAPIAddress', () => {
       });
 
       expect(dapiAddress).to.be.an.instanceOf(DAPIAddress);
-      expect(dapiAddress.host).to.equal(host);
       expect(dapiAddress.banCount).to.equal(0);
       expect(dapiAddress.banStartTime).to.be.undefined();
-      expect(dapiAddress.toJSON()).to.deep.equal({
-        grpcPort: DAPIAddress.DEFAULT_GRPC_PORT,
-        host,
-        httpPort: DAPIAddress.DEFAULT_HTTP_PORT,
-        proRegTxHash: undefined,
-      });
     });
 
     it('should throw DAPIAddressHostMissingError if host is missed', () => {
@@ -130,7 +123,6 @@ describe('DAPIAddress', () => {
     it('should get HTTP port', () => {
       dapiAddress = new DAPIAddress('127.0.0.1');
 
-      expect(dapiAddress.getHttpPort()).to.equal(dapiAddress.httpPort);
       expect(dapiAddress.getHttpPort()).to.equal(DAPIAddress.DEFAULT_HTTP_PORT);
     });
   });

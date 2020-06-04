@@ -1,37 +1,37 @@
-const createAddressProviderFromOptions = require(
-  '../../../lib/addressProvider/createAddressProviderFromOptions',
+const createDAPIAddressProviderFromOptions = require(
+  '../../../lib/dapiAddressProvider/createDAPIAddressProviderFromOptions',
 );
-const ListAddressProvider = require('../../../lib/addressProvider/ListAddressProvider');
-const SMLAddressProvider = require('../../../lib/addressProvider/SMLAddressProvider');
+const ListDAPIAddressProvider = require('../../../lib/dapiAddressProvider/ListDAPIAddressProvider');
+const SimplifiedMasternodeListDAPIAddressProvider = require('../../../lib/dapiAddressProvider/SimplifiedMasternodeListDAPIAddressProvider');
 
 const networks = require('../../../lib/networkConfigs');
 
 const DAPIClientError = require('../../../lib/errors/DAPIClientError');
 
-describe('createAddressProviderFromOptions', () => {
-  describe('addressProvider', () => {
+describe('createDAPIAddressProviderFromOptions', () => {
+  describe('dapiAddressProvider', () => {
     let options;
-    let addressProvider;
+    let dapiAddressProvider;
 
     beforeEach(() => {
-      addressProvider = 'addressProvider';
+      dapiAddressProvider = Object.create(null);
 
       options = {
-        addressProvider,
+        dapiAddressProvider,
       };
     });
 
-    it('should return AddressProvider from `addressProvider` option', async () => {
-      const result = createAddressProviderFromOptions(options);
+    it('should return AddressProvider from `dapiAddressProvider` option', async () => {
+      const result = createDAPIAddressProviderFromOptions(options);
 
-      expect(result).to.equal(addressProvider);
+      expect(result).to.equal(dapiAddressProvider);
     });
 
     it('should throw DAPIClientError if `addresses` option is passed too', async () => {
       options.addresses = ['localhost'];
 
       try {
-        createAddressProviderFromOptions(options);
+        createDAPIAddressProviderFromOptions(options);
 
         expect.fail('should throw DAPIClientError');
       } catch (e) {
@@ -43,7 +43,7 @@ describe('createAddressProviderFromOptions', () => {
       options.seeds = ['127.0.0.1'];
 
       try {
-        createAddressProviderFromOptions(options);
+        createDAPIAddressProviderFromOptions(options);
 
         expect.fail('should throw DAPIClientError');
       } catch (e) {
@@ -55,7 +55,7 @@ describe('createAddressProviderFromOptions', () => {
       options.network = 'testnet';
 
       try {
-        createAddressProviderFromOptions(options);
+        createDAPIAddressProviderFromOptions(options);
 
         expect.fail('should throw DAPIClientError');
       } catch (e) {
@@ -73,17 +73,17 @@ describe('createAddressProviderFromOptions', () => {
       };
     });
 
-    it('should return ListAddressProvider with addresses', async () => {
-      const result = createAddressProviderFromOptions(options);
+    it('should return ListDAPIAddressProvider with addresses', async () => {
+      const result = createDAPIAddressProviderFromOptions(options);
 
-      expect(result).to.be.an.instanceOf(ListAddressProvider);
+      expect(result).to.be.an.instanceOf(ListDAPIAddressProvider);
     });
 
     it('should throw DAPIClientError if `seeds` option is passed too', async () => {
       options.seeds = ['127.0.0.1'];
 
       try {
-        createAddressProviderFromOptions(options);
+        createDAPIAddressProviderFromOptions(options);
 
         expect.fail('should throw DAPIClientError');
       } catch (e) {
@@ -95,7 +95,7 @@ describe('createAddressProviderFromOptions', () => {
       options.network = 'testnet';
 
       try {
-        createAddressProviderFromOptions(options);
+        createDAPIAddressProviderFromOptions(options);
 
         expect.fail('should throw DAPIClientError');
       } catch (e) {
@@ -113,17 +113,17 @@ describe('createAddressProviderFromOptions', () => {
       };
     });
 
-    it('should return SMLAddressProvider based on seeds', async () => {
-      const result = createAddressProviderFromOptions(options);
+    it('should return SimplifiedMasternodeListDAPIAddressProvider based on seeds', async () => {
+      const result = createDAPIAddressProviderFromOptions(options);
 
-      expect(result).to.be.an.instanceOf(SMLAddressProvider);
+      expect(result).to.be.an.instanceOf(SimplifiedMasternodeListDAPIAddressProvider);
     });
 
     it('should throw DAPIClientError if `network` option is passed too', async () => {
       options.network = 'testnet';
 
       try {
-        createAddressProviderFromOptions(options);
+        createDAPIAddressProviderFromOptions(options);
 
         expect.fail('should throw DAPIClientError');
       } catch (e) {
@@ -142,16 +142,16 @@ describe('createAddressProviderFromOptions', () => {
     });
 
     it('should create address provider from `network` options', async () => {
-      const result = createAddressProviderFromOptions(options);
+      const result = createDAPIAddressProviderFromOptions(options);
 
-      expect(result).to.be.an.instanceOf(SMLAddressProvider);
+      expect(result).to.be.an.instanceOf(SimplifiedMasternodeListDAPIAddressProvider);
     });
 
     it('should throw DAPIClientError if `network` is invalid', async () => {
       options.network = 'unknown';
 
       try {
-        createAddressProviderFromOptions(options);
+        createDAPIAddressProviderFromOptions(options);
 
         expect.fail('should throw DAPIClientError');
       } catch (e) {

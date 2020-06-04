@@ -1,14 +1,14 @@
 const SimplifiedMNListEntry = require('@dashevo/dashcore-lib/lib/deterministicmnlist/SimplifiedMNListEntry');
 
 const getMNListDiffsFixture = require('../../../lib/test/fixtures/getMNListDiffsFixture');
-const DAPIAddress = require('../../../lib/addressProvider/DAPIAddress');
+const DAPIAddress = require('../../../lib/dapiAddressProvider/DAPIAddress');
 
-const SMLAddressProvider = require('../../../lib/addressProvider/SMLAddressProvider');
+const SimplifiedMasternodeListDAPIAddressProvider = require('../../../lib/dapiAddressProvider/SimplifiedMasternodeListDAPIAddressProvider');
 
-describe('SMLAddressProvider', () => {
-  let smlAddressProvider;
+describe('SimplifiedMasternodeListDAPIAddressProvider', () => {
+  let smlDAPIAddressProvider;
   let smlProviderMock;
-  let listAddressProviderMock;
+  let listDAPIAddressProviderMock;
   let smlMock;
   let validMasternodeList;
   let addresses;
@@ -44,33 +44,36 @@ describe('SMLAddressProvider', () => {
       getSimplifiedMNList: this.sinon.stub().resolves(smlMock),
     };
 
-    listAddressProviderMock = {
+    listDAPIAddressProviderMock = {
       getLiveAddress: this.sinon.stub().resolves(addresses[0]),
       hasLiveAddresses: this.sinon.stub().resolves(true),
       getAllAddresses: this.sinon.stub().returns(addresses),
       setAddresses: this.sinon.stub(),
     };
 
-    smlAddressProvider = new SMLAddressProvider(smlProviderMock, listAddressProviderMock);
+    smlDAPIAddressProvider = new SimplifiedMasternodeListDAPIAddressProvider(
+      smlProviderMock,
+      listDAPIAddressProviderMock,
+    );
   });
 
   describe('#getLiveAddress', () => {
     it('should get SML from provider, update ListAddressProvider and return live address', async () => {
-      const liveAddress = await smlAddressProvider.getLiveAddress();
+      const liveAddress = await smlDAPIAddressProvider.getLiveAddress();
 
       expect(liveAddress).to.equal(addresses[0]);
 
-      expect(listAddressProviderMock.setAddresses).to.be.calledOnce();
+      expect(listDAPIAddressProviderMock.setAddresses).to.be.calledOnce();
 
-      expect(listAddressProviderMock.setAddresses.getCall(0).args).to.have.lengthOf(1);
-      expect(listAddressProviderMock.setAddresses.getCall(0).args[0]).to.be.an('array');
-      expect(listAddressProviderMock.setAddresses.getCall(0).args[0]).to.have.lengthOf(3);
+      expect(listDAPIAddressProviderMock.setAddresses.getCall(0).args).to.have.lengthOf(1);
+      expect(listDAPIAddressProviderMock.setAddresses.getCall(0).args[0]).to.be.an('array');
+      expect(listDAPIAddressProviderMock.setAddresses.getCall(0).args[0]).to.have.lengthOf(3);
 
       const [
         firstAddress,
         secondAddress,
         thirdAddress,
-      ] = listAddressProviderMock.setAddresses.getCall(0).args[0];
+      ] = listDAPIAddressProviderMock.setAddresses.getCall(0).args[0];
 
       expect(firstAddress).to.be.instanceOf(DAPIAddress);
       expect(firstAddress).to.equal(addresses[0]);
@@ -101,18 +104,18 @@ describe('SMLAddressProvider', () => {
 
       expect(smlMock.getValidMasternodesList).to.be.calledOnceWithExactly();
       expect(smlProviderMock.getSimplifiedMNList).to.be.calledOnceWithExactly();
-      expect(listAddressProviderMock.getAllAddresses).to.be.calledOnceWithExactly();
-      expect(listAddressProviderMock.getLiveAddress).to.be.calledOnceWithExactly();
+      expect(listDAPIAddressProviderMock.getAllAddresses).to.be.calledOnceWithExactly();
+      expect(listDAPIAddressProviderMock.getLiveAddress).to.be.calledOnceWithExactly();
     });
   });
 
   describe('#hasLiveAddresses', () => {
     it('should return ListAddressProvider#hasLiveAddresses result', async () => {
-      const result = await smlAddressProvider.hasLiveAddresses();
+      const result = await smlDAPIAddressProvider.hasLiveAddresses();
 
       expect(result).to.be.true();
 
-      expect(listAddressProviderMock.hasLiveAddresses).to.be.calledOnceWithExactly();
+      expect(listDAPIAddressProviderMock.hasLiveAddresses).to.be.calledOnceWithExactly();
     });
   });
 });

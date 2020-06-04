@@ -1,13 +1,13 @@
 const SimplifiedMNList = require('@dashevo/dashcore-lib/lib/deterministicmnlist/SimplifiedMNList');
 
-const SMLProvider = require('../../../lib/SMLProvider/SMLProvider');
-const DAPIAddress = require('../../../lib/addressProvider/DAPIAddress');
+const SimplifiedMasternodeListProvider = require('../../../lib/SimplifiedMasternodeListProvider/SimplifiedMasternodeListProvider');
+const DAPIAddress = require('../../../lib/dapiAddressProvider/DAPIAddress');
 
 const getMNListDiffsFixture = require('../../../lib/test/fixtures/getMNListDiffsFixture');
 
 const wait = require('../../../lib/test/utils/wait');
 
-describe('SMLProvider', () => {
+describe('SimplifiedMasternodeListProvider', () => {
   let jsonTransportMock;
   let smlProvider;
   let lastUsedAddress;
@@ -39,7 +39,7 @@ describe('SMLProvider', () => {
       mnListDiffsFixture[1],
     );
 
-    smlProvider = new SMLProvider(jsonTransportMock, {
+    smlProvider = new SimplifiedMasternodeListProvider(jsonTransportMock, {
       updateInterval: 50,
       networkType: 'testnet',
     });
@@ -48,7 +48,7 @@ describe('SMLProvider', () => {
   describe('#getSimplifiedMNList', () => {
     it('should update SML and return list of valid masternodes', async () => {
       expect(smlProvider.lastUpdateDate).to.equal(0);
-      expect(smlProvider.baseBlockHash).to.equal(SMLProvider.NULL_HASH);
+      expect(smlProvider.baseBlockHash).to.equal(SimplifiedMasternodeListProvider.NULL_HASH);
 
       const sml = await smlProvider.getSimplifiedMNList();
 
@@ -67,7 +67,7 @@ describe('SMLProvider', () => {
       expect(jsonTransportMock.request.getCall(1).args).to.deep.equal([
         'getMnListDiff',
         {
-          baseBlockHash: SMLProvider.NULL_HASH,
+          baseBlockHash: SimplifiedMasternodeListProvider.NULL_HASH,
           blockHash: mnListDiffsFixture[0].blockHash,
         },
         {

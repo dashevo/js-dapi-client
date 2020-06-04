@@ -1,16 +1,16 @@
 const GrpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorCodes');
 
 const GrpcTransport = require('../../../lib/transport/GrpcTransport');
-const DAPIAddress = require('../../../lib/addressProvider/DAPIAddress');
+const DAPIAddress = require('../../../lib/dapiAddressProvider/DAPIAddress');
 
 const MaxRetriesReachedError = require('../../../lib/transport/errors/MaxRetriesReachedError');
 const NoAvailableAddressesForRetry = require('../../../lib/transport/errors/NoAvailableAddressesForRetry');
 
 describe('GrpcTransport', () => {
   let grpcTransport;
-  let addressProviderMock;
+  let dapiAddressProviderMock;
   let globalOptions;
-  let createAddressProviderFromOptionsMock;
+  let createDAPIAddressProviderFromOptionsMock;
   let dapiAddress;
   let host;
   let url;
@@ -19,7 +19,7 @@ describe('GrpcTransport', () => {
     host = '127.0.0.1';
     dapiAddress = new DAPIAddress(host);
 
-    addressProviderMock = {
+    dapiAddressProviderMock = {
       getLiveAddress: this.sinon.stub().resolves(dapiAddress),
       hasLiveAddresses: this.sinon.stub().resolves(false),
     };
@@ -28,11 +28,11 @@ describe('GrpcTransport', () => {
       retries: 0,
     };
 
-    createAddressProviderFromOptionsMock = this.sinon.stub().returns(null);
+    createDAPIAddressProviderFromOptionsMock = this.sinon.stub().returns(null);
 
     grpcTransport = new GrpcTransport(
-      createAddressProviderFromOptionsMock,
-      addressProviderMock,
+      createDAPIAddressProviderFromOptionsMock,
+      dapiAddressProviderMock,
       globalOptions,
     );
 
@@ -62,15 +62,15 @@ describe('GrpcTransport', () => {
         [method]: requestFunc,
       });
 
-      addressProviderMock.hasLiveAddresses.resolves(true);
+      dapiAddressProviderMock.hasLiveAddresses.resolves(true);
 
       globalOptions = {
         retries: 1,
       };
 
       grpcTransport = new GrpcTransport(
-        createAddressProviderFromOptionsMock,
-        addressProviderMock,
+        createDAPIAddressProviderFromOptionsMock,
+        dapiAddressProviderMock,
         globalOptions,
       );
     });
@@ -85,7 +85,7 @@ describe('GrpcTransport', () => {
         );
 
         expect(receivedData).to.equal(data);
-        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(url);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
@@ -107,7 +107,7 @@ describe('GrpcTransport', () => {
           expect.fail('should throw error');
         } catch (e) {
           expect(e).to.deep.equal(error);
-          expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+          expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);
           expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
         }
@@ -132,22 +132,22 @@ describe('GrpcTransport', () => {
         } catch (e) {
           expect(e).to.be.an.instanceof(MaxRetriesReachedError);
           expect(e.getError()).to.equal(error);
-          expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+          expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);
           expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
         }
       });
 
       it('should throw NoAvailableAddressesForRetry error if there are no more available addresses to request', async () => {
-        addressProviderMock.hasLiveAddresses.resolves(false);
+        dapiAddressProviderMock.hasLiveAddresses.resolves(false);
 
         globalOptions = {
           retries: 1,
         };
 
         grpcTransport = new GrpcTransport(
-          createAddressProviderFromOptionsMock,
-          addressProviderMock,
+          createDAPIAddressProviderFromOptionsMock,
+          dapiAddressProviderMock,
           globalOptions,
         );
 
@@ -168,7 +168,7 @@ describe('GrpcTransport', () => {
         } catch (e) {
           expect(e).to.be.an.instanceof(NoAvailableAddressesForRetry);
           expect(e.getError()).to.equal(error);
-          expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+          expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);
           expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
         }
@@ -188,7 +188,7 @@ describe('GrpcTransport', () => {
         );
 
         expect(receivedData).to.deep.equal(data);
-        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledTwice();
         expect(clientClassMock).to.be.calledTwice();
         expect(requestFunc).to.be.calledTwice();
       });
@@ -207,7 +207,7 @@ describe('GrpcTransport', () => {
         );
 
         expect(receivedData).to.deep.equal(data);
-        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledTwice();
         expect(clientClassMock).to.be.calledTwice();
         expect(requestFunc).to.be.calledTwice();
       });
@@ -226,7 +226,7 @@ describe('GrpcTransport', () => {
         );
 
         expect(receivedData).to.deep.equal(data);
-        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledTwice();
         expect(clientClassMock).to.be.calledTwice();
         expect(requestFunc).to.be.calledTwice();
       });
@@ -245,7 +245,7 @@ describe('GrpcTransport', () => {
         );
 
         expect(receivedData).to.deep.equal(data);
-        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledTwice();
         expect(clientClassMock).to.be.calledTwice();
         expect(requestFunc).to.be.calledTwice();
       });
@@ -264,7 +264,7 @@ describe('GrpcTransport', () => {
         );
 
         expect(receivedData).to.deep.equal(data);
-        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledTwice();
         expect(clientClassMock).to.be.calledTwice();
         expect(requestFunc).to.be.calledTwice();
       });
@@ -308,7 +308,7 @@ describe('GrpcTransport', () => {
         );
 
         expect(receivedData).to.deep.equal(data);
-        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(`http://${host}:${dapiAddress.getHttpPort()}`);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
@@ -320,11 +320,11 @@ describe('GrpcTransport', () => {
           httpPort: 443,
         });
 
-        addressProviderMock.getLiveAddress.resolves(dapiAddress);
+        dapiAddressProviderMock.getLiveAddress.resolves(dapiAddress);
 
         grpcTransport = new GrpcTransport(
-          createAddressProviderFromOptionsMock,
-          addressProviderMock,
+          createDAPIAddressProviderFromOptionsMock,
+          dapiAddressProviderMock,
           globalOptions,
         );
 
@@ -336,7 +336,7 @@ describe('GrpcTransport', () => {
         );
 
         expect(receivedData).to.deep.equal(data);
-        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+        expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(`https://${host}:${dapiAddress.getHttpPort()}`);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);

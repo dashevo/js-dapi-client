@@ -47,6 +47,7 @@ describe('GrpcTransport', () => {
     let options;
     let data;
     let requestFunc;
+    let clock;
 
     beforeEach(function beforeEach() {
       data = 'result';
@@ -75,6 +76,12 @@ describe('GrpcTransport', () => {
       );
     });
 
+    afterEach(() => {
+      if (clock) {
+        clock.restore();
+      }
+    });
+
     describe('#request', () => {
       it('should make a request', async () => {
         const receivedData = await grpcTransport.request(
@@ -93,7 +100,10 @@ describe('GrpcTransport', () => {
         expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
       });
 
-      it('should make a request with `deadline` option if `timeout` option is set', async () => {
+      it('should make a request with `deadline` option if `timeout` option is set', async function itContainer() {
+        // Freeze time by using fake timers
+        clock = this.sinon.useFakeTimers();
+
         const timeout = 2000;
 
         const deadline = new Date();

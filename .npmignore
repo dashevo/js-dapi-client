@@ -1,0 +1,11 @@
+.idea
+.github
+.nyc_output/
+node_modules/
+scripts
+test
+.travis.yml
+.mocharc.yml
+.eslint*
+karma.conf.js
+webpack.config.js

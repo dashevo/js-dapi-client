@@ -75,208 +75,212 @@ describe('GrpcTransport', () => {
       );
     });
 
-    it('should make a request', async () => {
-      const receivedData = await grpcTransport.request(
-        clientClassMock,
-        method,
-        requestMessage,
-        options,
-      );
-
-      expect(receivedData).to.equal(data);
-      expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
-      expect(clientClassMock).to.be.calledOnceWithExactly(url);
-      expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
-      expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
-    });
-
-    it('should throw unknown error', async () => {
-      const error = new Error('Unknown error');
-
-      requestFunc.throws(error);
-
-      try {
-        await grpcTransport.request(
+    describe('#request', () => {
+      it('should make a request', async () => {
+        const receivedData = await grpcTransport.request(
           clientClassMock,
           method,
           requestMessage,
           options,
         );
 
-        expect.fail('should throw error');
-      } catch (e) {
-        expect(e).to.deep.equal(error);
+        expect(receivedData).to.equal(data);
         expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(clientClassMock).to.be.calledOnceWithExactly(url);
         expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
-      }
-    });
+        expect(grpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
+      });
 
-    it('should throw MaxRetriesReachedError', async () => {
-      const error = new Error('Internal error');
-      error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
+      it('should throw unknown error if it happened during the request', async () => {
+        const error = new Error('Unknown error');
 
-      requestFunc.throws(error);
+        requestFunc.throws(error);
 
-      options.retries = 0;
-      try {
-        await grpcTransport.request(
+        try {
+          await grpcTransport.request(
+            clientClassMock,
+            method,
+            requestMessage,
+            options,
+          );
+
+          expect.fail('should throw error');
+        } catch (e) {
+          expect(e).to.deep.equal(error);
+          expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+          expect(clientClassMock).to.be.calledOnceWithExactly(url);
+          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+        }
+      });
+
+      it('should throw MaxRetriesReachedError if there are not more retries left', async () => {
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
+
+        requestFunc.throws(error);
+
+        options.retries = 0;
+        try {
+          await grpcTransport.request(
+            clientClassMock,
+            method,
+            requestMessage,
+            options,
+          );
+
+          expect.fail('should throw MaxRetriesReachedError');
+        } catch (e) {
+          expect(e).to.be.an.instanceof(MaxRetriesReachedError);
+          expect(e.getError()).to.equal(error);
+          expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+          expect(clientClassMock).to.be.calledOnceWithExactly(url);
+          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+        }
+      });
+
+      it('should throw NoAvailableAddressesForRetry error if there are no more available addresses to request', async () => {
+        addressProviderMock.hasLiveAddresses.resolves(false);
+
+        globalOptions = {
+          retries: 1,
+        };
+
+        grpcTransport = new GrpcTransport(
+          createAddressProviderFromOptionsMock,
+          addressProviderMock,
+          globalOptions,
+        );
+
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.UNAVAILABLE;
+
+        requestFunc.throws(error);
+
+        try {
+          await grpcTransport.request(
+            clientClassMock,
+            method,
+            requestMessage,
+            options,
+          );
+
+          expect.fail('should throw NoAvailableAddressesForRetry');
+        } catch (e) {
+          expect(e).to.be.an.instanceof(NoAvailableAddressesForRetry);
+          expect(e.getError()).to.equal(error);
+          expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+          expect(clientClassMock).to.be.calledOnceWithExactly(url);
+          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
+        }
+      });
+
+      it('should retry the request if an internal error has thrown', async () => {
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.INTERNAL;
+
+        requestFunc.onCall(0).throws(error);
+
+        const receivedData = await grpcTransport.request(
           clientClassMock,
           method,
           requestMessage,
           options,
         );
 
-        expect.fail('should throw MaxRetriesReachedError');
-      } catch (e) {
-        expect(e).to.be.an.instanceof(MaxRetriesReachedError);
-        expect(e.getError()).to.equal(error);
-        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
-        expect(clientClassMock).to.be.calledOnceWithExactly(url);
-        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
-      }
-    });
+        expect(receivedData).to.deep.equal(data);
+        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(clientClassMock).to.be.calledTwice();
+        expect(requestFunc).to.be.calledTwice();
+      });
 
-    it('should throw NoAvailableAddressesForRetry error', async () => {
-      addressProviderMock.hasLiveAddresses.resolves(false);
+      it('should retry the request if an unavailable error has thrown', async () => {
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.UNAVAILABLE;
 
-      globalOptions = {
-        retries: 1,
-      };
+        requestFunc.onCall(0).throws(error);
 
-      grpcTransport = new GrpcTransport(
-        createAddressProviderFromOptionsMock,
-        addressProviderMock,
-        globalOptions,
-      );
-
-      const error = new Error('Internal error');
-      error.code = GrpcErrorCodes.UNAVAILABLE;
-
-      requestFunc.throws(error);
-
-      try {
-        await grpcTransport.request(
+        const receivedData = await grpcTransport.request(
           clientClassMock,
           method,
           requestMessage,
           options,
         );
 
-        expect.fail('should throw NoAvailableAddressesForRetry');
-      } catch (e) {
-        expect(e).to.be.an.instanceof(NoAvailableAddressesForRetry);
-        expect(e.getError()).to.equal(error);
-        expect(createAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
-        expect(clientClassMock).to.be.calledOnceWithExactly(url);
-        expect(requestFunc).to.be.calledOnceWithExactly(requestMessage);
-      }
+        expect(receivedData).to.deep.equal(data);
+        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(clientClassMock).to.be.calledTwice();
+        expect(requestFunc).to.be.calledTwice();
+      });
+
+      it('should retry the request if a deadline exceeded error has thrown', async () => {
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
+
+        requestFunc.onCall(0).throws(error);
+
+        const receivedData = await grpcTransport.request(
+          clientClassMock,
+          method,
+          requestMessage,
+          options,
+        );
+
+        expect(receivedData).to.deep.equal(data);
+        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(clientClassMock).to.be.calledTwice();
+        expect(requestFunc).to.be.calledTwice();
+      });
+
+      it('should retry the request if a cancelled exceeded error has thrown', async () => {
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.CANCELLED;
+
+        requestFunc.onCall(0).throws(error);
+
+        const receivedData = await grpcTransport.request(
+          clientClassMock,
+          method,
+          requestMessage,
+          options,
+        );
+
+        expect(receivedData).to.deep.equal(data);
+        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(clientClassMock).to.be.calledTwice();
+        expect(requestFunc).to.be.calledTwice();
+      });
+
+      it('should retry the request if a GRPC unknown error has thrown', async () => {
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.UNKNOWN;
+
+        requestFunc.onCall(0).throws(error);
+
+        const receivedData = await grpcTransport.request(
+          clientClassMock,
+          method,
+          requestMessage,
+          options,
+        );
+
+        expect(receivedData).to.deep.equal(data);
+        expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
+        expect(clientClassMock).to.be.calledTwice();
+        expect(requestFunc).to.be.calledTwice();
+      });
     });
 
-    it('should retry the request if an internal error has thrown', async () => {
-      const error = new Error('Internal error');
-      error.code = GrpcErrorCodes.INTERNAL;
+    describe('#getLastUsedAddress', () => {
+      it('should return last used address', async () => {
+        await grpcTransport.request(
+          clientClassMock,
+          method,
+          requestMessage,
+        );
 
-      requestFunc.onCall(0).throws(error);
-
-      const receivedData = await grpcTransport.request(
-        clientClassMock,
-        method,
-        requestMessage,
-        options,
-      );
-
-      expect(receivedData).to.deep.equal(data);
-      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
-      expect(clientClassMock).to.be.calledTwice();
-      expect(requestFunc).to.be.calledTwice();
-    });
-
-    it('should retry the request if an unavailable error has thrown', async () => {
-      const error = new Error('Internal error');
-      error.code = GrpcErrorCodes.UNAVAILABLE;
-
-      requestFunc.onCall(0).throws(error);
-
-      const receivedData = await grpcTransport.request(
-        clientClassMock,
-        method,
-        requestMessage,
-        options,
-      );
-
-      expect(receivedData).to.deep.equal(data);
-      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
-      expect(clientClassMock).to.be.calledTwice();
-      expect(requestFunc).to.be.calledTwice();
-    });
-
-    it('should retry the request if a deadline exceeded error has thrown', async () => {
-      const error = new Error('Internal error');
-      error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
-
-      requestFunc.onCall(0).throws(error);
-
-      const receivedData = await grpcTransport.request(
-        clientClassMock,
-        method,
-        requestMessage,
-        options,
-      );
-
-      expect(receivedData).to.deep.equal(data);
-      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
-      expect(clientClassMock).to.be.calledTwice();
-      expect(requestFunc).to.be.calledTwice();
-    });
-
-    it('should retry the request if a cancelled exceeded error has thrown', async () => {
-      const error = new Error('Internal error');
-      error.code = GrpcErrorCodes.CANCELLED;
-
-      requestFunc.onCall(0).throws(error);
-
-      const receivedData = await grpcTransport.request(
-        clientClassMock,
-        method,
-        requestMessage,
-        options,
-      );
-
-      expect(receivedData).to.deep.equal(data);
-      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
-      expect(clientClassMock).to.be.calledTwice();
-      expect(requestFunc).to.be.calledTwice();
-    });
-
-    it('should retry the request if a GRPC unknown error has thrown', async () => {
-      const error = new Error('Internal error');
-      error.code = GrpcErrorCodes.UNKNOWN;
-
-      requestFunc.onCall(0).throws(error);
-
-      const receivedData = await grpcTransport.request(
-        clientClassMock,
-        method,
-        requestMessage,
-        options,
-      );
-
-      expect(receivedData).to.deep.equal(data);
-      expect(createAddressProviderFromOptionsMock).to.be.calledTwice();
-      expect(clientClassMock).to.be.calledTwice();
-      expect(requestFunc).to.be.calledTwice();
-    });
-
-    it('should return last used address', async () => {
-      await grpcTransport.request(
-        clientClassMock,
-        method,
-        requestMessage,
-      );
-
-      const getLastUsedAddress = grpcTransport.getLastUsedAddress();
-      expect(getLastUsedAddress).to.deep.equal(grpcTransport.lastUsedAddress);
+        const getLastUsedAddress = grpcTransport.getLastUsedAddress();
+        expect(getLastUsedAddress).to.deep.equal(grpcTransport.lastUsedAddress);
+      });
     });
 
     describe('gRPC-Web', () => {

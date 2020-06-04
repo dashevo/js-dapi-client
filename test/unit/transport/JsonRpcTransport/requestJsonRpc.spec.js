@@ -1,6 +1,7 @@
 const axios = require('axios');
 const requestJsonRpc = require('../../../../lib/transport/JsonRpcTransport/requestJsonRpc');
 const JsonRpcError = require('../../../../lib/transport/JsonRpcTransport/errors/JsonRpcError');
+const WrongHttpCodeError = require('../../../../lib/transport/JsonRpcTransport/errors/WrongHttpCodeError');
 
 describe('requestJsonRpc', () => {
   let host;
@@ -96,19 +97,31 @@ describe('requestJsonRpc', () => {
     expect(result).to.equal('passed');
   });
 
-  it('should throw error if response status is not 200', async () => {
+  it('should throw WrongHttpCodeError if response status is not 200', async () => {
+    const method = 'wrongData';
+    const options = { timeout };
+
     try {
       await requestJsonRpc(
         host,
         port,
-        'wrongData',
+        method,
         params,
-        { timeout },
+        options,
       );
 
       expect.fail('should throw error');
     } catch (e) {
-      expect(e.message).to.equal('Status message');
+      expect(e).to.be.an.instanceOf(WrongHttpCodeError);
+      expect(e.message).to.equal('DAPI JSON RPC wrong http code: Status message');
+      expect(e.getStatusCode()).to.equal(400);
+      expect(e.getRequestInfo()).to.deep.equal({
+        host,
+        port,
+        method,
+        params,
+        options,
+      });
     }
   });
 

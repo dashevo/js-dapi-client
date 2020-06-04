@@ -35,9 +35,9 @@ describe('DAPIAddress', () => {
     });
 
     it('should construct DAPIAddress form RawDAPIAddress', () => {
-      const rawDAPIAddress = new DAPIAddress(host).toJSON();
-
-      dapiAddress = new DAPIAddress(rawDAPIAddress);
+      dapiAddress = new DAPIAddress({
+        host,
+      });
 
       expect(dapiAddress).to.be.an.instanceOf(DAPIAddress);
       expect(dapiAddress.host).to.equal(host);

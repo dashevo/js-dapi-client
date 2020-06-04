@@ -72,7 +72,7 @@ describe('ListAddressProvider', () => {
       expect(liveAddresses[1]).to.equal(bannedInThePastAddress);
     });
 
-    it('should return empty array', () => {
+    it('should return empty array if all addresses are banned', () => {
       listAddressProvider.addresses.forEach((address) => {
         address.markAsBanned();
       });

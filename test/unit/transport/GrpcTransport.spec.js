@@ -113,7 +113,7 @@ describe('GrpcTransport', () => {
         }
       });
 
-      it('should throw MaxRetriesReachedError if there are not more retries left', async () => {
+      it('should throw MaxRetriesReachedError if there are no more retries left', async () => {
         const error = new Error('Internal error');
         error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
 

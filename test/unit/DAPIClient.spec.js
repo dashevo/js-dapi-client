@@ -1,8 +1,8 @@
 const DAPIClient = require('../../lib/DAPIClient');
 const CoreMethodsFacade = require('../../lib/methods/core/CoreMethodsFacade');
 const PlatformMethodsFacade = require('../../lib/methods/platform/PlatformMethodsFacade');
-const SMLAddressProvider = require('../../lib/addressProvider/SMLAddressProvider');
-const ListAddressProvider = require('../../lib/addressProvider/ListAddressProvider');
+const SimplifiedMasternodeListDAPIAddressProvider = require('../../lib/dapiAddressProvider/SimplifiedMasternodeListDAPIAddressProvider');
+const ListDAPIAddressProvider = require('../../lib/dapiAddressProvider/ListDAPIAddressProvider');
 
 describe('DAPIClient', () => {
   let options;
@@ -23,7 +23,9 @@ describe('DAPIClient', () => {
         timeout: 2000,
       });
 
-      expect(dapiClient.addressProvider).to.be.an.instanceOf(SMLAddressProvider);
+      expect(dapiClient.dapiAddressProvider).to.be.an.instanceOf(
+        SimplifiedMasternodeListDAPIAddressProvider,
+      );
 
       expect(dapiClient.core).to.be.an.instanceOf(CoreMethodsFacade);
       expect(dapiClient.platform).to.be.an.instanceOf(PlatformMethodsFacade);
@@ -37,7 +39,9 @@ describe('DAPIClient', () => {
         timeout: 2000,
       });
 
-      expect(dapiClient.addressProvider).to.be.an.instanceOf(SMLAddressProvider);
+      expect(dapiClient.dapiAddressProvider).to.be.an.instanceOf(
+        SimplifiedMasternodeListDAPIAddressProvider,
+      );
 
       expect(dapiClient.core).to.be.an.instanceOf(CoreMethodsFacade);
       expect(dapiClient.platform).to.be.an.instanceOf(PlatformMethodsFacade);
@@ -57,7 +61,7 @@ describe('DAPIClient', () => {
         timeout: 2000,
       });
 
-      expect(dapiClient.addressProvider).to.be.an.instanceOf(ListAddressProvider);
+      expect(dapiClient.dapiAddressProvider).to.be.an.instanceOf(ListDAPIAddressProvider);
 
       expect(dapiClient.core).to.be.an.instanceOf(CoreMethodsFacade);
       expect(dapiClient.platform).to.be.an.instanceOf(PlatformMethodsFacade);

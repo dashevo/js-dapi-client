@@ -61,7 +61,10 @@ describe('subscribeToTransactionsWithProofsFactory', () => {
       TransactionsFilterStreamPromiseClient,
       'subscribeToTransactionsWithProofs',
       request,
-      options,
+      {
+        timeout: undefined,
+        ...options,
+      },
     );
 
     expect(actualStream).to.be.equal(stream);

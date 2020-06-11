@@ -2,7 +2,7 @@ const rpcClient = require('../RPCClient');
 
 class JsonRpcTransport {
   /**
-   * @param {MNDiscovery} mnDiscovery
+   * @param {MNDiscovery|ListMNDiscovery} mnDiscovery
    * @param {number} dapiPort
    */
   constructor(mnDiscovery, dapiPort) {
@@ -28,10 +28,9 @@ class JsonRpcTransport {
     const excludedIps = options.excludedIps || [];
     const clientOptions = options.client || {};
 
-    let urlToConnect;
-    try {
-      urlToConnect = await this.getJsonRpcUrl(excludedIps);
+    const urlToConnect = await this.getJsonRpcUrl(excludedIps);
 
+    try {
       const result = await rpcClient.request(
         urlToConnect, method, params, { timeout: 10000, ...clientOptions },
       );
@@ -70,6 +69,10 @@ class JsonRpcTransport {
    */
   async getJsonRpcUrl(excludedIps = []) {
     const randomMasternode = await this.mnDiscovery.getRandomMasternode(excludedIps);
+
+    if (!randomMasternode) {
+      throw new Error('No available masternodes');
+    }
 
     return {
       host: randomMasternode.getIp(),

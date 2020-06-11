@@ -17,6 +17,10 @@ const {
   GetIdentityIdByFirstPublicKeyRequest,
 } = require('@dashevo/dapi-grpc');
 
+const ListMNDiscovery = require('./MNDiscovery/ListMNDiscovery');
+const JsonRpcTransport = require('./transport/JsonRpcTransport');
+const MasternodeListProvider = require('./MNDiscovery/MasternodeListProvider');
+
 const MNDiscovery = require('./MNDiscovery/index');
 const TransportManager = require('./transport/TransportManager');
 const config = require('./config');
@@ -33,8 +37,8 @@ const { responseErrorCodes } = require('./constants');
  */
 class DAPIClient {
   constructor(options = {}) {
-    this.MNDiscovery = new MNDiscovery(options.seeds, options.port);
     this.DAPIPort = options.port || config.Api.port;
+
     this.nativeGrpcPort = options.nativeGrpcPort || config.grpc.nativePort;
 
     this.timeout = options.timeout || 2000;
@@ -44,6 +48,16 @@ class DAPIClient {
     this.retries = options.retries ? options.retries : 3;
     preconditionsUtil.checkArgument(jsutil.isUnsignedInteger(this.retries),
       'Expect retries to be an unsigned integer');
+
+    const listMNDiscovery = new ListMNDiscovery(options.seeds);
+
+    const jsonRpcTransport = new JsonRpcTransport(
+      listMNDiscovery, this.DAPIPort,
+    );
+
+    const masternodeListProvider = new MasternodeListProvider(jsonRpcTransport);
+
+    this.MNDiscovery = new MNDiscovery(masternodeListProvider);
 
     this.transportManager = new TransportManager(
       this.MNDiscovery, this.DAPIPort, this.nativeGrpcPort,

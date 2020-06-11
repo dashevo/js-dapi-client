@@ -328,9 +328,6 @@ describe('api', () => {
         port: 1234
       });
       expect(dapi.DAPIPort).to.be.equal(1234);
-      expect(dapi.MNDiscovery.masternodeListProvider.DAPIPort).to.be.equal(1234);
-      expect(dapi.MNDiscovery.masternodeListProvider.seeds).to.be.deep.equal([{ service: '127.1.2.3:19999' }]);
-      expect(dapi.MNDiscovery.seeds).to.be.deep.equal([{ service: '127.1.2.3:19999' }]);
 
       await dapi.getBestBlockHash();
       //const baseHash = config.nullHash;

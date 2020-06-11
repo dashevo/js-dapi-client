@@ -38,7 +38,7 @@ class JsonRpcTransport {
 
       return result;
     } catch (e) {
-      if (e.code !== 'ECONNABORTED' && e.code !== 'ECONNREFUSED'
+      if (e.code !== 'ECONNABORTED' && e.code !== 'ECONNREFUSED' && e.code !== 'ETIMEDOUT'
             && e.code !== -32603 && !(e.code >= -32000 && e.code <= -32099)) {
         throw e;
       }

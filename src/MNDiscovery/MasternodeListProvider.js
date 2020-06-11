@@ -12,8 +12,6 @@ const {
   MerkleBlock,
   BlockHeader,
 } = require('@dashevo/dashcore-lib');
-const sample = require('lodash/sample');
-const RPCClient = require('../RPCClient');
 const config = require('../config');
 const constants = require('../constants');
 
@@ -90,29 +88,18 @@ async function validateDiff(diff) { // eslint-disable-line no-unused-vars
  */
 
 class MasternodeListProvider {
-  constructor(seeds, DAPIPort = config.Api.port) {
-    const seedsIsArray = Array.isArray(seeds);
-
-    if (seeds && !seedsIsArray) {
-      throw new Error('seed is not an array');
-    }
-    /**
-     * @type Array<SimplifiedMNListEntry>
-     */
-    this.seeds = seedsIsArray ? seeds.slice() : config.DAPIDNSSeeds.slice();
+  /**
+   * @param {JsonRpcTransport} jsonRpcTransport
+   */
+  constructor(jsonRpcTransport) {
+    this.jsonRpcTransport = jsonRpcTransport;
     /**
      * Deterministic simplified masternode list.
      * @type Array<SimplifiedMNListEntry>
      */
-    this.masternodeList = [];
     this.simplifiedMNList = new SimplifiedMNList();
-    this.DAPIPort = DAPIPort;
     this.lastUpdateDate = 0;
     this.baseBlockHash = constants.masternodeList.NULL_HASH;
-  }
-
-  isEmptyMasternodeList() {
-    return this.masternodeList.length === 0;
   }
 
   /**
@@ -123,12 +110,11 @@ class MasternodeListProvider {
    */
   async getGenesisHash() {
     const genesisHeight = 0;
-    const node = this.isEmptyMasternodeList() ? sample(this.seeds) : sample(this.masternodeList);
-    const ipAddress = node.service.split(':')[0];
-    return RPCClient.request({
-      host: ipAddress,
-      port: this.DAPIPort,
-    }, 'getBlockHash', { height: genesisHeight });
+
+    return this.jsonRpcTransport.makeRequest(
+      'getBlockHash',
+      { height: genesisHeight },
+    );
   }
 
   /**
@@ -161,7 +147,9 @@ class MasternodeListProvider {
     if (!validMasternodesList.length) {
       throw new Error('No MNs in list. Can\'t connect to the network.');
     }
-    this.masternodeList = validMasternodesList;
+
+    this.jsonRpcTransport.mnDiscovery.setMNList(validMasternodesList);
+
     this.baseBlockHash = diff.blockHash;
     this.lastUpdateDate = Date.now();
   }
@@ -172,23 +160,26 @@ class MasternodeListProvider {
    * @returns {Promise<SimplifiedMNListDiff>}
    */
   async getSimplifiedMNListDiff() {
-    const node = this.isEmptyMasternodeList() ? sample(this.seeds) : sample(this.masternodeList);
     const { baseBlockHash } = this;
-    const ipAddress = node.service.split(':')[0];
-    const blockHash = await RPCClient.request({
-      host: ipAddress,
-      port: this.DAPIPort,
-    }, 'getBestBlockHash', {});
+
+    const blockHash = await this.jsonRpcTransport.makeRequest(
+      'getBestBlockHash',
+      {},
+    );
+
     if (!blockHash) {
-      throw new Error(`Failed to get best block hash for getSimplifiedMNListDiff from node ${ipAddress}`);
+      throw new Error('Failed to get best block hash for getSimplifiedMNListDiff');
     }
-    const diff = await RPCClient.request({
-      host: ipAddress,
-      port: this.DAPIPort,
-    }, 'getMnListDiff', { baseBlockHash, blockHash });
+
+    const diff = await this.jsonRpcTransport.makeRequest(
+      'getMnListDiff',
+      { baseBlockHash, blockHash },
+    );
+
     if (!diff) {
-      throw new Error(`Failed to get mn diff from node ${ipAddress}`);
+      throw new Error('Failed to get mn diff');
     }
+
     return diff;
   }
 
@@ -209,7 +200,7 @@ class MasternodeListProvider {
     if (this.needsUpdate()) {
       await this.updateMNList();
     }
-    return this.masternodeList;
+    return this.jsonRpcTransport.mnDiscovery.getMNList();
   }
 }
 

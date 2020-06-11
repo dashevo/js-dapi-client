@@ -1,3 +1,12 @@
+## [0.13.2](https://github.com/dashevo/dapi-client/compare/v0.13.1...v0.13.2) (2020-06-11)
+
+
+### Bug Fixes
+
+* retries don't work for MN discovery ([#157](https://github.com/dashevo/dapi-client/issues/157))
+
+
+
 ## [0.13.1](https://github.com/dashevo/dapi-client/compare/v0.13.0...v0.13.1) (2020-06-11)
 
 

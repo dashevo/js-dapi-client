@@ -1,3 +1,12 @@
+## [0.13.1](https://github.com/dashevo/dapi-client/compare/v0.13.0...v0.13.1) (2020-06-11)
+
+
+### Bug Fixes
+
+* JSON RPC doesn't retry on `ETIMEDOUT ([#155](https://github.com/dashevo/dapi-client/issues/155))
+
+
+
 # [0.13.0](https://github.com/dashevo/dapi-client/compare/v0.12.0...v0.13.0) (2020-06-08)
 
 

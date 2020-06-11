@@ -31,7 +31,7 @@ const masternodesThatReturnNull = {
   "merkleRootMNList": "b6eca6fff6ba9d91be84a035b86c48977da58e34f0d43548563bf6a5ea8e133d"
 };
 
-describe('MNListProvider', async () => {
+describe.skip('MNListProvider', async () => {
 
   describe('.getMnListDiff()', async () => {
 

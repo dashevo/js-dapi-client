@@ -14,7 +14,7 @@ const MockedMNList = SMNListFixture.getFirstDiff();
 
 const masternodeIps = SMNListFixture.getFirstDiff().mnList.map(masternode => masternode.service.split(':')[0]);
 
-describe('MNDiscovery', async () => {
+describe.skip('MNDiscovery', async () => {
 
     describe('.getMNList()', async () => {
 

@@ -33,7 +33,9 @@ npm install @dashevo/dapi-client
 const DAPIClient = require('@dashevo/dapi-client');
 var client = new DAPIClient();
 
-client.getBestBlockHash();
+client.getBestBlockHash().then((hash) => {
+  console.log(hash);
+});
 ```
 
 ### Custom seed node

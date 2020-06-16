@@ -6,6 +6,8 @@
         - [`.getDataContract()`](usage/application/getDataContract.md)
         - [`.getDocuments()`](usage/application/getDocuments.md)
         - [`.getIdentity()`](usage/application/getIdentity.md)
+        - [`.getIdentityByFirstPublicKey()`](usage/application/getIdentityByFirstPublicKey.md)
+        - [`.getIdentityIdByFirstPublicKey()`](usage/application/getIdentityIdByFirstPublicKey.md)
     - Payment
         - [`.getBestBlockHash()`](usage/payment/getBestBlockHash.md)
         - [`.getBlockHash()`](usage/payment/getBlockHash.md)

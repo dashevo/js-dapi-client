@@ -1,3 +1,12 @@
+## [0.13.3](https://github.com/dashevo/dapi-client/compare/v0.13.2...v0.13.3) (2020-06-18)
+
+
+### Bug Fixes
+
+* calling method `getIp` of `undefined` ([#159](https://github.com/dashevo/dapi-client/issues/159))
+
+
+
 ## [0.13.2](https://github.com/dashevo/dapi-client/compare/v0.13.1...v0.13.2) (2020-06-11)
 
 

@@ -1,3 +1,12 @@
+## [0.13.4](https://github.com/dashevo/dapi-client/compare/v0.13.3...v0.13.4) (2020-06-30)
+
+
+### Bug Fixes
+
+* network is not set to `SimplifiedMNListDiff` ([#161](https://github.com/dashevo/dapi-client/issues/161))
+
+
+
 ## [0.13.3](https://github.com/dashevo/dapi-client/compare/v0.13.2...v0.13.3) (2020-06-18)
 
 

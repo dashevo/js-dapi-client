@@ -811,7 +811,9 @@ module.exports = {
           "isValid": true
         }
       ],
-      "merkleRootMNList": "cf31dc397df3c4048d44a49e176afa64b3b3a053597003eb518eeb7252ff6536"
+      "merkleRootMNList": "cf31dc397df3c4048d44a49e176afa64b3b3a053597003eb518eeb7252ff6536",
+      "deletedQuorums": [],
+      "newQuorums": [],
     };
   },
   getSecondDiff: function getSecondDiff() {
@@ -1065,7 +1067,9 @@ module.exports = {
           "isValid": false
         }
       ],
-      "merkleRootMNList": "17dc82a12c7eaeb8d7efcd0b64af236b836bede2095dec5b3072408ed8c301b3"
+      "merkleRootMNList": "17dc82a12c7eaeb8d7efcd0b64af236b836bede2095dec5b3072408ed8c301b3",
+      "deletedQuorums": [],
+      "newQuorums": [],
     };
   },
 };

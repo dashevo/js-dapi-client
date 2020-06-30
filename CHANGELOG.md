@@ -1,3 +1,12 @@
+## [0.13.6](https://github.com/dashevo/dapi-client/compare/v0.13.5...v0.13.6) (2020-06-30)
+
+
+### Features
+
+* update dapi-client to `0.18.11` ([#163](https://github.com/dashevo/dapi-client/issues/163))
+
+
+
 ## [0.13.5](https://github.com/dashevo/dapi-client/compare/v0.13.4...v0.13.5) (2020-06-30)
 
 

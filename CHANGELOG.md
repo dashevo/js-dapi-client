@@ -1,3 +1,12 @@
+## [0.13.5](https://github.com/dashevo/dapi-client/compare/v0.13.4...v0.13.5) (2020-06-30)
+
+
+### Features
+
+* update `dashcore-lib` to `0.18.10` ([#162](https://github.com/dashevo/dapi-client/issues/162))
+
+
+
 ## [0.13.4](https://github.com/dashevo/dapi-client/compare/v0.13.3...v0.13.4) (2020-06-30)
 
 

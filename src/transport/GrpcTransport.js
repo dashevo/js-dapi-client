@@ -79,6 +79,10 @@ class GrpcTransport {
   async getGrpcUrl(excludedIps = []) {
     const randomMasternode = await this.mnDiscovery.getRandomMasternode(excludedIps);
 
+    if (!randomMasternode) {
+      throw new Error('No available masternodes');
+    }
+
     if (typeof process !== 'undefined'
       && process.versions != null
       && process.versions.node != null) {

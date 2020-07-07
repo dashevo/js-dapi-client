@@ -33,7 +33,11 @@ npm install @dashevo/dapi-client
 
 ```javascript
 const DAPIClient = require('@dashevo/dapi-client');
-var client = new DAPIClient();
+const client = new DAPIClient();
+
+const coreStatus = await client.core.getStatus();
+
+console.dir(coreStatus);
 
 client.getBestBlockHash().then((hash) => {
   console.log(hash);
@@ -49,6 +53,10 @@ const DAPIClient = require('@dashevo/dapi-client');
 
 var client = new DAPIClient({
   seeds: [{
+     host: 'seed-1.evonet.networks.dash.org',
+     httpPort: 3000,
+     grpcPort: 3010,
+  }]
     service: 'seed-1.evonet.networks.dash.org',
     port: 3000
   }],

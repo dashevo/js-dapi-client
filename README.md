@@ -56,9 +56,6 @@ var client = new DAPIClient({
      host: 'seed-1.evonet.networks.dash.org',
      httpPort: 3000,
      grpcPort: 3010,
-  }]
-    service: 'seed-1.evonet.networks.dash.org',
-    port: 3000
   }],
 });
 

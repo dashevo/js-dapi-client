@@ -36,7 +36,7 @@ const DAPIClient = require('@dashevo/dapi-client');
 const client = new DAPIClient();
 
 client.core.getStatus().then((coreStatus) => {
-  console.log(coreStatus);
+  console.dir(coreStatus);
 });
 ```
 

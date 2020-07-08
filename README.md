@@ -39,7 +39,7 @@ const coreStatus = await client.core.getStatus();
 
 console.dir(coreStatus);
 
-client.getBestBlockHash().then((hash) => {
+client.core.getBestBlockHash().then((hash) => {
   console.log(hash);
 });
 ```
@@ -59,7 +59,7 @@ var client = new DAPIClient({
   }],
 });
 
-client.getBestBlockHash().then((r) => {
+client.core.getBestBlockHash().then((r) => {
   console.log(r);
 });
 

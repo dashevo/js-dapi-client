@@ -85,6 +85,24 @@ client.core.getBestBlockHash().then((r) => {
 });
 ```
 
+### Command specific options
+
+DAPI Client options can be passed directly to any command to override any predefined client options and modify the client's behavior for that specific call.
+
+```javascript
+const DAPIClient = require('@dashevo/dapi-client');
+
+// Set options to direct the request to a specific address and disable retries
+const options = {
+  addresses: ['127.0.0.1'],
+  retries: 0,
+};
+
+client.core.getBestBlockHash(options).then((r) => {
+  console.log(r);
+});
+```
+
 ## Documentation
 
 More extensive documentation available at https://dashevo.github.io/dapi-client/.

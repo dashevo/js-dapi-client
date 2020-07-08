@@ -35,12 +35,8 @@ npm install @dashevo/dapi-client
 const DAPIClient = require('@dashevo/dapi-client');
 const client = new DAPIClient();
 
-const coreStatus = await client.core.getStatus();
-
-console.dir(coreStatus);
-
-client.core.getBestBlockHash().then((hash) => {
-  console.log(hash);
+client.core.getStatus().then((coreStatus) => {
+  console.log(coreStatus);
 });
 ```
 

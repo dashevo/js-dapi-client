@@ -62,10 +62,28 @@ var client = new DAPIClient({
 client.core.getBestBlockHash().then((r) => {
   console.log(r);
 });
-
 ```
 
 **Note**: The seed node shown above (`seed-1.evonet.networks.dash.org`) is for the Dash Evonet testing network.
+
+### Custom addresses
+
+Custom addresses may be directly specified in cases where it is beneficial to know exactly what node(s) are being accessed (e.g. debugging, local development, etc.).
+
+```javascript
+const DAPIClient = require('@dashevo/dapi-client');
+
+var client = new DAPIClient({
+  addresses: [
+    '127.0.0.1',
+    '127.0.0.2'
+  ],
+});
+
+client.core.getBestBlockHash().then((r) => {
+  console.log(r);
+});
+```
 
 ## Documentation
 

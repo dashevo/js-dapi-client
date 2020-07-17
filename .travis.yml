@@ -24,8 +24,7 @@ addons:
       - jq
 
 env:
-  - MOZ_HEADLESS=1
-  - DOCKER_COMPOSE_VERSION=1.25.5
+  - MOZ_HEADLESS=1 DOCKER_COMPOSE_VERSION=1.25.5
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose

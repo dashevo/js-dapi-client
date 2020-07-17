@@ -70,9 +70,9 @@ Custom addresses may be directly specified in cases where it is beneficial to kn
 const DAPIClient = require('@dashevo/dapi-client');
 
 var client = new DAPIClient({
-  addresses: [
+  dapiAddresses: [
     '127.0.0.1:3000:3010',
-    '127.0.0.2:3000:3010'
+    '127.0.0.2:3000:3010',
   ],
 });
 
@@ -90,7 +90,7 @@ const DAPIClient = require('@dashevo/dapi-client');
 
 // Set options to direct the request to a specific address and disable retries
 const options = {
-  addresses: ['127.0.0.1'],
+  dapiAddresses: ['127.0.0.1'],
   retries: 0,
 };
 

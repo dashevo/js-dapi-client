@@ -1,3 +1,42 @@
+# [0.14.0](https://github.com/dashevo/dapi-client/compare/v0.14.0-dev.8...v0.14.0) (2020-07-23)
+
+
+### Bug Fixes
+
+* cannot read property 'getHttpPort' of undefined ([#173](https://github.com/dashevo/dapi-client/issues/173))
+* internal error when submitting `fromBlockHeight` as 0 to `subscribeToTransactionsWithProofs` ([#174](https://github.com/dashevo/dapi-client/issues/174))
+* ambiguity in `addresses` option ([#170](https://github.com/dashevo/dapi-client/issues/170))
+* JSON RPC does not retry on `ETIMEDOUT` ([#156](https://github.com/dashevo/dapi-client/issues/156))
+* 2 seconds timeout not enough for some requests ([#151](https://github.com/dashevo/dapi-client/issues/151))
+* construct DAPIClient with network option didn't work properly ([#150](https://github.com/dashevo/dapi-client/issues/150))
+* global default timeout applies for streams ([#152](https://github.com/dashevo/dapi-client/issues/152))
+
+
+### Features
+
+* add ports to string representation of DAPIAddress ([#171](https://github.com/dashevo/dapi-client/issues/171)) ([1f4ffb7](https://github.com/dashevo/dapi-client/commit/1f4ffb7ed2cd8079eccf938ede2d43f37a5f80d3))
+* allow to specify network with other connection options ([#160](https://github.com/dashevo/dapi-client/issues/160)) ([cfbc5cd](https://github.com/dashevo/dapi-client/commit/cfbc5cd649358420df99f76f1ca84b8c7ae826a4))
+* update DAPI gRPC to 0.14.0-dev.1 ([#149](https://github.com/dashevo/dapi-client/issues/149)) ([4598def](https://github.com/dashevo/dapi-client/commit/4598def13dbdba9c9c1392c65e2c97ceb322c34c))
+* timeout options for gRPC requests and simplified URL for gRPC client ([#146](https://github.com/dashevo/dapi-client/issues/146)) ([35685b9](https://github.com/dashevo/dapi-client/commit/35685b98fa05fc4436630f165113419b3f48833f))
+
+
+### Documentation
+
+* readme standard updates ([#167](https://github.com/dashevo/dapi-client/issues/147))
+
+
+### Code Refactoring
+
+* rewrite DAPI Client from scratch ([#140](https://github.com/dashevo/dapi-client/issues/140))
+
+
+### BREAKING CHANGES
+
+* DAPI Client options [are changed](https://github.com/dashevo/dapi-client/blob/1ec21652f1615ba95ea537c38632692f81deefa3/lib/DAPIClient.js#L42-L51)
+* Core and Platform methods moved to specific namespaces (ie. `client.platform.getIdentity()`, `client.core.getStatus()`)
+
+
+
 # [0.13.0](https://github.com/dashevo/dapi-client/compare/v0.12.0...v0.13.0) (2020-06-08)
 
 

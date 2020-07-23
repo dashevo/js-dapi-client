@@ -1,8 +1,9 @@
 # DAPI Client
 
+[![NPM Version](https://img.shields.io/npm/v/@dashevo/dapi-client)](https://www.npmjs.com/package/@dashevo/dapi-client)
 [![Build Status](https://travis-ci.com/dashevo/dapi-client.svg?branch=master)](https://travis-ci.com/dashevo/dapi-client)
-[![GitHub Current Tag](https://img.shields.io/github/tag-date/dashevo/dapi-client.svg)](https://github.com/dashevo/dapi-client/tags)
-[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
+[![Release Date](https://img.shields.io/github/release-date/dashevo/dapi-client)](https://github.com/dashevo/dapi-client/releases/latest)
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen)](https://github.com/RichardLitt/standard-readme)
 
 Client library used to access Dash DAPI endpoints
 
@@ -32,10 +33,10 @@ npm install @dashevo/dapi-client
 
 ```javascript
 const DAPIClient = require('@dashevo/dapi-client');
-var client = new DAPIClient();
+const client = new DAPIClient();
 
-client.getBestBlockHash().then((hash) => {
-  console.log(hash);
+client.core.getStatus().then((coreStatus) => {
+  console.dir(coreStatus);
 });
 ```
 
@@ -48,18 +49,55 @@ const DAPIClient = require('@dashevo/dapi-client');
 
 var client = new DAPIClient({
   seeds: [{
-    service: 'seed-1.evonet.networks.dash.org',
-    port: 3000
+     host: 'seed-1.evonet.networks.dash.org',
+     httpPort: 3000,
+     grpcPort: 3010,
   }],
 });
 
-client.getBestBlockHash().then((r) => {
+client.core.getBestBlockHash().then((r) => {
   console.log(r);
 });
-
 ```
 
 **Note**: The seed node shown above (`seed-1.evonet.networks.dash.org`) is for the Dash Evonet testing network.
+
+### Custom addresses
+
+Custom addresses may be directly specified in cases where it is beneficial to know exactly what node(s) are being accessed (e.g. debugging, local development, etc.).
+
+```javascript
+const DAPIClient = require('@dashevo/dapi-client');
+
+var client = new DAPIClient({
+  dapiAddresses: [
+    '127.0.0.1:3000:3010',
+    '127.0.0.2:3000:3010',
+  ],
+});
+
+client.core.getBestBlockHash().then((r) => {
+  console.log(r);
+});
+```
+
+### Command specific options
+
+DAPI Client options can be passed directly to any command to override any predefined client options and modify the client's behavior for that specific call.
+
+```javascript
+const DAPIClient = require('@dashevo/dapi-client');
+
+// Set options to direct the request to a specific address and disable retries
+const options = {
+  dapiAddresses: ['127.0.0.1'],
+  retries: 0,
+};
+
+client.core.getBestBlockHash(options).then((r) => {
+  console.log(r);
+});
+```
 
 ## Documentation
 

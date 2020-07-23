@@ -1,9 +1,13 @@
 # [0.14.0](https://github.com/dashevo/dapi-client/compare/v0.13.6...v0.14.0) (2020-07-23)
 
 We completely rewrote DAPI Client to improve code quality, usability, and testability.
+
 In the new version, you can specify not just seeds to connect but also specific DAPI addresses
 and even inject own logic to obtain/select nodes. API methods accept the same options
 as the `DAPIClient` constructor so you can specify different behavior for each API call.
+
+Previously, faulty nodes were excluded for a specific API call. Now they are banning
+for a period of time, and this time increments exponentially in the event of repeated faults.
 
 
 ### Bug Fixes

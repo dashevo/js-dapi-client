@@ -1,4 +1,4 @@
-# [0.14.0](https://github.com/dashevo/dapi-client/compare/v0.14.0-dev.8...v0.14.0) (2020-07-23)
+# [0.14.0](https://github.com/dashevo/dapi-client/compare/v0.13.0...v0.14.0) (2020-07-23)
 
 We completely rewrote DAPI Client to improve code quality, usability, and testability.
 In the new version, you can specify not just seeds to connect but also specific DAPI addresses

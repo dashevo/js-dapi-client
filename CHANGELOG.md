@@ -1,4 +1,4 @@
-# [0.14.0](https://github.com/dashevo/dapi-client/compare/v0.13.0...v0.14.0) (2020-07-23)
+# [0.14.0](https://github.com/dashevo/dapi-client/compare/v0.13.6...v0.14.0) (2020-07-23)
 
 We completely rewrote DAPI Client to improve code quality, usability, and testability.
 In the new version, you can specify not just seeds to connect but also specific DAPI addresses
@@ -39,6 +39,60 @@ as the `DAPIClient` constructor so you can specify different behavior for each A
 
 * DAPI Client options [are changed](https://github.com/dashevo/dapi-client/blob/1ec21652f1615ba95ea537c38632692f81deefa3/lib/DAPIClient.js#L42-L51)
 * Core and Platform methods moved to specific namespaces (ie. `client.platform.getIdentity()`, `client.core.getStatus()`)
+
+
+
+## [0.13.6](https://github.com/dashevo/dapi-client/compare/v0.13.5...v0.13.6) (2020-06-30)
+
+
+### Features
+
+* update dapi-client to `0.18.11` ([#163](https://github.com/dashevo/dapi-client/issues/163))
+
+
+
+## [0.13.5](https://github.com/dashevo/dapi-client/compare/v0.13.4...v0.13.5) (2020-06-30)
+
+
+### Features
+
+* update `dashcore-lib` to `0.18.10` ([#162](https://github.com/dashevo/dapi-client/issues/162))
+
+
+
+## [0.13.4](https://github.com/dashevo/dapi-client/compare/v0.13.3...v0.13.4) (2020-06-30)
+
+
+### Bug Fixes
+
+* network is not set to `SimplifiedMNListDiff` ([#161](https://github.com/dashevo/dapi-client/issues/161))
+
+
+
+## [0.13.3](https://github.com/dashevo/dapi-client/compare/v0.13.2...v0.13.3) (2020-06-18)
+
+
+### Bug Fixes
+
+* calling method `getIp` of `undefined` ([#159](https://github.com/dashevo/dapi-client/issues/159))
+
+
+
+## [0.13.2](https://github.com/dashevo/dapi-client/compare/v0.13.1...v0.13.2) (2020-06-11)
+
+
+### Bug Fixes
+
+* retries don't work for MN discovery ([#157](https://github.com/dashevo/dapi-client/issues/157))
+
+
+
+## [0.13.1](https://github.com/dashevo/dapi-client/compare/v0.13.0...v0.13.1) (2020-06-11)
+
+
+### Bug Fixes
+
+* JSON RPC doesn't retry on `ETIMEDOUT ([#155](https://github.com/dashevo/dapi-client/issues/155))
 
 
 

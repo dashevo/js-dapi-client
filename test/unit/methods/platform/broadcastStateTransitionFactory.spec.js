@@ -1,7 +1,9 @@
 const {
-  ApplyStateTransitionRequest,
-  ApplyStateTransitionResponse,
-  PlatformPromiseClient,
+  v0: {
+    BroadcastStateTransitionRequest,
+    BroadcastStateTransitionResponse,
+    PlatformPromiseClient,
+  },
 } = require('@dashevo/dapi-grpc');
 
 const DashPlatformProtocol = require('@dashevo/dpp');
@@ -18,7 +20,7 @@ describe('broadcastStateTransitionFactory', () => {
   let response;
 
   beforeEach(function beforeEach() {
-    response = new ApplyStateTransitionResponse();
+    response = new BroadcastStateTransitionResponse();
 
     grpcTransportMock = {
       request: this.sinon.stub().resolves(response),
@@ -38,12 +40,12 @@ describe('broadcastStateTransitionFactory', () => {
   it('should broadcast state transition', async () => {
     const result = await broadcastStateTransition(stateTransitionFixture, options);
 
-    const request = new ApplyStateTransitionRequest();
+    const request = new BroadcastStateTransitionRequest();
     request.setStateTransition(stateTransitionFixture);
 
     expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
       PlatformPromiseClient,
-      'applyStateTransition',
+      'broadcastStateTransition',
       request,
       options,
     );

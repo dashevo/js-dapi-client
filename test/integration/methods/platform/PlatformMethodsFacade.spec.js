@@ -1,11 +1,14 @@
 const {
-  GetDataContractResponse,
-  GetDocumentsResponse,
-  GetIdentityByFirstPublicKeyResponse,
-  GetIdentityResponse,
-  GetIdentityIdByFirstPublicKeyResponse,
-  ApplyStateTransitionResponse,
+  v0: {
+    GetDataContractResponse,
+    GetDocumentsResponse,
+    GetIdentityByFirstPublicKeyResponse,
+    GetIdentityResponse,
+    GetIdentityIdByFirstPublicKeyResponse,
+    BroadcastStateTransitionResponse,
+  },
 } = require('@dashevo/dapi-grpc');
+
 const DashPlatformProtocol = require('@dashevo/dpp');
 
 const getDataContractFixture = require('@dashevo/dpp/lib/test/fixtures/getDataContractFixture');
@@ -26,7 +29,7 @@ describe('PlatformMethodsFacade', () => {
 
   describe('#broadcastStateTransition', () => {
     it('should broadcast state transition', async () => {
-      const response = new ApplyStateTransitionResponse();
+      const response = new BroadcastStateTransitionResponse();
       grpcTransportMock.request.resolves(response);
 
       const dpp = new DashPlatformProtocol();

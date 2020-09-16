@@ -1,21 +1,21 @@
 const {
   v0: {
     PlatformPromiseClient,
-    GetIdentityByFirstPublicKeyRequest,
-    GetIdentityByFirstPublicKeyResponse,
+    GetIdentityIdByFirstPublicKeyRequest,
+    GetIdentityIdByFirstPublicKeyResponse,
   },
 } = require('@dashevo/dapi-grpc');
 
 const getIdentityFixture = require('@dashevo/dpp/lib/test/fixtures/getIdentityFixture');
 const grpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorCodes');
 
-const getIdentityByFirstPublicKeyFactory = require(
-  '../../../../lib/methods/platform/getIdentityByFirstPublicKeyFactory',
+const getIdentityIdByPublicKeyHashFactory = require(
+  '../../../../lib/methods/platform/getIdentityIdByPublicKeyHashFactory',
 );
 
-describe('getIdentityByFirstPublicKeyFactory', () => {
+describe('getIdentityIdByPublicKeyHashFactory', () => {
   let grpcTransportMock;
-  let getIdentityByFirstPublicKey;
+  let getIdentityIdByPublicKeyHash;
   let options;
   let response;
   let identityFixture;
@@ -24,8 +24,8 @@ describe('getIdentityByFirstPublicKeyFactory', () => {
   beforeEach(function beforeEach() {
     identityFixture = getIdentityFixture();
 
-    response = new GetIdentityByFirstPublicKeyResponse();
-    response.setIdentity(identityFixture.serialize());
+    response = new GetIdentityIdByFirstPublicKeyResponse();
+    response.setId(identityFixture.getId());
 
     publicKeyHash = '556c2910d46fda2b327ef9d9bda850cc84d30db0';
 
@@ -37,22 +37,22 @@ describe('getIdentityByFirstPublicKeyFactory', () => {
       timeout: 1000,
     };
 
-    getIdentityByFirstPublicKey = getIdentityByFirstPublicKeyFactory(grpcTransportMock);
+    getIdentityIdByPublicKeyHash = getIdentityIdByPublicKeyHashFactory(grpcTransportMock);
   });
 
   it('should return identity', async () => {
-    const result = await getIdentityByFirstPublicKey(publicKeyHash, options);
+    const result = await getIdentityIdByPublicKeyHash(publicKeyHash, options);
 
-    const request = new GetIdentityByFirstPublicKeyRequest();
+    const request = new GetIdentityIdByFirstPublicKeyRequest();
     request.setPublicKeyHash(Buffer.from(publicKeyHash, 'hex'));
 
     expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
       PlatformPromiseClient,
-      'getIdentityByFirstPublicKey',
+      'getIdentityIdByPublicKeyHash',
       request,
       options,
     );
-    expect(result).to.deep.equal(identityFixture.serialize());
+    expect(result).to.deep.equal(identityFixture.getId());
   });
 
   it('should return null if identity not found', async () => {
@@ -61,14 +61,14 @@ describe('getIdentityByFirstPublicKeyFactory', () => {
 
     grpcTransportMock.request.throws(error);
 
-    const result = await getIdentityByFirstPublicKey(publicKeyHash, options);
+    const result = await getIdentityIdByPublicKeyHash(publicKeyHash, options);
 
-    const request = new GetIdentityByFirstPublicKeyRequest();
+    const request = new GetIdentityIdByFirstPublicKeyRequest();
     request.setPublicKeyHash(Buffer.from(publicKeyHash, 'hex'));
 
     expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
       PlatformPromiseClient,
-      'getIdentityByFirstPublicKey',
+      'getIdentityIdByPublicKeyHash',
       request,
       options,
     );
@@ -80,18 +80,18 @@ describe('getIdentityByFirstPublicKeyFactory', () => {
 
     grpcTransportMock.request.throws(error);
 
-    const request = new GetIdentityByFirstPublicKeyRequest();
+    const request = new GetIdentityIdByFirstPublicKeyRequest();
     request.setPublicKeyHash(Buffer.from(publicKeyHash, 'hex'));
 
     try {
-      await getIdentityByFirstPublicKey(publicKeyHash, options);
+      await getIdentityIdByPublicKeyHash(publicKeyHash, options);
 
       expect.fail('should throw unknown error');
     } catch (e) {
       expect(e).to.deep.equal(error);
       expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
         PlatformPromiseClient,
-        'getIdentityByFirstPublicKey',
+        'getIdentityIdByPublicKeyHash',
         request,
         options,
       );

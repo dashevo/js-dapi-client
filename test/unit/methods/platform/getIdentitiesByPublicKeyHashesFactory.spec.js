@@ -3,7 +3,6 @@ const {
     PlatformPromiseClient,
     GetIdentitiesByPublicKeyHashesRequest,
     GetIdentitiesByPublicKeyHashesResponse,
-    PublicKeyHashIdentityPair,
   },
 } = require('@dashevo/dapi-grpc');
 
@@ -20,23 +19,16 @@ describe('getIdentitiesByPublicKeyHashesFactory', () => {
   let response;
   let identityFixture;
   let publicKeyHash;
-  let publicKeyHashIdentityPair;
 
   beforeEach(function beforeEach() {
     identityFixture = getIdentityFixture();
 
-    publicKeyHashIdentityPair = new PublicKeyHashIdentityPair();
-    publicKeyHashIdentityPair.setPublicKeyHash(
-      identityFixture.getPublicKeyById(0).hash(),
-    );
-    publicKeyHashIdentityPair.setIdentity(identityFixture.serialize());
-
     response = new GetIdentitiesByPublicKeyHashesResponse();
-    response.setIdentitiesByPublicKeyHashes(
-      [publicKeyHashIdentityPair],
+    response.setIdentitiesList(
+      [identityFixture.serialize()],
     );
 
-    publicKeyHash = identityFixture.getPublicKeyById(0).hash();
+    publicKeyHash = identityFixture.getPublicKeyById(1).hash();
 
     grpcTransportMock = {
       request: this.sinon.stub().resolves(response),
@@ -53,7 +45,7 @@ describe('getIdentitiesByPublicKeyHashesFactory', () => {
     const result = await getIdentitiesByPublicKeyHashes([publicKeyHash], options);
 
     const request = new GetIdentitiesByPublicKeyHashesRequest();
-    request.setPublicKeyHashes([publicKeyHash]);
+    request.setPublicKeyHashesList([publicKeyHash]);
 
     expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
       PlatformPromiseClient,
@@ -61,7 +53,7 @@ describe('getIdentitiesByPublicKeyHashesFactory', () => {
       request,
       options,
     );
-    expect(result).to.deep.equal(identityFixture.serialize());
+    expect(result).to.have.deep.members([identityFixture.serialize()]);
   });
 
   it('should throw unknown error', async () => {
@@ -70,7 +62,7 @@ describe('getIdentitiesByPublicKeyHashesFactory', () => {
     grpcTransportMock.request.throws(error);
 
     const request = new GetIdentitiesByPublicKeyHashesRequest();
-    request.setPublicKeyHashes([publicKeyHash]);
+    request.setPublicKeyHashesList([publicKeyHash]);
 
     try {
       await getIdentitiesByPublicKeyHashes(publicKeyHash, options);

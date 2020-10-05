@@ -1,9 +1,10 @@
+const bs58 = require('bs58');
+
 const {
   v0: {
     PlatformPromiseClient,
     GetIdentityIdsByPublicKeyHashesRequest,
     GetIdentityIdsByPublicKeyHashesResponse,
-    PublicKeyHashIdentityIdPair,
   },
 } = require('@dashevo/dapi-grpc');
 
@@ -20,25 +21,16 @@ describe('getIdentityIdsByPublicKeyHashesFactory', () => {
   let response;
   let identityFixture;
   let publicKeyHash;
-  let publicKeyHashIdentityIdPair;
 
   beforeEach(function beforeEach() {
     identityFixture = getIdentityFixture();
 
-    publicKeyHashIdentityIdPair = new PublicKeyHashIdentityIdPair();
-    publicKeyHashIdentityIdPair.setPublicKeyHash(
-      identityFixture.getPublicKeyById(0).hash(),
-    );
-    publicKeyHashIdentityIdPair.setIdentityId(
-      Buffer.from(identityFixture.getId(), 'hex'),
-    );
-
     response = new GetIdentityIdsByPublicKeyHashesResponse();
-    response.setIdentityIdsByPublicKeyHashes(
-      [publicKeyHashIdentityIdPair],
+    response.setIdentityIdsList(
+      [bs58.decode(identityFixture.getId())],
     );
 
-    publicKeyHash = identityFixture.getPublicKeyById(0).hash();
+    publicKeyHash = identityFixture.getPublicKeyById(1).hash();
 
     grpcTransportMock = {
       request: this.sinon.stub().resolves(response),
@@ -55,7 +47,7 @@ describe('getIdentityIdsByPublicKeyHashesFactory', () => {
     const result = await getIdentityIdsByPublicKeyHashes([publicKeyHash], options);
 
     const request = new GetIdentityIdsByPublicKeyHashesRequest();
-    request.setPublicKeyHashes([publicKeyHash]);
+    request.setPublicKeyHashesList([publicKeyHash]);
 
     expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
       PlatformPromiseClient,
@@ -63,7 +55,9 @@ describe('getIdentityIdsByPublicKeyHashesFactory', () => {
       request,
       options,
     );
-    expect(result).to.deep.equal(identityFixture.serialize());
+    expect(result).to.have.deep.members([
+      bs58.decode(identityFixture.getId()),
+    ]);
   });
 
   it('should throw unknown error', async () => {
@@ -72,7 +66,7 @@ describe('getIdentityIdsByPublicKeyHashesFactory', () => {
     grpcTransportMock.request.throws(error);
 
     const request = new GetIdentityIdsByPublicKeyHashesRequest();
-    request.setPublicKeyHashes([publicKeyHash]);
+    request.setPublicKeyHashesList([publicKeyHash]);
 
     try {
       await getIdentityIdsByPublicKeyHashes(publicKeyHash, options);

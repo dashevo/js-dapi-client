@@ -65,7 +65,7 @@ describe('getIdentitiesByPublicKeyHashesFactory', () => {
     request.setPublicKeyHashesList([publicKeyHash]);
 
     try {
-      await getIdentitiesByPublicKeyHashes(publicKeyHash, options);
+      await getIdentitiesByPublicKeyHashes([publicKeyHash], options);
 
       expect.fail('should throw unknown error');
     } catch (e) {

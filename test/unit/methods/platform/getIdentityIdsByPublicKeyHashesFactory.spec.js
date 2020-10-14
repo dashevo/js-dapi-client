@@ -1,5 +1,3 @@
-const bs58 = require('bs58');
-
 const {
   v0: {
     PlatformPromiseClient,
@@ -27,7 +25,7 @@ describe('getIdentityIdsByPublicKeyHashesFactory', () => {
 
     response = new GetIdentityIdsByPublicKeyHashesResponse();
     response.setIdentityIdsList(
-      [bs58.decode(identityFixture.getId())],
+      [identityFixture.getId()],
     );
 
     publicKeyHash = identityFixture.getPublicKeyById(1).hash();
@@ -56,7 +54,7 @@ describe('getIdentityIdsByPublicKeyHashesFactory', () => {
       options,
     );
     expect(result).to.have.deep.members([
-      bs58.decode(identityFixture.getId()),
+      identityFixture.getId(),
     ]);
   });
 

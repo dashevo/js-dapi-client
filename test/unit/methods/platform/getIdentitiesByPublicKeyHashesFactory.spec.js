@@ -25,7 +25,7 @@ describe('getIdentitiesByPublicKeyHashesFactory', () => {
 
     response = new GetIdentitiesByPublicKeyHashesResponse();
     response.setIdentitiesList(
-      [identityFixture.serialize()],
+      [identityFixture.toBuffer()],
     );
 
     publicKeyHash = identityFixture.getPublicKeyById(1).hash();
@@ -53,7 +53,7 @@ describe('getIdentitiesByPublicKeyHashesFactory', () => {
       request,
       options,
     );
-    expect(result).to.have.deep.members([identityFixture.serialize()]);
+    expect(result).to.have.deep.members([identityFixture.toBuffer()]);
   });
 
   it('should throw unknown error', async () => {

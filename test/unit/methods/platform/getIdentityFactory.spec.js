@@ -24,7 +24,7 @@ describe('getIdentityFactory', () => {
     identityId = identityFixture.getId();
 
     response = new GetIdentityResponse();
-    response.setIdentity(identityFixture.serialize());
+    response.setIdentity(identityFixture.toBuffer());
 
     grpcTransportMock = {
       request: this.sinon.stub().resolves(response),
@@ -49,7 +49,7 @@ describe('getIdentityFactory', () => {
       request,
       options,
     );
-    expect(result).to.deep.equal(identityFixture.serialize());
+    expect(result).to.deep.equal(identityFixture.toBuffer());
   });
 
   it('should return null if identity not found', async () => {

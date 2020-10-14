@@ -22,7 +22,7 @@ describe('getDataContractFactory', () => {
     dataContractFixture = getDataContractFixture();
 
     response = new GetDataContractResponse();
-    response.setDataContract(dataContractFixture.serialize());
+    response.setDataContract(dataContractFixture.toBuffer());
 
     grpcTransportMock = {
       request: this.sinon.stub().resolves(response),
@@ -48,7 +48,7 @@ describe('getDataContractFactory', () => {
       request,
       options,
     );
-    expect(result).to.deep.equal(dataContractFixture.serialize());
+    expect(result).to.deep.equal(dataContractFixture.toBuffer());
   });
 
   it('should return null if data contract not found', async () => {

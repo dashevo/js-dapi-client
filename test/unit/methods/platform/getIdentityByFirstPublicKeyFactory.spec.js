@@ -25,7 +25,7 @@ describe('getIdentityByFirstPublicKeyFactory', () => {
     identityFixture = getIdentityFixture();
 
     response = new GetIdentityByFirstPublicKeyResponse();
-    response.setIdentity(identityFixture.serialize());
+    response.setIdentity(identityFixture.toBuffer());
 
     publicKeyHash = '556c2910d46fda2b327ef9d9bda850cc84d30db0';
 
@@ -52,7 +52,7 @@ describe('getIdentityByFirstPublicKeyFactory', () => {
       request,
       options,
     );
-    expect(result).to.deep.equal(identityFixture.serialize());
+    expect(result).to.deep.equal(identityFixture.toBuffer());
   });
 
   it('should return null if identity not found', async () => {

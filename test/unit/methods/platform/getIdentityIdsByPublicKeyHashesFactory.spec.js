@@ -1,5 +1,3 @@
-const bs58 = require('bs58');
-
 const {
   v0: {
     PlatformPromiseClient,

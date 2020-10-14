@@ -3,7 +3,6 @@ const {
     GetDataContractResponse,
     GetDocumentsResponse,
     GetIdentityResponse,
-    GetIdentityIdByFirstPublicKeyResponse,
     BroadcastStateTransitionResponse,
   },
 } = require('@dashevo/dapi-grpc');

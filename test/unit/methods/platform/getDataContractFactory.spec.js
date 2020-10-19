@@ -42,12 +42,12 @@ describe('getDataContractFactory', () => {
     const request = new GetDataContractRequest();
     request.setId(contractId);
 
-    expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
+    expect(grpcTransportMock.request.getCall(0).args).to.have.deep.members([
       PlatformPromiseClient,
       'getDataContract',
       request,
       options,
-    );
+    ]);
     expect(result).to.deep.equal(dataContractFixture.toBuffer());
   });
 
@@ -64,12 +64,12 @@ describe('getDataContractFactory', () => {
     const request = new GetDataContractRequest();
     request.setId(contractId);
 
-    expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
+    expect(grpcTransportMock.request.getCall(0).args).to.have.deep.members([
       PlatformPromiseClient,
       'getDataContract',
       request,
       options,
-    );
+    ]);
     expect(result).to.equal(null);
   });
 
@@ -80,7 +80,7 @@ describe('getDataContractFactory', () => {
     grpcTransportMock.request.throws(error);
 
     const request = new GetDataContractRequest();
-    request.setId(contractId);
+    request.setId(contractId.toBuffer());
 
     try {
       await getDataContract(contractId, options);

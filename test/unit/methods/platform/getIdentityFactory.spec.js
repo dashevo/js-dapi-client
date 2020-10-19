@@ -41,7 +41,7 @@ describe('getIdentityFactory', () => {
     const result = await getIdentity(identityId, options);
 
     const request = new GetIdentityRequest();
-    request.setId(identityId);
+    request.setId(identityId.toBuffer());
 
     expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
       PlatformPromiseClient,
@@ -61,7 +61,7 @@ describe('getIdentityFactory', () => {
     const result = await getIdentity(identityId, options);
 
     const request = new GetIdentityRequest();
-    request.setId(identityId);
+    request.setId(identityId.toBuffer());
 
     expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
       PlatformPromiseClient,
@@ -78,7 +78,7 @@ describe('getIdentityFactory', () => {
     grpcTransportMock.request.throws(error);
 
     const request = new GetIdentityRequest();
-    request.setId(identityId);
+    request.setId(identityId.toBuffer());
 
     try {
       await getIdentity(identityId, options);

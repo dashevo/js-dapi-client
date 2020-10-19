@@ -80,7 +80,7 @@ describe('getDataContractFactory', () => {
     grpcTransportMock.request.throws(error);
 
     const request = new GetDataContractRequest();
-    request.setId(contractId);
+    request.setId(contractId.toBuffer());
 
     try {
       await getDataContract(contractId, options);

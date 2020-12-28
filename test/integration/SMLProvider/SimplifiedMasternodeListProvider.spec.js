@@ -148,7 +148,7 @@ describe('SimplifiedMasternodeListProvider', () => {
       expect(smlProvider.baseBlockHash).to.equal(SimplifiedMasternodeListProvider.NULL_HASH);
 
       await smlProvider.getSimplifiedMNList();
-      await wait(50);
+      await wait(200);
 
       const sml = await smlProvider.getSimplifiedMNList();
 

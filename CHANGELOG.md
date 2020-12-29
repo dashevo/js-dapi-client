@@ -12,6 +12,11 @@
 * SML unhandled error on blockchain reorg ([#215](https://github.com/dashevo/dapi-client/issues/215))
 
 
+### BREAKING CHANGES
+
+* DAPI client is now connecting to a testnet by default
+
+
 
 # [0.16.0](https://github.com/dashevo/dapi-client/compare/v0.15.0...v0.16.0) (2020-10-27)
 

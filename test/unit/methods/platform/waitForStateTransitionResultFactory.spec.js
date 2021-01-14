@@ -7,6 +7,8 @@ const {
     Proof,
   },
 } = require('@dashevo/dapi-grpc');
+const cbor = require('cbor');
+
 const waitForStateTransitionResultFactory = require('../../../../lib/methods/platform/waitForStateTransitionResultFactory');
 
 describe('waitForStateTransitionResultFactory', () => {
@@ -32,13 +34,11 @@ describe('waitForStateTransitionResultFactory', () => {
   });
 
   it('should return response', async () => {
-    response.setStateTransitionHash(hash);
+    options.prove = false;
 
-    const result = await waitForStateTransitionResult(hash, false, options);
+    const result = await waitForStateTransitionResult(hash, options);
 
-    expect(result).to.be.deep.equal({
-      hash,
-    });
+    expect(result).to.be.deep.equal({});
 
     const request = new WaitForStateTransitionResultRequest();
     request.setStateTransitionHash(hash);
@@ -57,13 +57,13 @@ describe('waitForStateTransitionResultFactory', () => {
     proof.setRootTreeProof(Buffer.from('rootTreeProof'));
     proof.setStoreTreeProof(Buffer.from('storeTreeProof'));
 
-    response.setStateTransitionHash(hash);
     response.setProof(proof);
 
-    const result = await waitForStateTransitionResult(hash, true, options);
+    options.prove = true;
+
+    const result = await waitForStateTransitionResult(hash, options);
 
     expect(result).to.be.deep.equal({
-      hash,
       proof: {
         rootTreeProof: Buffer.from('rootTreeProof'),
         storeTreeProof: Buffer.from('storeTreeProof'),
@@ -85,18 +85,18 @@ describe('waitForStateTransitionResultFactory', () => {
   it('should return response with error', async () => {
     const error = new StateTransitionBroadcastError();
     error.setCode(2);
-    error.setLog('Some error');
+    error.setData(cbor.encode('Some error'));
 
-    response.setStateTransitionHash(hash);
     response.setError(error);
 
-    const result = await waitForStateTransitionResult(hash, true, options);
+    options.prove = true;
+
+    const result = await waitForStateTransitionResult(hash, options);
 
     expect(result).to.be.deep.equal({
-      hash,
       error: {
         code: 2,
-        log: 'Some error',
+        data: 'Some error',
       },
     });
 

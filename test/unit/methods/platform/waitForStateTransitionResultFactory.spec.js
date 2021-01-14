@@ -85,7 +85,8 @@ describe('waitForStateTransitionResultFactory', () => {
   it('should return response with error', async () => {
     const error = new StateTransitionBroadcastError();
     error.setCode(2);
-    error.setData(cbor.encode('Some error'));
+    error.setMessage('Some error');
+    error.setData(cbor.encode({ data: 'error data' }));
 
     response.setError(error);
 
@@ -96,7 +97,8 @@ describe('waitForStateTransitionResultFactory', () => {
     expect(result).to.be.deep.equal({
       error: {
         code: 2,
-        data: 'Some error',
+        message: 'Some error',
+        data: { data: 'error data' },
       },
     });
 

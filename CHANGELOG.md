@@ -1,3 +1,12 @@
+## [0.19.1](https://github.com/dashevo/dapi-client/compare/v0.19.0...v0.19.1) (2021-05-04)
+
+
+### Bug Fixes
+
+* `getStatus` reponse was returning buffers as Base64 encoded strings ([#235](https://github.com/dashevo/dapi-client/issues/235))
+
+
+
 # [0.19.0](https://github.com/dashevo/dapi-client/compare/v0.18.0...v0.19.0) (2021-05-03)
 
 

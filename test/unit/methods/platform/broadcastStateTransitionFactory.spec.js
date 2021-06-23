@@ -19,7 +19,7 @@ describe('broadcastStateTransitionFactory', () => {
   let stateTransitionFixture;
   let response;
 
-  beforeEach(function beforeEach() {
+  beforeEach(async function beforeEach() {
     response = new BroadcastStateTransitionResponse();
 
     grpcTransportMock = {
@@ -28,6 +28,8 @@ describe('broadcastStateTransitionFactory', () => {
 
     const dataContractFixture = getDataContractFixture();
     const dpp = new DashPlatformProtocol();
+    await dpp.initialize();
+
     stateTransitionFixture = dpp.dataContract.createStateTransition(dataContractFixture);
 
     options = {

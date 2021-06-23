@@ -32,6 +32,7 @@ describe('PlatformMethodsFacade', () => {
       grpcTransportMock.request.resolves(response);
 
       const dpp = new DashPlatformProtocol();
+      await dpp.initialize();
       const stateTransition = dpp.dataContract.createStateTransition(getDataContractFixture());
 
       await platformMethods.broadcastStateTransition(stateTransition);

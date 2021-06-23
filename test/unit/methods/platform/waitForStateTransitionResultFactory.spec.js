@@ -5,11 +5,13 @@ const {
     StateTransitionBroadcastError,
     WaitForStateTransitionResultResponse,
     Proof,
+    ResponseMetadata,
   },
 } = require('@dashevo/dapi-grpc');
 const cbor = require('cbor');
 
 const waitForStateTransitionResultFactory = require('../../../../lib/methods/platform/waitForStateTransitionResult/waitForStateTransitionResultFactory');
+const getMetadataFixture = require('../../../../lib/test/fixtures/getMetadataFixture');
 
 describe('waitForStateTransitionResultFactory', () => {
   let grpcTransportMock;
@@ -17,10 +19,18 @@ describe('waitForStateTransitionResultFactory', () => {
   let response;
   let hash;
   let waitForStateTransitionResult;
+  let metadataFixture;
 
   beforeEach(function beforeEach() {
     hash = Buffer.from('hash');
+    metadataFixture = getMetadataFixture();
+
+    const metadata = new ResponseMetadata();
+    metadata.setHeight(metadataFixture.height);
+    metadata.setCoreChainLockedHeight(metadataFixture.coreChainLockedHeight);
+
     response = new WaitForStateTransitionResultResponse();
+    response.setMetadata(metadata);
 
     grpcTransportMock = {
       request: this.sinon.stub().resolves(response),
@@ -40,7 +50,9 @@ describe('waitForStateTransitionResultFactory', () => {
 
     const result = await waitForStateTransitionResult(hash, options);
 
-    expect(result).to.be.deep.equal({});
+    expect(result.getMetadata()).to.deep.equal(metadataFixture);
+    expect(result.getError()).to.equal(undefined);
+    expect(result.getProof()).to.equal(undefined);
 
     const request = new WaitForStateTransitionResultRequest();
     request.setStateTransitionHash(hash);
@@ -58,6 +70,8 @@ describe('waitForStateTransitionResultFactory', () => {
     const proof = new Proof();
     proof.setRootTreeProof(Buffer.from('rootTreeProof'));
     proof.setStoreTreeProof(Buffer.from('storeTreeProof'));
+    proof.setSignatureLlmqHash(Buffer.from('signatureLlmqHash'));
+    proof.setSignature(Buffer.from('signature'));
 
     response.setProof(proof);
 
@@ -65,11 +79,13 @@ describe('waitForStateTransitionResultFactory', () => {
 
     const result = await waitForStateTransitionResult(hash, options);
 
-    expect(result).to.be.deep.equal({
-      proof: {
-        rootTreeProof: Buffer.from('rootTreeProof'),
-        storeTreeProof: Buffer.from('storeTreeProof'),
-      },
+    expect(result.getMetadata()).to.deep.equal(metadataFixture);
+    expect(result.getError()).to.equal(undefined);
+    expect(result.getProof()).to.be.deep.equal({
+      rootTreeProof: Buffer.from('rootTreeProof'),
+      storeTreeProof: Buffer.from('storeTreeProof'),
+      signatureLLMQHash: Buffer.from('signatureLlmqHash'),
+      signature: Buffer.from('signature'),
     });
 
     const request = new WaitForStateTransitionResultRequest();
@@ -96,12 +112,12 @@ describe('waitForStateTransitionResultFactory', () => {
 
     const result = await waitForStateTransitionResult(hash, options);
 
-    expect(result).to.be.deep.equal({
-      error: {
-        code: 2,
-        message: 'Some error',
-        data: { data: 'error data' },
-      },
+    expect(result.getMetadata()).to.deep.equal(metadataFixture);
+    expect(result.getProof()).to.equal(undefined);
+    expect(result.getError()).to.be.deep.equal({
+      code: 2,
+      message: 'Some error',
+      data: { data: 'error data' },
     });
 
     const request = new WaitForStateTransitionResultRequest();

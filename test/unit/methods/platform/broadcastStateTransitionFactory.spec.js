@@ -10,7 +10,7 @@ const DashPlatformProtocol = require('@dashevo/dpp');
 
 const getDataContractFixture = require('@dashevo/dpp/lib/test/fixtures/getDataContractFixture');
 
-const broadcastStateTransitionFactory = require('../../../../lib/methods/platform/broadcastStateTransitionFactory');
+const broadcastStateTransitionFactory = require('../../../../lib/methods/platform/broadcastStateTransition/broadcastStateTransitionFactory');
 
 describe('broadcastStateTransitionFactory', () => {
   let grpcTransportMock;

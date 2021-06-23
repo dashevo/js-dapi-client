@@ -9,7 +9,7 @@ const {
 } = require('@dashevo/dapi-grpc');
 const cbor = require('cbor');
 
-const waitForStateTransitionResultFactory = require('../../../../lib/methods/platform/waitForStateTransitionResultFactory');
+const waitForStateTransitionResultFactory = require('../../../../lib/methods/platform/waitForStateTransitionResult/waitForStateTransitionResultFactory');
 
 describe('waitForStateTransitionResultFactory', () => {
   let grpcTransportMock;

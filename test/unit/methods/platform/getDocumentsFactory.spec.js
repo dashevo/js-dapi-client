@@ -11,7 +11,7 @@ const {
 
 const getDocumentsFixture = require('@dashevo/dpp/lib/test/fixtures/getDocumentsFixture');
 
-const getDocumentsFactory = require('../../../../lib/methods/platform/getDocumentsFactory');
+const getDocumentsFactory = require('../../../../lib/methods/platform/getDocuments/getDocumentsFactory');
 
 describe('getDocumentsFactory', () => {
   let grpcTransportMock;

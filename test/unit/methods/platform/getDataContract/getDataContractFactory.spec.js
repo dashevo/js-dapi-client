@@ -62,7 +62,9 @@ describe('getDataContractFactory', () => {
     expect(result.getDataContract()).to.deep.equal(dataContractFixture.toBuffer());
     expect(result.getMetadata()).to.deep.equal(metadataFixture);
     expect(result.getMetadata().getHeight()).to.equal(metadataFixture.height);
-    expect(result.getMetadata().getCoreChainLockedHeight()).to.equal(metadataFixture.coreChainLockedHeight);
+    expect(result.getMetadata().getCoreChainLockedHeight()).to.equal(
+      metadataFixture.coreChainLockedHeight,
+    );
   });
 
   it('should return null if data contract not found', async () => {

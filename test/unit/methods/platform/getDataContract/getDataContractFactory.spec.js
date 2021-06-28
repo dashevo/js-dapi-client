@@ -10,8 +10,8 @@ const {
 const getDataContractFixture = require('@dashevo/dpp/lib/test/fixtures/getDataContractFixture');
 const grpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorCodes');
 
-const getDataContractFactory = require('../../../../lib/methods/platform/getDataContract/getDataContractFactory');
-const getMetadataFixture = require('../../../../lib/test/fixtures/getMetadataFixture');
+const getDataContractFactory = require('../../../../../lib/methods/platform/getDataContract/getDataContractFactory');
+const getMetadataFixture = require('../../../../../lib/test/fixtures/getMetadataFixture');
 
 describe('getDataContractFactory', () => {
   let grpcTransportMock;

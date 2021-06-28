@@ -9,7 +9,7 @@ const {
 const getIdentityFixture = require('@dashevo/dpp/lib/test/fixtures/getIdentityFixture');
 
 const getIdentitiesByPublicKeyHashesFactory = require(
-  '../../../../lib/methods/platform/getIdentitiesByPublicKeyHashes/getIdentitiesByPublicKeyHashesFactory',
+  '../../../../../lib/methods/platform/getIdentitiesByPublicKeyHashes/getIdentitiesByPublicKeyHashesFactory',
 );
 
 describe('getIdentitiesByPublicKeyHashesFactory', () => {

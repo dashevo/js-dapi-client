@@ -10,8 +10,8 @@ const {
 const getIdentityFixture = require('@dashevo/dpp/lib/test/fixtures/getIdentityFixture');
 const grpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorCodes');
 
-const getIdentityFactory = require('../../../../lib/methods/platform/getIdentity/getIdentityFactory');
-const getMetadataFixture = require('../../../../lib/test/fixtures/getMetadataFixture');
+const getIdentityFactory = require('../../../../../lib/methods/platform/getIdentity/getIdentityFactory');
+const getMetadataFixture = require('../../../../../lib/test/fixtures/getMetadataFixture');
 
 describe('getIdentityFactory', () => {
   let grpcTransportMock;

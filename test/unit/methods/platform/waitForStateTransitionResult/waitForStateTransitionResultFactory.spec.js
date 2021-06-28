@@ -10,8 +10,8 @@ const {
 } = require('@dashevo/dapi-grpc');
 const cbor = require('cbor');
 
-const waitForStateTransitionResultFactory = require('../../../../lib/methods/platform/waitForStateTransitionResult/waitForStateTransitionResultFactory');
-const getMetadataFixture = require('../../../../lib/test/fixtures/getMetadataFixture');
+const waitForStateTransitionResultFactory = require('../../../../../lib/methods/platform/waitForStateTransitionResult/waitForStateTransitionResultFactory');
+const getMetadataFixture = require('../../../../../lib/test/fixtures/getMetadataFixture');
 
 describe('waitForStateTransitionResultFactory', () => {
   let grpcTransportMock;

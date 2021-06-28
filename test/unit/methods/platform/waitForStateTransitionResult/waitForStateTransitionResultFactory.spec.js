@@ -87,6 +87,10 @@ describe('waitForStateTransitionResultFactory', () => {
       signatureLLMQHash: Buffer.from('signatureLlmqHash'),
       signature: Buffer.from('signature'),
     });
+    expect(result.getProof().getSignature()).to.deep.equal(Buffer.from('signature'));
+    expect(result.getProof().getRootTreeProof()).to.deep.equal(Buffer.from('rootTreeProof'));
+    expect(result.getProof().getStoreTreeProof()).to.deep.equal(Buffer.from('storeTreeProof'));
+    expect(result.getProof().getSignatureLLMQHash()).to.deep.equal(Buffer.from('signatureLlmqHash'));
 
     const request = new WaitForStateTransitionResultRequest();
     request.setStateTransitionHash(hash);

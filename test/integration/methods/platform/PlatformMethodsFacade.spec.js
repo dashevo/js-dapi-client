@@ -1,5 +1,6 @@
 const {
   v0: {
+    ResponseMetadata,
     GetDataContractResponse,
     GetDocumentsResponse,
     GetIdentityResponse,
@@ -44,6 +45,7 @@ describe('PlatformMethodsFacade', () => {
   describe('#getDataContract', () => {
     it('should get data contract', async () => {
       const response = new GetDataContractResponse();
+      response.setMetadata(new ResponseMetadata());
       grpcTransportMock.request.resolves(response);
 
       await platformMethods.getDataContract(getDataContractFixture().getId());
@@ -55,6 +57,7 @@ describe('PlatformMethodsFacade', () => {
   describe('#getDocuments', () => {
     it('should get documents', async () => {
       const response = new GetDocumentsResponse();
+      response.setMetadata(new ResponseMetadata());
       grpcTransportMock.request.resolves(response);
 
       await platformMethods.getDocuments(
@@ -69,6 +72,7 @@ describe('PlatformMethodsFacade', () => {
   describe('#getIdentity', () => {
     it('should get Identity', async () => {
       const response = new GetIdentityResponse();
+      response.setMetadata(new ResponseMetadata());
       grpcTransportMock.request.resolves(response);
 
       await platformMethods.getIdentity('41nthkqvHBLnqiMkSbsdTNANzYu9bgdv4etKoRUunY1M');
@@ -80,6 +84,7 @@ describe('PlatformMethodsFacade', () => {
   describe('#waitForStateTransitionResult', () => {
     it('should wait for state transition', async () => {
       const response = new WaitForStateTransitionResultResponse();
+      response.setMetadata(new ResponseMetadata());
       grpcTransportMock.request.resolves(response);
 
       await platformMethods.waitForStateTransitionResult(

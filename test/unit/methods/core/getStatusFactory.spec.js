@@ -29,7 +29,7 @@ describe('getStatusFactory', () => {
     masternode.setStatus(GetStatusResponse.Masternode.Status.READY);
 
     const chain = new GetStatusResponse.Chain();
-    chain.setBestBlockHash(Buffer.from('bestBlockHash').toString('base64'));
+    chain.setBestBlockHash(Buffer.from('bestBlockHash'));
 
     response.setMasternode(masternode);
     response.setChain(chain);
@@ -62,7 +62,7 @@ describe('getStatusFactory', () => {
       },
     };
 
-    expectedResult.chain.bestBlockHash = Buffer.from(Buffer.from('bestBlockHash').toString('base64'));
+    expectedResult.chain.bestBlockHash = Buffer.from(expectedResult.chain.bestBlockHash, 'base64');
 
     expect(result).to.deep.equal(expectedResult);
   });

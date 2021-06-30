@@ -80,7 +80,8 @@ describe('getIdentityFactory', () => {
       request,
       options,
     );
-    expect(result).to.equal(null);
+    expect(result.getIdentity()).to.equal(null);
+    expect(result.getMetadata()).to.equal(undefined);
   });
 
   it('should throw unknown error', async () => {

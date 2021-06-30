@@ -86,7 +86,8 @@ describe('getDataContractFactory', () => {
       request,
       options,
     ]);
-    expect(result).to.equal(null);
+    expect(result.getDataContract()).to.equal(null);
+    expect(result.getMetadata()).to.equal(undefined);
   });
 
   it('should throw unknown error', async () => {

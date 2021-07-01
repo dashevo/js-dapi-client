@@ -45,7 +45,9 @@ describe('GetIdentityIdsByPublicKeyHashesResponse', () => {
 
   it('should create an instance from proto', () => {
     getDataContractResponse = GetIdentityIdsByPublicKeyHashesResponseClass.createFromProto(proto);
-    expect(getDataContractResponse).to.be.an.instanceOf(GetIdentityIdsByPublicKeyHashesResponseClass);
+    expect(getDataContractResponse).to.be.an.instanceOf(
+      GetIdentityIdsByPublicKeyHashesResponseClass,
+    );
     expect(getDataContractResponse.getIdentityIds()).to.deep.equal([identityFixture.getId()]);
     expect(getDataContractResponse.getMetadata()).to.deep.equal(metadataFixture);
   });

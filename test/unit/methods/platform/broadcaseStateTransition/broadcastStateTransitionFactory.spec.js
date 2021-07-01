@@ -1,7 +1,6 @@
 const {
   v0: {
     BroadcastStateTransitionRequest,
-    BroadcastStateTransitionResponse,
     PlatformPromiseClient,
   },
 } = require('@dashevo/dapi-grpc');
@@ -11,6 +10,7 @@ const DashPlatformProtocol = require('@dashevo/dpp');
 const getDataContractFixture = require('@dashevo/dpp/lib/test/fixtures/getDataContractFixture');
 
 const broadcastStateTransitionFactory = require('../../../../../lib/methods/platform/broadcastStateTransition/broadcastStateTransitionFactory');
+const BroadcastStateTransitionResponse = require('../../../../../lib/methods/platform/broadcastStateTransition/BroadcastStateTransitionResponse');
 
 describe('broadcastStateTransitionFactory', () => {
   let grpcTransportMock;
@@ -51,6 +51,6 @@ describe('broadcastStateTransitionFactory', () => {
       request,
       options,
     );
-    expect(result).to.equal(response);
+    expect(result).to.be.an.instanceOf(BroadcastStateTransitionResponse);
   });
 });

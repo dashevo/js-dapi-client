@@ -59,4 +59,16 @@ describe('GetIdentityResponse', () => {
       expect(e).to.be.an.instanceOf(InvalidResponseError);
     }
   });
+
+  it('should throw InvalidResponseError if Identity is not defined', () => {
+    proto.setIdentity(undefined);
+
+    try {
+      getDataContractResponse = GetIdentityResponseClass.createFromProto(proto);
+
+      expect.fail('should throw InvalidResponseError');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(InvalidResponseError);
+    }
+  });
 });

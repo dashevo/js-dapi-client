@@ -87,18 +87,25 @@ describe('getTransactionFactory', () => {
     }
   });
 
-  it('should return null if transaction is not found', async () => {
-    const response = new ProtoGetTransactionResponse();
-    grpcTransportMock.request.resolves(response);
+  it('should throw NotFoundError if transaction is not found', async () => {
+    const error = new Error('Nothing found');
+    error.code = grpcErrorCodes.NOT_FOUND;
+
+    grpcTransportMock.request.throws(error);
 
     const id = '4f46066bd50cc2684484407696b7949e82bd906ea92c040f59a97cba47ed8176';
 
-    const result = await getTransaction(id);
+    try {
+      await getTransaction(id);
+
+      expect.fail('should throw NotFoundError');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(NotFoundError);
+    }
 
     const request = new GetTransactionRequest();
     request.setId(id);
 
-    expect(result.getTransaction()).to.equal(null);
     expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
       CorePromiseClient,
       'getTransaction',

@@ -16,12 +16,27 @@ describe('getTransactionFactory', () => {
   let getTransaction;
   let grpcTransportMock;
   let transaction;
+  let blockHash;
+  let height;
+  let confirmations;
+  let isChainLocked;
+  let isInstantLocked;
 
   beforeEach(function beforeEach() {
     transaction = Buffer.from('transaction');
+    blockHash = Buffer.from('blockHash');
+    height = 42;
+    confirmations = 3;
+    isChainLocked = true;
+    isInstantLocked = false;
 
     const response = new ProtoGetTransactionResponse();
     response.setTransaction(transaction);
+    response.setBlockHash(blockHash);
+    response.setHeight(height);
+    response.setConfirmations(confirmations);
+    response.setIsChainLocked(isChainLocked);
+    response.setIsInstantLocked(isInstantLocked);
 
     grpcTransportMock = {
       request: this.sinon.stub().resolves(response),
@@ -43,6 +58,11 @@ describe('getTransactionFactory', () => {
 
     expect(result).to.be.instanceof(GetTransactionResponse);
     expect(result.getTransaction()).to.deep.equal(transaction);
+    expect(result.getBlockHash()).to.deep.equal(blockHash);
+    expect(result.getConfirmations()).to.equal(confirmations);
+    expect(result.getHeight()).to.equal(height);
+    expect(result.isInstantLocked()).to.equal(isInstantLocked);
+    expect(result.isChainLocked()).to.equal(isChainLocked);
     expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
       CorePromiseClient,
       'getTransaction',

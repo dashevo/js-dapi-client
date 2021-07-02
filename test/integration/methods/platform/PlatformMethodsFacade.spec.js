@@ -12,6 +12,7 @@ const {
 const DashPlatformProtocol = require('@dashevo/dpp');
 
 const getDataContractFixture = require('@dashevo/dpp/lib/test/fixtures/getDataContractFixture');
+const getIdentityFixture = require('@dashevo/dpp/lib/test/fixtures/getIdentityFixture');
 
 const PlatformMethodsFacade = require('../../../../lib/methods/platform/PlatformMethodsFacade');
 
@@ -46,6 +47,7 @@ describe('PlatformMethodsFacade', () => {
     it('should get data contract', async () => {
       const response = new GetDataContractResponse();
       response.setMetadata(new ResponseMetadata());
+      response.setDataContract(getDataContractFixture().toBuffer());
       grpcTransportMock.request.resolves(response);
 
       await platformMethods.getDataContract(getDataContractFixture().getId());
@@ -72,7 +74,10 @@ describe('PlatformMethodsFacade', () => {
   describe('#getIdentity', () => {
     it('should get Identity', async () => {
       const response = new GetIdentityResponse();
+
       response.setMetadata(new ResponseMetadata());
+      response.setIdentity(getIdentityFixture().toBuffer());
+
       grpcTransportMock.request.resolves(response);
 
       await platformMethods.getIdentity('41nthkqvHBLnqiMkSbsdTNANzYu9bgdv4etKoRUunY1M');

@@ -87,7 +87,7 @@ describe('getDataContractFactory', () => {
       options,
     ]);
     expect(result.getDataContract()).to.equal(null);
-    expect(result.getMetadata()).to.equal(undefined);
+    expect(result.getMetadata()).to.deep.equal({ height: 0, coreChainLockedHeight: 0 });
   });
 
   it('should throw unknown error', async () => {

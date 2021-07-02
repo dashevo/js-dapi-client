@@ -59,4 +59,21 @@ describe('GetDataContractResponse', () => {
       expect(e).to.be.an.instanceOf(InvalidResponseError);
     }
   });
+
+  it('should throw InvalidResponseError if DataContract is not defined', () => {
+    const proto = new GetDataContractResponse();
+    const metadata = new ResponseMetadata();
+    metadata.setHeight(metadataFixture.height);
+    metadata.setCoreChainLockedHeight(metadataFixture.coreChainLockedHeight);
+
+    proto.setMetadata(metadata);
+
+    try {
+      getDataContractResponse = GetDataContractResponseClass.createFromProto(proto);
+
+      expect.fail('should throw InvalidResponseError');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(InvalidResponseError);
+    }
+  });
 });

@@ -8,7 +8,7 @@ const {
 
 const grpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorCodes');
 
-const getTransactionFactory = require('../../../../lib/methods/core/getTransactionFactory');
+const getTransactionFactory = require('../../../../lib/methods/core/getTransaction/getTransactionFactory');
 
 describe('getTransactionFactory', () => {
   let getTransaction;

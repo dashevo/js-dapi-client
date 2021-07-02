@@ -4,6 +4,7 @@ const {
   },
 } = require('@dashevo/dapi-grpc');
 const GetTransactionResponse = require('../../../../../lib/methods/core/getTransaction/GetTransactionResponse');
+const InvalidResponseError = require('../../../../../lib/methods/platform/response/errors/InvalidResponseError');
 
 describe('GetTransactionResponse', () => {
   let getTransactionResponse;
@@ -77,5 +78,29 @@ describe('GetTransactionResponse', () => {
     expect(instance.confirmations).to.deep.equal(proto.getConfirmations());
     expect(instance.instantLocked).to.deep.equal(proto.getIsInstantLocked());
     expect(instance.chainLocked).to.deep.equal(proto.getIsChainLocked());
+  });
+
+  it('should throw InvalidResponseError if Transaction is not defined', () => {
+    proto.setTransaction(undefined);
+
+    try {
+      GetTransactionResponse.createFromProto(proto);
+
+      expect.fail('should throw InvalidResponseError');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(InvalidResponseError);
+    }
+  });
+
+  it('should throw InvalidResponseError if BlockHash is not defined', () => {
+    proto.setBlockHash(undefined);
+
+    try {
+      GetTransactionResponse.createFromProto(proto);
+
+      expect.fail('should throw InvalidResponseError');
+    } catch (e) {
+      expect(e).to.be.an.instanceOf(InvalidResponseError);
+    }
   });
 });

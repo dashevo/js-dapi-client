@@ -3,7 +3,6 @@
 
 ### Features
 
-* replace all MN addresses with localhost is the network is local ([#239](https://github.com/dashevo/dapi-client/issues/239))
 * provide metadata in responses ([#243](https://github.com/dashevo/dapi-client/issues/243), [#246](https://github.com/dashevo/dapi-client/issues/246))
 * throw `NotFoundError` if data is not found ([#247](https://github.com/dashevo/dapi-client/issues/247))
 

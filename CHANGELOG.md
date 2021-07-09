@@ -11,8 +11,7 @@
 
 * platform methods respond with response classes instead of plain data
 * Core method `getTransaction` responds with response class instead of plain data
-* Core method `getTransaction` throws a `NotFoundError` in case if the transaction is not present
-* `getDataContract` and `getIdentity` platform methods throws `NotFoundError` if data is not found
+* `getTransaction`, `getDataContract` and `getIdentity` methods throw `NotFoundError` if no data was found
 
 
 

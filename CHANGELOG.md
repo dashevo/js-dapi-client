@@ -3,7 +3,7 @@
 
 ### Bug Fixes
 
-* * crash when connecting to an older version of dapi ([#252](https://github.com/dashevo/dapi-client/issues/252))
+* crash when connecting to an older version of dapi ([#252](https://github.com/dashevo/dapi-client/issues/252), [#253](https://github.com/dashevo/dapi-client/issues/253))
 
 
 

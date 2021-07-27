@@ -1,3 +1,9 @@
+## [0.20.1](https://github.com/dashevo/dapi-client/compare/v0.19.2...v0.19.3) (2021-05-26)
+
+### Bug Fixes
+
+* crash when connection to older versions of dapi that don't send metadata ([46b36ae](https://github.com/dashevo/js-dapi-client/commit/46b36ae72743fd1cba8bf8cba73c36b1a350f4d7))
+
 # [0.20.0](https://github.com/dashevo/dapi-client/compare/v0.19.3...v0.20.0) (2021-07-09)
 
 

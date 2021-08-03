@@ -9,7 +9,7 @@ const {
     ResponseMetadata,
     Proof: ProofResponse,
   },
-} = require('@dashevo/dapi-grpc');
+} = require('strophy-dapi-grpc');
 
 const getDocumentsFixture = require('@dashevo/dpp/lib/test/fixtures/getDocumentsFixture');
 

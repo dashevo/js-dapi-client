@@ -4,7 +4,7 @@ const {
     GetStatusResponse,
     CorePromiseClient,
   },
-} = require('@dashevo/dapi-grpc');
+} = require('strophy-dapi-grpc');
 
 const getStatusFactory = require('../../../../lib/methods/core/getStatusFactory');
 

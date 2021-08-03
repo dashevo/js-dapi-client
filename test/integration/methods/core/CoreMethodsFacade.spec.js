@@ -7,7 +7,7 @@ const {
     GetTransactionResponse,
     GetStatusResponse,
   },
-} = require('@dashevo/dapi-grpc');
+} = require('strophy-dapi-grpc');
 
 const BloomFilter = require('@dashevo/dashcore-lib/lib/bloomfilter');
 

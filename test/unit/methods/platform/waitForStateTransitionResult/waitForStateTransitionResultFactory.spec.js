@@ -7,7 +7,7 @@ const {
     Proof,
     ResponseMetadata,
   },
-} = require('@dashevo/dapi-grpc');
+} = require('strophy-dapi-grpc');
 const cbor = require('cbor');
 
 const waitForStateTransitionResultFactory = require('../../../../../lib/methods/platform/waitForStateTransitionResult/waitForStateTransitionResultFactory');

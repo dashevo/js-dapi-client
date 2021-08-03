@@ -26,13 +26,13 @@
     }
   ],
   "dependencies": {
-    "@dashevo/dapi-grpc": "~0.21.0-dev.1",
     "@dashevo/dashcore-lib": "~0.19.25",
     "axios": "^0.21.1",
     "bs58": "^4.0.1",
     "cbor": "^7.0.5",
     "lodash.sample": "^4.2.1",
-    "node-inspect-extracted": "^1.0.7"
+    "node-inspect-extracted": "^1.0.7",
+    "strophy-dapi-grpc": "^0.21.0-dev.2"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",
@@ -61,7 +61,7 @@
     "webpack-cli": "^3.3.11"
   },
   "peerDependencies": {
-    "@dashevo/grpc-common": "~0.3.4"
+    "@dashevo/grpc-common": "github:dashevo/js-grpc-common#update-grpc"
   },
   "files": [
     "docs",

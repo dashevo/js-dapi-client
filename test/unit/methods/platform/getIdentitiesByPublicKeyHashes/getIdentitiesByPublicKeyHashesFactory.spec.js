@@ -6,7 +6,7 @@ const {
     ResponseMetadata,
     Proof: ProofResponse,
   },
-} = require('@dashevo/dapi-grpc');
+} = require('strophy-dapi-grpc');
 
 const getIdentityFixture = require('@dashevo/dpp/lib/test/fixtures/getIdentityFixture');
 const getMetadataFixture = require('../../../../../lib/test/fixtures/getMetadataFixture');

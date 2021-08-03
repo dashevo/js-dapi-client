@@ -5,7 +5,7 @@ const {
     ResponseMetadata,
     Proof: ProofResponse,
   },
-} = require('@dashevo/dapi-grpc');
+} = require('strophy-dapi-grpc');
 
 const GetDataContractResponseClass = require('../../../../../lib/methods/platform/getDataContract/GetDataContractResponse');
 const getMetadataFixture = require('../../../../../lib/test/fixtures/getMetadataFixture');

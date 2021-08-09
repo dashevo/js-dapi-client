@@ -10,7 +10,7 @@ const {
     Proof: ProofResponse,
     StoreTreeProofs,
   },
-} = require(''@dashevo/dapi-grpc'');
+} = require('@dashevo/dapi-grpc');
 
 const getDocumentsFixture = require('@dashevo/dpp/lib/test/fixtures/getDocumentsFixture');
 

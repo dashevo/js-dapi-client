@@ -6,7 +6,7 @@ const {
     Proof: ProofResponse,
     StoreTreeProofs,
   },
-} = require(''@dashevo/dapi-grpc'');
+} = require('@dashevo/dapi-grpc');
 
 const GetDataContractResponseClass = require('../../../../../lib/methods/platform/getDataContract/GetDataContractResponse');
 const getMetadataFixture = require('../../../../../lib/test/fixtures/getMetadataFixture');

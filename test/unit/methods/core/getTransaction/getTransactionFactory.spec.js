@@ -4,7 +4,7 @@ const {
     GetTransactionResponse: ProtoGetTransactionResponse,
     CorePromiseClient,
   },
-} = require(''@dashevo/dapi-grpc'');
+} = require('@dashevo/dapi-grpc');
 
 const grpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorCodes');
 

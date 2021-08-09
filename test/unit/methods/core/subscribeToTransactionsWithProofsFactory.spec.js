@@ -6,7 +6,7 @@ const {
     CorePromiseClient,
     TransactionsWithProofsRequest,
   },
-} = require(''@dashevo/dapi-grpc'');
+} = require('@dashevo/dapi-grpc');
 
 const { EventEmitter } = require('events');
 

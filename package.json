@@ -26,13 +26,13 @@
     }
   ],
   "dependencies": {
+    "@dashevo/dapi-grpc": "github:dashevo/dapi-grpc#update-grpc",
     "@dashevo/dashcore-lib": "~0.19.25",
     "axios": "^0.21.1",
     "bs58": "^4.0.1",
     "cbor": "^7.0.5",
     "lodash.sample": "^4.2.1",
-    "node-inspect-extracted": "^1.0.7",
-    "@dashevo/dapi-grpc": "github:dashevo/dapi-grpc#update-grpc"
+    "node-inspect-extracted": "^1.0.7"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",

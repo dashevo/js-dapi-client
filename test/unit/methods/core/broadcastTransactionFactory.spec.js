@@ -4,7 +4,7 @@ const {
     BroadcastTransactionRequest,
     BroadcastTransactionResponse,
   },
-} = require('strophy-dapi-grpc');
+} = require(''@dashevo/dapi-grpc'');
 
 const broadcastTransactionFactory = require(
   '../../../../lib/methods/core/broadcastTransactionFactory',

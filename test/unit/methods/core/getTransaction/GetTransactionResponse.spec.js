@@ -2,7 +2,7 @@ const {
   v0: {
     GetTransactionResponse: ProtoGetTransactionResponse,
   },
-} = require('strophy-dapi-grpc');
+} = require(''@dashevo/dapi-grpc'');
 const GetTransactionResponse = require('../../../../../lib/methods/core/getTransaction/GetTransactionResponse');
 const InvalidResponseError = require('../../../../../lib/methods/platform/response/errors/InvalidResponseError');
 

@@ -32,7 +32,7 @@
     "cbor": "^7.0.5",
     "lodash.sample": "^4.2.1",
     "node-inspect-extracted": "^1.0.7",
-    "strophy-dapi-grpc": "^0.21.0-dev.2"
+    "@dashevo/dapi-grpc": "github:dashevo/dapi-grpc#update-grpc"
   },
   "devDependencies": {
     "@babel/core": "^7.10.2",

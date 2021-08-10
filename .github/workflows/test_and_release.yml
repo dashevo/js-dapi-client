@@ -38,6 +38,9 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
 
+      - name: Run build
+        run: npm run build
+
       - name: Run ESLinter
         run: npm run lint
 
@@ -67,6 +70,9 @@ jobs:
 
       - name: Install NPM dependencies
         run: npm ci
+
+      - name: Run build
+        run: npm run build
 
       - name: Set release tag
         uses: actions/github-script@v3

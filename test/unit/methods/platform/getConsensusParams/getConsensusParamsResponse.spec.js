@@ -28,9 +28,21 @@ describe('getConsensusParamsResponse', () => {
       },
     };
 
+    const block = new ConsensusParamsBlock(
+      consensusParamsFixture.block.maxBytes,
+      consensusParamsFixture.block.maxGas,
+      consensusParamsFixture.block.timeIotaMs,
+    );
+
+    const evidence = new ConsensusParamsEvidence(
+      consensusParamsFixture.evidence.maxAgeNumBlocks,
+      consensusParamsFixture.evidence.maxAgeDuration,
+      consensusParamsFixture.evidence.maxBytes,
+    );
+
     getConsensusParamsResponse = new GetConsensusParamsResponse(
-      consensusParamsFixture.block,
-      consensusParamsFixture.evidence,
+      block,
+      evidence,
     );
   });
 

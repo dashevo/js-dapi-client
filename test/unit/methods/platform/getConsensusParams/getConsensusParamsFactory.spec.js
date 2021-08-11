@@ -8,6 +8,7 @@ const {
   },
 } = require('@dashevo/dapi-grpc');
 const getConsensusParamsFactory = require('../../../../../lib/methods/platform/getConsensusParams/getConsensusParamsFactory');
+const InvalidResponseError = require('../../../../../lib/methods/platform/response/errors/InvalidResponseError');
 
 describe('getConsensusParams', () => {
   let getConsensusParams;
@@ -106,6 +107,25 @@ describe('getConsensusParams', () => {
 
     expect(result.getBlock()).to.deep.equal(consensusParamsFixture.block);
     expect(result.getEvidence()).to.deep.equal(consensusParamsFixture.evidence);
+  });
+
+  it('should throw InvalidResponseError', async () => {
+    const options = {};
+    const error = new InvalidResponseError('Unknown error');
+
+    grpcTransportMock.request.throws(error);
+
+    const request = new GetConsensusParamsRequest();
+    request.setProve(!!options.prove);
+
+    try {
+      await getConsensusParams();
+
+      expect.fail('should throw unknown error');
+    } catch (e) {
+      expect(e).to.deep.equal(error);
+      expect(grpcTransportMock.request).to.be.calledThrice();
+    }
   });
 
   it('should throw unknown error', async () => {

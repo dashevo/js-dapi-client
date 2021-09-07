@@ -2,8 +2,8 @@ const JsonRpcTransport = require('../../../../lib/transport/JsonRpcTransport/Jso
 const DAPIAddress = require('../../../../lib/dapiAddressProvider/DAPIAddress');
 
 const MaxRetriesReachedError = require('../../../../lib/transport/errors/MaxRetriesReachedError');
-const NoAvailableAddressesForRetry = require('../../../../lib/transport/errors/NoAvailableAddressesForRetry');
-const NoAvailableAddresses = require('../../../../lib/transport/errors/NoAvailableAddresses');
+const NoAvailableAddressesForRetryError = require('../../../../lib/transport/errors/NoAvailableAddressesForRetryError');
+const NoAvailableAddressesError = require('../../../../lib/transport/errors/NoAvailableAddressesError');
 
 describe('JsonRpcTransport', () => {
   let jsonRpcTransport;
@@ -112,7 +112,7 @@ describe('JsonRpcTransport', () => {
 
         expect.fail('should throw NoAvailableAddresses');
       } catch (e) {
-        expect(e).to.be.an.instanceof(NoAvailableAddresses);
+        expect(e).to.be.an.instanceof(NoAvailableAddressesError);
         expect(requestJsonRpcMock).to.not.be.called();
       }
     });
@@ -159,7 +159,7 @@ describe('JsonRpcTransport', () => {
 
         expect.fail('should throw NoAvailableAddressesForRetry');
       } catch (e) {
-        expect(e).to.be.an.instanceof(NoAvailableAddressesForRetry);
+        expect(e).to.be.an.instanceof(NoAvailableAddressesForRetryError);
         expect(e.getError()).to.equal(error);
         expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(jsonRpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);

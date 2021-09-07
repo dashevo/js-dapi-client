@@ -4,8 +4,10 @@ const GrpcTransport = require('../../../lib/transport/GrpcTransport');
 const DAPIAddress = require('../../../lib/dapiAddressProvider/DAPIAddress');
 
 const MaxRetriesReachedError = require('../../../lib/transport/errors/MaxRetriesReachedError');
-const NoAvailableAddressesForRetry = require('../../../lib/transport/errors/NoAvailableAddressesForRetry');
-const NoAvailableAddresses = require('../../../lib/transport/errors/NoAvailableAddresses');
+const NoAvailableAddressesForRetryError = require('../../../lib/transport/errors/NoAvailableAddressesForRetryError');
+const NoAvailableAddressesError = require('../../../lib/transport/errors/NoAvailableAddressesError');
+const NotFoundError = require('../../../lib/methods/errors/NotFoundError');
+const ResponseError = require('../../../lib/methods/errors/ResponseError');
 
 describe('GrpcTransport', () => {
   let grpcTransport;
@@ -154,7 +156,7 @@ describe('GrpcTransport', () => {
         }
       });
 
-      it('should throw NoAvailableAddresses if there is no available addresses', async () => {
+      it('should throw NoAvailableAddressesError if there is no available addresses', async () => {
         dapiAddressProviderMock.getLiveAddress.resolves(null);
 
         try {
@@ -165,9 +167,9 @@ describe('GrpcTransport', () => {
             options,
           );
 
-          expect.fail('should throw NoAvailableAddresses');
+          expect.fail('should throw NoAvailableAddressesError');
         } catch (e) {
-          expect(e).to.be.an.instanceof(NoAvailableAddresses);
+          expect(e).to.be.an.instanceof(NoAvailableAddressesError);
           expect(clientClassMock).to.not.be.called();
         }
       });
@@ -175,6 +177,9 @@ describe('GrpcTransport', () => {
       it('should throw MaxRetriesReachedError if there are no more retries left', async () => {
         const error = new Error('Internal error');
         error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
+        error.metadata = {
+          data: 'additional data',
+        };
 
         requestFunc.throws(error);
 
@@ -191,13 +196,14 @@ describe('GrpcTransport', () => {
         } catch (e) {
           expect(e).to.be.an.instanceof(MaxRetriesReachedError);
           expect(e.getError()).to.equal(error);
+          expect(e.getDapiAddress()).to.equal('127.0.0.1:3000:3010');
           expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);
           expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {});
         }
       });
 
-      it('should throw NoAvailableAddressesForRetry error if there are no more available addresses to request', async () => {
+      it('should throw NoAvailableAddressesForRetryError if there are no more available addresses to request', async () => {
         dapiAddressProviderMock.hasLiveAddresses.resolves(false);
 
         globalOptions = {
@@ -212,6 +218,9 @@ describe('GrpcTransport', () => {
 
         const error = new Error('Internal error');
         error.code = GrpcErrorCodes.UNAVAILABLE;
+        error.metadata = {
+          data: 'additional data',
+        };
 
         requestFunc.throws(error);
 
@@ -223,10 +232,135 @@ describe('GrpcTransport', () => {
             options,
           );
 
-          expect.fail('should throw NoAvailableAddressesForRetry');
+          expect.fail('should throw NoAvailableAddressesForRetryError');
         } catch (e) {
-          expect(e).to.be.an.instanceof(NoAvailableAddressesForRetry);
+          expect(e).to.be.an.instanceof(NoAvailableAddressesForRetryError);
           expect(e.getError()).to.equal(error);
+          expect(e.getDapiAddress()).to.equal('127.0.0.1:3000:3010');
+          expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+          expect(clientClassMock).to.be.calledOnceWithExactly(url);
+          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {});
+        }
+      });
+
+      it('should throw NotFoundError if error code is NOT_FOUND', async () => {
+        dapiAddressProviderMock.hasLiveAddresses.resolves(false);
+
+        globalOptions = {
+          retries: 1,
+        };
+
+        grpcTransport = new GrpcTransport(
+          createDAPIAddressProviderFromOptionsMock,
+          dapiAddressProviderMock,
+          globalOptions,
+        );
+
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.NOT_FOUND;
+        error.metadata = {
+          data: 'additional data',
+        };
+
+        requestFunc.throws(error);
+
+        try {
+          await grpcTransport.request(
+            clientClassMock,
+            method,
+            requestMessage,
+            options,
+          );
+
+          expect.fail('should throw NotFoundError');
+        } catch (e) {
+          expect(e).to.be.an.instanceof(NotFoundError);
+          expect(e.getMetadata()).to.deep.equal(error.metadata);
+          expect(e.getDapiAddress()).to.equal('127.0.0.1:3000:3010');
+          expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+          expect(clientClassMock).to.be.calledOnceWithExactly(url);
+          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {});
+        }
+      });
+
+      it('should throw ResponseError', async () => {
+        dapiAddressProviderMock.hasLiveAddresses.resolves(false);
+
+        globalOptions = {
+          retries: 1,
+        };
+
+        grpcTransport = new GrpcTransport(
+          createDAPIAddressProviderFromOptionsMock,
+          dapiAddressProviderMock,
+          globalOptions,
+        );
+
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.OUT_OF_RANGE;
+        error.metadata = {
+          data: 'additional data',
+        };
+
+        requestFunc.throws(error);
+
+        try {
+          await grpcTransport.request(
+            clientClassMock,
+            method,
+            requestMessage,
+            options,
+          );
+
+          expect.fail('should throw NotFoundError');
+        } catch (e) {
+          expect(e).to.be.an.instanceof(ResponseError);
+          expect(e.getMetadata()).to.deep.equal(error.metadata);
+          expect(e.getCode()).to.equal(error.code);
+          expect(e.getDapiAddress()).to.equal('127.0.0.1:3000:3010');
+          expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
+          expect(clientClassMock).to.be.calledOnceWithExactly(url);
+          expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {});
+        }
+      });
+
+      it('should throw ResponseError on throwDeadlineExceeded option', async () => {
+        dapiAddressProviderMock.hasLiveAddresses.resolves(false);
+
+        globalOptions = {
+          retries: 1,
+        };
+
+        options.throwDeadlineExceeded = true;
+
+        grpcTransport = new GrpcTransport(
+          createDAPIAddressProviderFromOptionsMock,
+          dapiAddressProviderMock,
+          globalOptions,
+        );
+
+        const error = new Error('Internal error');
+        error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
+        error.metadata = {
+          data: 'additional data',
+        };
+
+        requestFunc.throws(error);
+
+        try {
+          await grpcTransport.request(
+            clientClassMock,
+            method,
+            requestMessage,
+            options,
+          );
+
+          expect.fail('should throw NotFoundError');
+        } catch (e) {
+          expect(e).to.be.an.instanceof(ResponseError);
+          expect(e.getMetadata()).to.deep.equal(error.metadata);
+          expect(e.getCode()).to.equal(error.code);
+          expect(e.getDapiAddress()).to.equal('127.0.0.1:3000:3010');
           expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);
           expect(requestFunc).to.be.calledOnceWithExactly(requestMessage, {}, {});

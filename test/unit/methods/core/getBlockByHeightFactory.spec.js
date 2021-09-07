@@ -48,28 +48,6 @@ describe('getBlockByHeightFactory', () => {
     );
   });
 
-  it('should return null if block is not found', async () => {
-    const error = new Error('Nothing found');
-    error.code = grpcErrorCodes.NOT_FOUND;
-
-    grpcTransportMock.request.throws(error);
-
-    const height = 1;
-
-    const result = await getBlockByHeight(height);
-
-    const request = new GetBlockRequest();
-    request.setHeight(height);
-
-    expect(result).to.equal(null);
-    expect(grpcTransportMock.request).to.be.calledOnceWithExactly(
-      CorePromiseClient,
-      'getBlock',
-      request,
-      {},
-    );
-  });
-
   it('should throw unknown error', async () => {
     const error = new Error('Unknown found');
 

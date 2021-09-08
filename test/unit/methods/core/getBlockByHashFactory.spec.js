@@ -6,8 +6,6 @@ const {
   },
 } = require('@dashevo/dapi-grpc');
 
-const grpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorCodes');
-
 const getBlockByHashFactory = require('../../../../lib/methods/core/getBlockByHashFactory');
 
 describe('getBlockByHashFactory', () => {

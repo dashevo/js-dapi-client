@@ -195,7 +195,8 @@ describe('GrpcTransport', () => {
           expect.fail('should throw MaxRetriesReachedError');
         } catch (e) {
           expect(e).to.be.an.instanceof(MaxRetriesReachedError);
-          expect(e.getError()).to.equal(error);
+          expect(e.getCode()).to.equal(error.code);
+          expect(e.getMetadata()).to.deep.equal(error.metadata);
           expect(e.getDapiAddress()).to.equal('127.0.0.1:3000:3010');
           expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);
@@ -235,7 +236,8 @@ describe('GrpcTransport', () => {
           expect.fail('should throw NoAvailableAddressesForRetryError');
         } catch (e) {
           expect(e).to.be.an.instanceof(NoAvailableAddressesForRetryError);
-          expect(e.getError()).to.equal(error);
+          expect(e.getCode()).to.equal(error.code);
+          expect(e.getMetadata()).to.deep.equal(error.metadata);
           expect(e.getDapiAddress()).to.equal('127.0.0.1:3000:3010');
           expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
           expect(clientClassMock).to.be.calledOnceWithExactly(url);

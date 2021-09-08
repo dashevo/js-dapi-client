@@ -130,7 +130,8 @@ describe('JsonRpcTransport', () => {
         expect.fail('should throw MaxRetriesReachedError');
       } catch (e) {
         expect(e).to.be.an.instanceof(MaxRetriesReachedError);
-        expect(e.getError()).to.equal(error);
+        expect(e.getCode()).to.equal(error.code);
+        expect(e.getMetadata()).to.deep.equal(error.metadata);
         expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly({});
         expect(jsonRpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
         expect(requestJsonRpcMock).to.be.calledOnceWithExactly(
@@ -160,7 +161,8 @@ describe('JsonRpcTransport', () => {
         expect.fail('should throw NoAvailableAddressesForRetry');
       } catch (e) {
         expect(e).to.be.an.instanceof(NoAvailableAddressesForRetryError);
-        expect(e.getError()).to.equal(error);
+        expect(e.getCode()).to.equal(error.code);
+        expect(e.getMetadata()).to.deep.equal(error.metadata);
         expect(createDAPIAddressProviderFromOptionsMock).to.be.calledOnceWithExactly(options);
         expect(jsonRpcTransport.lastUsedAddress).to.deep.equal(dapiAddress);
         expect(requestJsonRpcMock).to.be.calledOnceWithExactly(

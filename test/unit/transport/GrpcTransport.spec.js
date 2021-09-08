@@ -3,8 +3,8 @@ const GrpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorC
 const GrpcTransport = require('../../../lib/transport/GrpcTransport');
 const DAPIAddress = require('../../../lib/dapiAddressProvider/DAPIAddress');
 
-const MaxRetriesReachedError = require('../../../lib/transport/errors/MaxRetriesReachedError');
-const NoAvailableAddressesForRetryError = require('../../../lib/transport/errors/NoAvailableAddressesForRetryError');
+const MaxRetriesReachedError = require('../../../lib/methods/errors/MaxRetriesReachedError');
+const NoAvailableAddressesForRetryError = require('../../../lib/methods/errors/NoAvailableAddressesForRetryError');
 const NoAvailableAddressesError = require('../../../lib/transport/errors/NoAvailableAddressesError');
 const NotFoundError = require('../../../lib/methods/errors/NotFoundError');
 const ResponseError = require('../../../lib/methods/errors/ResponseError');

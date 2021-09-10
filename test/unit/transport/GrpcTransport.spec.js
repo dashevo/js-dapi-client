@@ -1,5 +1,6 @@
 const GrpcErrorCodes = require('@dashevo/grpc-common/lib/server/error/GrpcErrorCodes');
 
+const GrpcError = require('@dashevo/grpc-common/lib/server/error/GrpcError');
 const GrpcTransport = require('../../../lib/transport/GrpcTransport');
 const DAPIAddress = require('../../../lib/dapiAddressProvider/DAPIAddress');
 
@@ -175,11 +176,7 @@ describe('GrpcTransport', () => {
       });
 
       it('should throw MaxRetriesReachedError if there are no more retries left', async () => {
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
-        error.metadata = {
-          data: 'additional data',
-        };
+        const error = new GrpcError(GrpcErrorCodes.DEADLINE_EXCEEDED, 'Internal error', { data: 'additional data' });
 
         requestFunc.throws(error);
 
@@ -298,10 +295,9 @@ describe('GrpcTransport', () => {
           globalOptions,
         );
 
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.OUT_OF_RANGE;
+        const error = new GrpcError(GrpcErrorCodes.UNKNOWN, 'Internal error');
         error.metadata = {
-          data: 'additional data',
+          code: GrpcErrorCodes.OUT_OF_RANGE,
         };
 
         requestFunc.throws(error);
@@ -408,8 +404,7 @@ describe('GrpcTransport', () => {
       });
 
       it('should retry the request if a deadline exceeded error has thrown', async () => {
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
+        const error = new GrpcError(GrpcErrorCodes.DEADLINE_EXCEEDED, 'Internal error');
 
         requestFunc.onCall(0).throws(error);
 

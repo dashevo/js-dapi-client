@@ -214,11 +214,7 @@ describe('GrpcTransport', () => {
           globalOptions,
         );
 
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.UNAVAILABLE;
-        error.metadata = {
-          data: 'additional data',
-        };
+        const error = new GrpcError(GrpcErrorCodes.UNAVAILABLE, 'Internal error', { data: 'additional data' });
 
         requestFunc.throws(error);
 
@@ -255,11 +251,7 @@ describe('GrpcTransport', () => {
           globalOptions,
         );
 
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.NOT_FOUND;
-        error.metadata = {
-          data: 'additional data',
-        };
+        const error = new GrpcError(GrpcErrorCodes.NOT_FOUND, 'Internal error', { data: 'additional data' });
 
         requestFunc.throws(error);
 
@@ -295,10 +287,9 @@ describe('GrpcTransport', () => {
           globalOptions,
         );
 
-        const error = new GrpcError(GrpcErrorCodes.UNKNOWN, 'Internal error');
-        error.metadata = {
+        const error = new GrpcError(GrpcErrorCodes.UNKNOWN, 'Internal error', {
           code: GrpcErrorCodes.OUT_OF_RANGE,
-        };
+        });
 
         requestFunc.throws(error);
 
@@ -337,11 +328,7 @@ describe('GrpcTransport', () => {
           globalOptions,
         );
 
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
-        error.metadata = {
-          data: 'additional data',
-        };
+        const error = new GrpcError(GrpcErrorCodes.DEADLINE_EXCEEDED, 'Internal error', { data: 'additional data' });
 
         requestFunc.throws(error);
 
@@ -366,8 +353,7 @@ describe('GrpcTransport', () => {
       });
 
       it('should retry the request if an internal error has thrown', async () => {
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.INTERNAL;
+        const error = new GrpcError(GrpcErrorCodes.INTERNAL, 'Internal error');
 
         requestFunc.onCall(0).throws(error);
 
@@ -385,8 +371,7 @@ describe('GrpcTransport', () => {
       });
 
       it('should retry the request if an unavailable error has thrown', async () => {
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.UNAVAILABLE;
+        const error = new GrpcError(GrpcErrorCodes.UNAVAILABLE, 'Internal error');
 
         requestFunc.onCall(0).throws(error);
 
@@ -422,8 +407,7 @@ describe('GrpcTransport', () => {
       });
 
       it('should retry the request if a cancelled exceeded error has thrown', async () => {
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.CANCELLED;
+        const error = new GrpcError(GrpcErrorCodes.CANCELLED, 'Internal error');
 
         requestFunc.onCall(0).throws(error);
 
@@ -441,8 +425,7 @@ describe('GrpcTransport', () => {
       });
 
       it('should retry the request if a unimplemented error has thrown', async () => {
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.UNIMPLEMENTED;
+        const error = new GrpcError(GrpcErrorCodes.UNIMPLEMENTED, 'Internal error');
 
         requestFunc.onCall(0).throws(error);
 
@@ -460,8 +443,7 @@ describe('GrpcTransport', () => {
       });
 
       it('should retry the request if a GRPC unknown error has thrown', async () => {
-        const error = new Error('Internal error');
-        error.code = GrpcErrorCodes.UNKNOWN;
+        const error = new GrpcError(GrpcErrorCodes.UNKNOWN, 'Internal error');
 
         requestFunc.onCall(0).throws(error);
 

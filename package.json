@@ -61,7 +61,7 @@
     "webpack-cli": "^3.3.11"
   },
   "peerDependencies": {
-    "@dashevo/grpc-common": "github:dashevo/js-grpc-common#grpc-errors-client"
+    "@dashevo/grpc-common": "^0.4.1"
   },
   "files": [
     "docs",

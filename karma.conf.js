@@ -21,6 +21,7 @@ module.exports = (config) => {
           assert: require.resolve('assert-browserify'),
           stream: require.resolve('stream-browserify'),
           path: require.resolve('path-browserify'),
+          url: require.resolve('url/'),
         },
       },
       plugins: [

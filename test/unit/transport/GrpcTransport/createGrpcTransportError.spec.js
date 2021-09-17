@@ -63,7 +63,7 @@ describe('createGrpcTransportError', () => {
 
     expect(error).to.be.an.instanceOf(TimeoutError);
     expect(error.message).to.equal(grpcError.message);
-    expect(error.getCode()).to.equal(GrpcErrorCodes.DEADLINE_EXCEEDED);
+    expect(error.getCode()).to.equal(GrpcErrorCodes.NOT_FOUND);
     expect(error.getDAPIAddress()).to.deep.equal(dapiAddress);
     expect(error.getData()).to.deep.equal(errorData);
   });

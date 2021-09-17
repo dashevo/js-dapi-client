@@ -7,7 +7,7 @@ const DAPIAddress = require('../../../lib/dapiAddressProvider/DAPIAddress');
 const MaxRetriesReachedError = require('../../../lib/transport/errors/response/MaxRetriesReachedError');
 const NoAvailableAddressesForRetryError = require('../../../lib/transport/errors/response/NoAvailableAddressesForRetryError');
 const NoAvailableAddressesError = require('../../../lib/transport/errors/NoAvailableAddressesError');
-const NotFoundError = require('../../../lib/transport/errors/response/NotFoundError');
+const NotFoundError = require('../../../lib/transport/GrpcTransport/errors/NotFoundError');
 const ResponseError = require('../../../lib/transport/errors/response/ResponseError');
 
 describe('GrpcTransport', () => {

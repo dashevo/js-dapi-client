@@ -1,8 +1,8 @@
 const JsonRpcTransport = require('../../../../lib/transport/JsonRpcTransport/JsonRpcTransport');
 const DAPIAddress = require('../../../../lib/dapiAddressProvider/DAPIAddress');
 
-const MaxRetriesReachedError = require('../../../../lib/errors/response/MaxRetriesReachedError');
-const NoAvailableAddressesForRetryError = require('../../../../lib/errors/response/NoAvailableAddressesForRetryError');
+const MaxRetriesReachedError = require('../../../../lib/transport/errors/response/MaxRetriesReachedError');
+const NoAvailableAddressesForRetryError = require('../../../../lib/transport/errors/response/NoAvailableAddressesForRetryError');
 const NoAvailableAddressesError = require('../../../../lib/transport/errors/NoAvailableAddressesError');
 
 describe('JsonRpcTransport', () => {

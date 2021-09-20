@@ -87,7 +87,7 @@ describe('createGrpcTransportError', () => {
     expect(error.getData()).to.deep.equal(errorData);
   });
 
-  it('should return InternalServerError', () => {
+  it('should return InternalServerError with stack', () => {
     const errorWithStack = new Error('Some error');
     const grpcError = new GrpcError(
       GrpcErrorCodes.INTERNAL,

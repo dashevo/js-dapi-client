@@ -5,7 +5,6 @@ const SerializedObjectParsingError = require('@dashevo/dpp/lib/errors/consensus/
 const createGrpcTransportError = require('../../../../lib/transport/GrpcTransport/createGrpcTransportError');
 const DAPIAddress = require('../../../../lib/dapiAddressProvider/DAPIAddress');
 const NotFoundError = require('../../../../lib/transport/GrpcTransport/errors/NotFoundError');
-const TimeoutError = require('../../../../lib/transport/GrpcTransport/errors/TimeoutError');
 const InvalidRequestError = require('../../../../lib/transport/errors/response/InvalidRequestError');
 const InternalServerError = require('../../../../lib/transport/GrpcTransport/errors/InternalServerError');
 const ServerError = require('../../../../lib/transport/errors/response/ServerError');
@@ -48,7 +47,7 @@ describe('createGrpcTransportError', () => {
   });
 
   it('should get code from metadata', () => {
-    metadata.code = GrpcErrorCodes.DEADLINE_EXCEEDED;
+    metadata.code = GrpcErrorCodes.INVALID_ARGUMENT;
 
     const grpcError = new GrpcError(
       GrpcErrorCodes.NOT_FOUND,
@@ -61,9 +60,9 @@ describe('createGrpcTransportError', () => {
       dapiAddress,
     );
 
-    expect(error).to.be.an.instanceOf(TimeoutError);
+    expect(error).to.be.an.instanceOf(InvalidRequestError);
     expect(error.message).to.equal(grpcError.message);
-    expect(error.getCode()).to.equal(GrpcErrorCodes.NOT_FOUND);
+    expect(error.getCode()).to.equal(GrpcErrorCodes.INVALID_ARGUMENT);
     expect(error.getDAPIAddress()).to.deep.equal(dapiAddress);
     expect(error.getData()).to.deep.equal(errorData);
   });
@@ -155,13 +154,14 @@ describe('createGrpcTransportError', () => {
 
     expect(error).to.be.an.instanceOf(InvalidRequestDPPError);
 
+    expect(error.getCode()).to.equal(grpcError.code);
+    expect(error.getDAPIAddress()).to.deep.equal(dapiAddress);
+    expect(error.getData()).to.deep.equal(errorData);
+
     const consensusError = error.getConsensusError();
 
     expect(consensusError).to.be.an.instanceOf(SerializedObjectParsingError);
     expect(consensusError.getConstructorArguments()).to.deep.equal(constructorArguments);
-    expect(error.getCode()).to.equal(grpcError.code);
-    expect(error.getDAPIAddress()).to.deep.equal(dapiAddress);
-    expect(error.getData()).to.deep.equal(errorData);
   });
 
   it('should return ResponseError', () => {

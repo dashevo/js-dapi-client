@@ -52,8 +52,8 @@ describe('createDAPIAddressProviderFromOptions', () => {
       }
     });
 
-    it('should throw DAPIClientError if `dapiAddressWhiteList` option is passed too', async () => {
-      options.dapiAddressWhiteList = ['127.0.0.1'];
+    it('should throw DAPIClientError if `dapiAddressesWhiteList` option is passed too', async () => {
+      options.dapiAddressesWhiteList = ['127.0.0.1'];
 
       try {
         createDAPIAddressProviderFromOptions(options);
@@ -93,8 +93,8 @@ describe('createDAPIAddressProviderFromOptions', () => {
       }
     });
 
-    it('should throw DAPIClientError if `dapiAddressWhiteList` option is passed too', async () => {
-      options.dapiAddressWhiteList = ['127.0.0.1'];
+    it('should throw DAPIClientError if `dapiAddressesWhiteList` option is passed too', async () => {
+      options.dapiAddressesWhiteList = ['127.0.0.1'];
 
       try {
         createDAPIAddressProviderFromOptions(options);

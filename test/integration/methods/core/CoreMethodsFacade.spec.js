@@ -124,7 +124,17 @@ describe('CoreMethodsFacade', () => {
   describe('#getStatus', () => {
     it('should get status', async () => {
       const response = new GetStatusResponse();
+
+      response.setStatus(GetStatusResponse.Status.READY);
+
+      const masternode = new GetStatusResponse.Masternode();
+
+      masternode.setStatus(GetStatusResponse.Masternode.Status.READY);
+
+      response.setMasternode(masternode);
+
       grpcTransportMock.request.resolves(response);
+
       await coreMethods.getStatus();
 
       expect(jsonRpcTransportMock.request).to.be.not.called();
@@ -137,6 +147,10 @@ describe('CoreMethodsFacade', () => {
       const transaction = Buffer.from('transaction');
       const response = new GetTransactionResponse();
       response.setTransaction(transaction);
+      response.setBlockHash(Buffer.from('blockHash'));
+      response.setHeight(1);
+      response.setConfirmations(2);
+
       grpcTransportMock.request.resolves(response);
       await coreMethods.getTransaction('4f46066bd50cc2684484407696b7949e82bd906ea92c040f59a97cba47ed8176');
 

@@ -1,17 +1,18 @@
 const {
   v0: {
+    ResponseMetadata,
     GetDataContractResponse,
     GetDocumentsResponse,
-    GetIdentityByFirstPublicKeyResponse,
     GetIdentityResponse,
-    GetIdentityIdByFirstPublicKeyResponse,
     BroadcastStateTransitionResponse,
+    WaitForStateTransitionResultResponse,
   },
 } = require('@dashevo/dapi-grpc');
 
 const DashPlatformProtocol = require('@dashevo/dpp');
 
 const getDataContractFixture = require('@dashevo/dpp/lib/test/fixtures/getDataContractFixture');
+const getIdentityFixture = require('@dashevo/dpp/lib/test/fixtures/getIdentityFixture');
 
 const PlatformMethodsFacade = require('../../../../lib/methods/platform/PlatformMethodsFacade');
 
@@ -33,6 +34,7 @@ describe('PlatformMethodsFacade', () => {
       grpcTransportMock.request.resolves(response);
 
       const dpp = new DashPlatformProtocol();
+      await dpp.initialize();
       const stateTransition = dpp.dataContract.createStateTransition(getDataContractFixture());
 
       await platformMethods.broadcastStateTransition(stateTransition);
@@ -44,6 +46,8 @@ describe('PlatformMethodsFacade', () => {
   describe('#getDataContract', () => {
     it('should get data contract', async () => {
       const response = new GetDataContractResponse();
+      response.setMetadata(new ResponseMetadata());
+      response.setDataContract(getDataContractFixture().toBuffer());
       grpcTransportMock.request.resolves(response);
 
       await platformMethods.getDataContract(getDataContractFixture().getId());
@@ -55,6 +59,7 @@ describe('PlatformMethodsFacade', () => {
   describe('#getDocuments', () => {
     it('should get documents', async () => {
       const response = new GetDocumentsResponse();
+      response.setMetadata(new ResponseMetadata());
       grpcTransportMock.request.resolves(response);
 
       await platformMethods.getDocuments(
@@ -66,20 +71,13 @@ describe('PlatformMethodsFacade', () => {
     });
   });
 
-  describe('#getIdentityByFirstPublicKey', () => {
-    it('should get Identity by first public key', async () => {
-      const response = new GetIdentityByFirstPublicKeyResponse();
-      grpcTransportMock.request.resolves(response);
-
-      await platformMethods.getIdentityByFirstPublicKey('556c2910d46fda2b327ef9d9bda850cc84d30db0');
-
-      expect(grpcTransportMock.request).to.be.calledOnce();
-    });
-  });
-
   describe('#getIdentity', () => {
     it('should get Identity', async () => {
       const response = new GetIdentityResponse();
+
+      response.setMetadata(new ResponseMetadata());
+      response.setIdentity(getIdentityFixture().toBuffer());
+
       grpcTransportMock.request.resolves(response);
 
       await platformMethods.getIdentity('41nthkqvHBLnqiMkSbsdTNANzYu9bgdv4etKoRUunY1M');
@@ -88,12 +86,16 @@ describe('PlatformMethodsFacade', () => {
     });
   });
 
-  describe('#getIdentityIdByFirstPublicKey', () => {
-    it('should get Identity ID by first public key', async () => {
-      const response = new GetIdentityIdByFirstPublicKeyResponse();
+  describe('#waitForStateTransitionResult', () => {
+    it('should wait for state transition', async () => {
+      const response = new WaitForStateTransitionResultResponse();
+      response.setMetadata(new ResponseMetadata());
       grpcTransportMock.request.resolves(response);
 
-      await platformMethods.getIdentityIdByFirstPublicKey('556c2910d46fda2b327ef9d9bda850cc84d30db0');
+      await platformMethods.waitForStateTransitionResult(
+        Buffer.from('6f49655a2906852a38e473dd47574fb70b8b7c4e5cee9ea8e7da3f07b970c421', 'hex'),
+        false,
+      );
 
       expect(grpcTransportMock.request).to.be.calledOnce();
     });

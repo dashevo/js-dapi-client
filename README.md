@@ -1,8 +1,8 @@
 # DAPI Client
 
 [![NPM Version](https://img.shields.io/npm/v/@dashevo/dapi-client)](https://www.npmjs.com/package/@dashevo/dapi-client)
-[![Build Status](https://travis-ci.com/dashevo/dapi-client.svg?branch=master)](https://travis-ci.com/dashevo/dapi-client)
-[![Release Date](https://img.shields.io/github/release-date/dashevo/dapi-client)](https://github.com/dashevo/dapi-client/releases/latest)
+[![Build Status](https://github.com/dashevo/js-dapi-client/actions/workflows/test_and_release.yml/badge.svg)](https://github.com/dashevo/js-dapi-client/actions/workflows/test_and_release.yml)
+[![Release Date](https://img.shields.io/github/release-date/dashevo/js-dapi-client)](https://github.com/dashevo/js-dapi-client/releases/latest)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen)](https://github.com/RichardLitt/standard-readme)
 
 Client library used to access Dash DAPI endpoints
@@ -101,12 +101,12 @@ client.core.getBestBlockHash(options).then((r) => {
 
 ## Documentation
 
-More extensive documentation available at https://dashevo.github.io/dapi-client/.
+More extensive documentation available at https://dashevo.github.io/js-dapi-client/.
 
 
 ## Contributing
 
-Feel free to dive in! [Open an issue](https://github.com/dashevo/dapi-client/issues/new) or submit PRs.
+Feel free to dive in! [Open an issue](https://github.com/dashevo/js-dapi-client/issues/new/choose) or submit PRs.
 
 ## License
 

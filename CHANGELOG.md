@@ -1,3 +1,188 @@
+## [0.21.2](https://github.com/dashevo/dapi-client/compare/v0.21.1...v0.21.2) (2021-10-22)
+
+
+### Features
+
+* DAPI addresses white list must not be applied in Regtest mode ([#289](https://github.com/dashevo/js-dapi-client/pull/289))
+
+
+## [0.21.1](https://github.com/dashevo/dapi-client/compare/v0.21.0...v0.21.1) (2021-10-21)
+
+
+### Features
+
+* DAPI addresses white list ([#288](https://github.com/dashevo/dapi-client/issues/288))
+
+
+
+# [0.21.0](https://github.com/dashevo/dapi-client/compare/v0.20.0...v0.21.0) (2021-10-12)
+
+
+### Features
+
+* improve error handling ([#268](https://github.com/dashevo/dapi-client/issues/268))
+* convenient response errors ([#272](https://github.com/dashevo/dapi-client/issues/272), [#280](https://github.com/dashevo/dapi-client/issues/280), [#282](https://github.com/dashevo/dapi-client/issues/282), [#284](https://github.com/dashevo/dapi-client/issues/284), [#286](https://github.com/dashevo/dapi-client/issues/286))
+* implement getConsensusParams method ([#261](https://github.com/dashevo/dapi-client/issues/261))
+* support returning of a multiproof ([#257](https://github.com/dashevo/dapi-client/issues/257))
+
+
+### BREAKING CHANGES
+
+* `getBlockByHash` and `getBlockByHeight` will throw `NotFoundError` instead of `null` result
+
+
+
+## [0.20.1](https://github.com/dashevo/dapi-client/compare/v0.20.0...v0.20.1) (2021-05-26)
+
+
+### Bug Fixes
+
+* crash when connecting to an older version of dapi ([#252](https://github.com/dashevo/dapi-client/issues/252), [#253](https://github.com/dashevo/dapi-client/issues/253))
+
+
+
+# [0.20.0](https://github.com/dashevo/dapi-client/compare/v0.19.3...v0.20.0) (2021-07-09)
+
+
+### Features
+
+* provide metadata in responses ([#243](https://github.com/dashevo/dapi-client/issues/243), [#246](https://github.com/dashevo/dapi-client/issues/246))
+* throw `NotFoundError` if data is not found ([#247](https://github.com/dashevo/dapi-client/issues/247))
+
+
+### BREAKING CHANGES
+
+* platform methods respond with response classes instead of plain data
+* Core method `getTransaction` responds with response class instead of plain data
+* `getTransaction`, `getDataContract` and `getIdentity` methods throw `NotFoundError` if no data was found
+
+
+
+## [0.19.3](https://github.com/dashevo/dapi-client/compare/v0.19.2...v0.19.3) (2021-05-26)
+
+
+### Bug Fixes
+
+* update cbor to fix serialization of queries with buffers ([178943b](https://github.com/dashevo/dapi-client/commit/178943b465b30ed838cb03a5a10c6f939db92a39))
+
+
+
+## [0.19.2](https://github.com/dashevo/dapi-client/compare/v0.19.1...v0.19.2) (2021-05-20)
+
+
+### Chores
+
+* Update DPP to a 0.19.2 ([#237](https://github.com/dashevo/dapi-client/issues/237))
+
+
+
+## [0.19.1](https://github.com/dashevo/dapi-client/compare/v0.19.0...v0.19.1) (2021-05-04)
+
+
+### Bug Fixes
+
+* `getStatus` reponse was returning buffers as Base64 encoded strings ([#235](https://github.com/dashevo/dapi-client/issues/235))
+
+
+
+# [0.19.0](https://github.com/dashevo/dapi-client/compare/v0.18.0...v0.19.0) (2021-05-03)
+
+
+### Features
+
+* `getStatus` method handler response updated ([#229](https://github.com/dashevo/dapi-client/issues/229), [#230](https://github.com/dashevo/dapi-client/issues/230))
+
+
+### Bug Fixes
+
+* critical security vulnerability in axios@0.19.2 ([#233](https://github.com/dashevo/dapi-client/issues/233))
+
+
+### BREAKING CHANGES
+
+* `getStatus` method handler response have changed
+
+
+
+# [0.18.0](https://github.com/dashevo/dapi-client/compare/v0.17.2...v0.18.0) (2021-03-03)
+
+
+### Bug Fixes
+
+* BLS was throwing an error inside `uncaughtException` handler ([#226](https://github.com/dashevo/dapi-client/issues/226))
+
+
+### Features
+
+
+* `waitForStateTransitionResult` method ([#221](https://github.com/dashevo/dapi-client/issues/221), ([#223](https://github.com/dashevo/dapi-client/issues/223))
+
+
+### Chores
+
+* remove temporary `timeout` option from `broadcastStateTransition` ([2abdf5](https://github.com/dashevo/js-dapi-client/commit/2abdf5dc45859bc142dd0f293d9f071190f2a59d))
+
+
+
+## [0.17.2](https://github.com/dashevo/dapi-client/compare/v0.17.1...v0.17.2) (2020-12-30)
+
+
+### Bug Fixes
+
+* broadcastStateTransitions is timing out on testnet ([#219](https://github.com/dashevo/dapi-client/issues/219))
+
+
+
+## [0.17.1](https://github.com/dashevo/dapi-client/compare/v0.17.0...v0.17.1) (2020-12-30)
+
+
+### Bug Fixes
+
+* merkleRootQuorums from the diff doesn’t match calculated quorum root after diff is applied ([#217](https://github.com/dashevo/dapi-client/issues/217))
+
+
+
+# [0.17.0](https://github.com/dashevo/dapi-client/compare/v0.16.0...v0.17.0) (2020-12-29)
+
+
+### Features
+
+* introduce testnet network ([#214](https://github.com/dashevo/dapi-client/issues/214))
+* update `dpp` and `dashcore-lib` ([#207](https://github.com/dashevo/dapi-client/issues/207), [#210](https://github.com/dashevo/dapi-client/issues/210), [#211](https://github.com/dashevo/dapi-client/issues/211), [#212](https://github.com/dashevo/dapi-client/issues/212))
+
+
+### Bug Fixes
+
+* SML unhandled error on blockchain reorg ([#215](https://github.com/dashevo/dapi-client/issues/215))
+
+
+### BREAKING CHANGES
+
+* DAPI client is now connecting to a testnet by default
+
+
+
+# [0.16.0](https://github.com/dashevo/dapi-client/compare/v0.15.0...v0.16.0) (2020-10-27)
+
+
+### Features
+
+* `getIdentitiesByPublicKeyHashes` and `getIdentityIdsByPublicKeyHashes` methods ([#191](https://github.com/dashevo/dapi-client/issues/191), [#196](https://github.com/dashevo/dapi-client/issues/196), [#205](https://github.com/dashevo/dapi-client/issues/205))
+* `getDataContract`, `getDocuments`, `getIdentity` accept `Buffer` ([#201](https://github.com/dashevo/dapi-client/issues/201))
+
+
+### Documentation
+
+* fix URLs in README ([#193](https://github.com/dashevo/dapi-client/issues/193))
+
+
+### BREAKING CHANGES
+
+* `getIdentityByFirstPublicKey` and `getIdentityIdByFirstPublicKey` removed
+* `getDataContract`, `getDocuments`, `getIdentity` accept `Buffer` or `TypedArray`
+
+
+
 # [0.15.0](https://github.com/dashevo/dapi-client/compare/v0.14.0...v0.15.0) (2020-09-04)
 
 

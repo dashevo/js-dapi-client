@@ -1,3 +1,11 @@
+## [0.21.3](https://github.com/dashevo/dapi-client/compare/v0.21.2...v0.21.3) (2021-11-12)
+
+
+### Bug Fixes
+
+* retry doesn’t work with 502 errors ([#291](https://github.com/dashevo/js-dapi-client/pull/291))
+
+
 ## [0.21.2](https://github.com/dashevo/dapi-client/compare/v0.21.1...v0.21.2) (2021-10-22)
 
 

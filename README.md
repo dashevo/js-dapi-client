@@ -1,6 +1,6 @@
 # DEPRECATED
 
-**This repository moved to https://github.com/dashevo/platform/tree/v0.22-dev/packages/js-dapi-client**
+**This repository moved to https://github.com/dashevo/platform/tree/master/packages/js-dapi-client**
 
 ## License
 
